@@ -1,0 +1,22 @@
+map[]
+
+ ┌───────────────────────────────────────────────────┐ 
+ │                  Fiber v2.52.10                   │ 
+ │                 http://[::]:3000                  │ 
+ │                                                   │ 
+ │ Handlers ............ 95  Processes ........... 1 │ 
+ │ Prefork ....... Disabled  PID ............... 153 │ 
+ └───────────────────────────────────────────────────┘ 
+
+time="2025-12-30T20:12:58Z" level=info msg="[DEBUG] Starting reconnect process..."
+time="2025-12-30T20:12:58Z" level=info msg="[DEBUG] Reconnection completed - IsConnected: true, IsLoggedIn: false"
+time="2025-12-30T20:12:58Z" level=info msg="[DEBUG] Reconnect process completed successfully"
+time="2025-12-31T12:54:19Z" level=info msg="[DEBUG] Starting login process..."
+time="2025-12-31T12:54:19Z" level=info msg="[DEBUG] Devices before login: 1 found"
+time="2025-12-31T12:54:19Z" level=info msg="[DEBUG] Device ID: 34624092504:2@s.whatsapp.net, PushName: lll"
+time="2025-12-31T12:54:19Z" level=info msg="[DEBUG] Client has existing store ID: 34624092504:2@s.whatsapp.net"
+time="2025-12-31T12:54:19Z" level=info msg="[DEBUG] Attempting to get QR channel..."
+time="2025-12-31T12:54:19Z" level=error msg="[DEBUG] GetQRChannel failed: GetQRChannel can only be called when there's no user ID in the client's Store"
+time="2025-12-31T12:54:19Z" level=error msg="GetQRChannel can only be called when there's no user ID in the client's Store"
+time="2025-12-31T12:54:19Z" level=info msg="[DEBUG] Error is ErrQRStoreContainsID - attempting to connect"
+time="2025-12-31T12:54:19Z" level=error msg="Panic recovered in middleware: you are already logged in."

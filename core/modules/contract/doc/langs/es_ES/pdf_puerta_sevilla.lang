@@ -1,0 +1,48 @@
+<?php
+/* Copyright (C) 2024	PuertaSevilla Team
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+/**
+ *	\file       htdocs/core/modules/contract/doc/langs/es_ES/pdf_puerta_sevilla.lang
+ *	\ingroup    contracts
+ *	\brief      Language file for PuertaSevilla rental contract template
+ */
+
+$this->strings = array(
+	'PuertaSevillaRentalContractTemplate' => 'Contrato de Alquiler PuertaSevilla',
+	'1. Identifying Parts' => '1. Identificación de Partes',
+	'2. Object of Contract' => '2. Objeto del Contrato',
+	'3. Duration' => '3. Duración',
+	'4. MonthlyRent' => '4. Renta Mensual',
+	'5. GeneralConditions' => '5. Condiciones Generales',
+	'Landlord' => 'Arrendador',
+	'Tenant' => 'Arrendatario',
+	'PropertyDescription' => 'Descripción de la Propiedad',
+	'StartDate' => 'Fecha de Inicio',
+	'EndDate' => 'Fecha de Fin',
+	'MonthlyRent' => 'Renta Mensual',
+	'Amount' => 'Cantidad',
+	'TenantObligations' => 'Obligaciones del Arrendatario',
+	'PayRentOnTime' => 'Pagar la renta a tiempo',
+	'MaintainProperty' => 'Mantener la propiedad en buen estado',
+	'AllowInspections' => 'Permitir inspecciones del arrendador',
+	'LandlordObligations' => 'Obligaciones del Arrendador',
+	'EnsurePropertyHabitability' => 'Garantizar que la propiedad sea habitable',
+	'PerformNecessaryRepairs' => 'Realizar las reparaciones necesarias',
+	'ProvideSecurityOfTenure' => 'Proporcionar seguridad de tenencia',
+	'Notes' => 'Notas',
+	'Siret' => 'SIRET',
+);

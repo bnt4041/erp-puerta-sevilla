@@ -1,0 +1,182 @@
+<?php
+
+/**
+ * Class to interact with goWA API
+ */
+class GoWAClient
+{
+	private $db;
+	private $url;
+	private $token;
+	private $instance;
+
+	/**
+	 * Constructor
+	 *
+	 * @param DoliDB $db Database handler
+	 */
+	public function __construct($db)
+	{
+		global $conf;
+		$this->db = $db;
+		$this->url = $conf->global->WHATSAPP_GOWA_URL;
+		$this->token = $conf->global->WHATSAPP_GOWA_TOKEN;
+		$this->instance = $conf->global->WHATSAPP_GOWA_INSTANCE;
+	}
+
+	/**
+	 * Send a text message
+	 *
+	 * @param string $to      Recipient phone number (with country code)
+	 * @param string $message Message content
+	 * @return array          Array with 'error' and 'message'
+	 */
+	public function sendMessage($to, $message)
+	{
+		if (empty($this->url)) {
+			return array('error' => 1, 'message' => 'GoWA URL not configured');
+		}
+
+		// Clean phone number (remove +, spaces, etc.)
+		$to = preg_replace('/[^0-9]/', '', $to);
+
+		// Example implementation for a typical REST API
+		// Adjust this based on actual goWA API documentation if provided
+		$endpoint = rtrim($this->url, '/') . '/api/sendText';
+		
+		$data = array(
+			'instance' => $this->instance,
+			'to' => $to,
+			'message' => $message
+		);
+
+		return $this->callAPI($endpoint, $data);
+	}
+
+	/**
+	 * Get QR Code for authentication
+	 *
+	 * @return array Response with QR data
+	 */
+	public function getQR()
+	{
+		if (empty($this->url)) {
+			return array('error' => 1, 'message' => 'GoWA URL not configured');
+		}
+
+		// goWA uses /app/login endpoint for QR
+		$endpoint = rtrim($this->url, '/') . '/app/login';
+		$result = $this->callAPI($endpoint, array(), 'GET');
+		
+		if ($result['error'] == 0 && isset($result['data']['results']['qr_link'])) {
+			$qrUrl = $result['data']['results']['qr_link'];
+			
+			// Download the QR image and convert to base64
+			$ch = curl_init();
+			curl_setopt($ch, CURLOPT_URL, $qrUrl);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+			$imageData = curl_exec($ch);
+			$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+			curl_close($ch);
+			
+			if ($httpCode == 200 && $imageData) {
+				$base64 = 'data:image/png;base64,' . base64_encode($imageData);
+				return array('error' => 0, 'data' => array('qr' => $base64, 'duration' => $result['data']['results']['qr_duration']));
+			} else {
+				return array('error' => 1, 'message' => 'Failed to download QR image');
+			}
+		}
+		
+		// Check if already logged in
+		if ($result['error'] == 0 && isset($result['data']['message']) && strpos($result['data']['message'], 'already') !== false) {
+			return array('error' => 0, 'data' => array('logged_in' => true, 'message' => $result['data']['message']));
+		}
+		
+		return $result;
+	}
+
+
+
+	/**
+	 * Get session status
+	 *
+	 * @return array Response with status
+	 */
+	public function getStatus()
+	{
+		if (empty($this->url)) {
+			return array('error' => 1, 'message' => 'GoWA URL not configured');
+		}
+
+		$endpoint = rtrim($this->url, '/') . '/api/status';
+		$data = array('instance' => $this->instance);
+
+		return $this->callAPI($endpoint, $data);
+	}
+
+	/**
+	 * Get connected devices/user info
+	 *
+	 * @return array Response with devices info
+	 */
+	public function getDevices()
+	{
+		if (empty($this->url)) {
+			return array('error' => 1, 'message' => 'GoWA URL not configured');
+		}
+
+		$endpoint = rtrim($this->url, '/') . '/app/devices';
+		return $this->callAPI($endpoint, array(), 'GET');
+	}
+
+	/**
+	 * Call the goWA API using native cURL (allows localhost)
+	 *
+	 * @param string $url      Endpoint URL
+	 * @param array  $data     Data to send (for POST)
+	 * @param string $method   HTTP method (GET or POST)
+	 * @return array           Response
+	 */
+	private function callAPI($url, $data = array(), $method = 'GET')
+	{
+		$ch = curl_init();
+		
+		if ($method == 'POST' && !empty($data)) {
+			curl_setopt($ch, CURLOPT_POST, true);
+			curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+		}
+		
+		$headers = array(
+			'Content-Type: application/json',
+			'Accept: application/json'
+		);
+		
+		if (!empty($this->token)) {
+			$headers[] = 'Authorization: Bearer ' . $this->token;
+		}
+		
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		
+		$response = curl_exec($ch);
+		$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		$error = curl_error($ch);
+		curl_close($ch);
+		
+		if ($error) {
+			return array('error' => 1, 'message' => 'cURL Error: ' . $error);
+		}
+		
+		if ($httpCode >= 200 && $httpCode < 300) {
+			return array('error' => 0, 'data' => json_decode($response, true));
+		} else {
+			return array('error' => 1, 'message' => 'API Error: ' . $httpCode . ' - ' . $response);
+		}
+	}
+}
+

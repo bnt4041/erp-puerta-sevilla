@@ -1,0 +1,231 @@
+INSTRUCCIONES DE INSTALACIÓN RÁPIDA
+===================================
+
+✅ PASO 1: VERIFICACIÓN
+Los archivos ya están en la ubicación correcta:
+├─ /var/www/html/dolpuerta/htdocs/core/modules/contract/doc/
+│  ├─ pdf_puerta_sevilla.modules.php          ✓ CREADO
+│  ├─ pdf_puerta_sevilla_config.php           ✓ CREADO
+│  ├─ langs/es_ES/pdf_puerta_sevilla.lang     ✓ CREADO
+│  ├─ PDF_PUERTA_SEVILLA_README.md            ✓ CREADO
+│  ├─ EJEMPLO_USO_PUERTA_SEVILLA.md           ✓ CREADO
+│  ├─ GUIA_INTEGRACION.md                     ✓ CREADO
+│  └─ RESUMEN_IMPLEMENTACION.txt              ✓ CREADO
+
+✅ PASO 2: PERMISOS (Ejecutar si es necesario)
+bash
+chmod 755 /var/www/html/dolpuerta/htdocs/core/modules/contract/doc/
+chmod 644 /var/www/html/dolpuerta/htdocs/core/modules/contract/doc/*.php
+chmod 644 /var/www/html/dolpuerta/htdocs/core/modules/contract/doc/langs/es_ES/*
+chmod 755 /var/www/html/dolpuerta/documents/contracts/
+
+✅ PASO 3: LIMPIAR CACHÉ DE DOLIBARR
+Opción A: Desde la interfaz web
+- Entrar en Dolibarr
+- Ir a: Administración → Herramientas → Limpiar cache
+- Click en botón "Vaciar cache"
+
+Opción B: Por terminal
+bash
+rm -rf /var/www/html/dolpuerta/var/cache/*
+
+✅ PASO 4: VERIFICAR INSTALACIÓN
+1. Abrir Dolibarr en navegador
+2. Ir a: Contratos → Listar
+3. Abrir un contrato existente o crear uno nuevo
+4. Click en botón "Generar PDF"
+5. Debe aparecer "PuertaSevilla" en la lista de templates
+
+✅ PASO 5: GENERAR PDF DE PRUEBA
+1. Ir a un contrato con datos completos
+2. Clic en "Generar PDF"
+3. Seleccionar "PuertaSevilla"
+4. El PDF se generará automáticamente
+5. Descargar y verificar
+
+---
+
+DATOS MÍNIMOS REQUERIDOS PARA GENERAR PDF
+===========================================
+
+En el Contrato:
+✓ Referencia del contrato
+✓ Fecha de contrato
+✓ Tercero (inquilino) asignado
+✓ Al menos 1 línea de contrato con:
+  - Descripción de la propiedad
+  - Importe (renta)
+  - Fecha de inicio
+  - Fecha de fin
+
+En la Empresa:
+✓ Nombre
+✓ Dirección (opcional pero recomendado)
+✓ Código postal y ciudad (opcionales)
+✓ SIRET/SIREN (opcional)
+
+En el Tercero:
+✓ Nombre
+✓ Dirección (recomendado)
+✓ Código postal y ciudad (recomendado)
+
+---
+
+SOLUCIÓN RÁPIDA DE PROBLEMAS
+============================
+
+Problema: "Template no aparece en la lista"
+Solución:
+- Limpiar cache: Administración → Herramientas → Limpiar cache
+- Recargar página (Ctrl+F5)
+- Verificar que php_puerta_sevilla.modules.php existe
+
+Problema: "Error al generar PDF"
+Solución:
+- Verificar logs: tail -f /var/www/html/dolpuerta/var/log/dolibarr.log
+- Revisar que contrato tiene al menos 1 línea
+- Revisar que hay datos en empresa y tercero
+
+Problema: "Caracteres especiales mal codificados"
+Solución:
+- Limpiar cache
+- Verificar que archivo .lang está en UTF-8
+- Recargar página en navegador (Ctrl+Shift+Del)
+
+Problema: "PDF sale en blanco"
+Solución:
+- Verificar módulo Contratos está habilitado
+- Asegurar contrato tiene líneas válidas
+- Ver logs de error
+
+---
+
+PERSONALIZACIÓN RÁPIDA
+======================
+
+Cambiar idioma de etiquetas:
+Editar: /var/www/html/dolpuerta/htdocs/core/modules/contract/doc/langs/es_ES/pdf_puerta_sevilla.lang
+
+Cambiar colores del PDF:
+Editar: /var/www/html/dolpuerta/htdocs/core/modules/contract/doc/pdf_puerta_sevilla_config.php
+Buscar: PS_PDF_*_COLOR_R/G/B
+
+Cambiar tamaños de fuente:
+Editar: /var/www/html/dolpuerta/htdocs/core/modules/contract/doc/pdf_puerta_sevilla_config.php
+Buscar: PS_PDF_*_FONT_SIZE_OFFSET
+
+Cambiar condiciones generales:
+Editar: /var/www/html/dolpuerta/htdocs/core/modules/contract/doc/pdf_puerta_sevilla.modules.php
+Buscar: $conditions = array(
+
+---
+
+ESTRUCTURA DEL PDF GENERADO
+============================
+
+El PDF incluye (en orden):
+
+1. ENCABEZADO
+   - Logo de empresa (si existe)
+   - Título "CONTRATO DE ALQUILER"
+   - Referencia y fecha
+
+2. IDENTIFICACIÓN DE PARTES (2 columnas)
+   - Arrendador (datos empresa)
+   - Arrendatario (datos tercero)
+
+3. OBJETO DEL CONTRATO
+   - Descripción de propiedad
+
+4. DURACIÓN
+   - Fecha inicio y fin
+
+5. RENTA MENSUAL
+   - Importe y IVA
+
+6. CONDICIONES GENERALES
+   - Obligaciones arrendatario y arrendador
+
+7. NOTAS (si existen)
+   - Texto de notas públicas
+
+8. FIRMAS
+   - Cajas para firma arrendador
+   - Cajas para firma arrendatario
+
+9. PIE DE PÁGINA
+   - Información de empresa
+   - Fecha de generación
+
+---
+
+ARCHIVOS CREADOS
+================
+
+Principal:
+📄 pdf_puerta_sevilla.modules.php
+   - Clase principal del template
+   - Lógica de generación PDF
+   - Métodos de renderización
+
+Configuración:
+📄 pdf_puerta_sevilla_config.php
+   - 45+ constantes personalizables
+   - Controla apariencia y comportamiento
+
+Idioma:
+📄 langs/es_ES/pdf_puerta_sevilla.lang
+   - Traducciones español
+   - Extensible a otros idiomas
+
+Documentación:
+📄 PDF_PUERTA_SEVILLA_README.md
+   - Documentación técnica detallada
+
+📄 EJEMPLO_USO_PUERTA_SEVILLA.md
+   - Ejemplos prácticos con datos
+
+📄 GUIA_INTEGRACION.md
+   - Guía completa de integración
+
+📄 RESUMEN_IMPLEMENTACION.txt
+   - Resumen ejecutivo de la implementación
+
+📄 INSTALACION_RAPIDA.txt (este archivo)
+   - Instrucciones rápidas de instalación
+
+---
+
+VERIFICACIÓN FINAL
+==================
+
+✓ Archivos creados correctamente
+✓ Ubicaciones correctas
+✓ Permisos adecuados
+✓ Documentación completa
+✓ Código comentado
+✓ Método write_file() implementado
+✓ Traducción español incluida
+✓ Configuración personalizable
+✓ Manejo de errores
+✓ Hooks de Dolibarr integrados
+
+---
+
+LISTO PARA USAR
+===============
+
+El template PDF "PuertaSevilla" está completamente operativo.
+
+Próximos pasos:
+1. Acceder a Dolibarr
+2. Crear o abrir un contrato
+3. Clic en "Generar PDF"
+4. Seleccionar template "PuertaSevilla"
+5. ¡El PDF se genera automáticamente!
+
+---
+
+Versión: 1.0.0
+Fecha: 29 de diciembre de 2024
+Estado: ✅ COMPLETADO Y LISTO

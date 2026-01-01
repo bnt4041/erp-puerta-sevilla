@@ -1,0 +1,1296 @@
+{
+  "syncType": 0,
+  "conversations": [
+    {
+      "ID": "34624230960@s.whatsapp.net",
+      "messages": [
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34624230960@s.whatsapp.net",
+              "fromMe": false,
+              "ID": "3EB078129933F4B85AF00E"
+            },
+            "message": {
+              "conversation": "compralo ya!",
+              "messageContextInfo": {
+                "messageSecret": "Vt8Ts6E7RCdoIGhx4e980cHEIXb7SmK5csM4Yp7aFas="
+              }
+            },
+            "messageTimestamp": 1767101399,
+            "messageSecret": "Vt8Ts6E7RCdoIGhx4e980cHEIXb7SmK5csM4Yp7aFas=",
+            "reportingTokenInfo": {
+              "reportingTag": "AQ5Isu+HAdyCt3LZJySBq26UOpU="
+            },
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 258
+        },
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34624230960@s.whatsapp.net",
+              "fromMe": true,
+              "ID": "A5142A7DE96CC5FDC957BD46F9E33936"
+            },
+            "message": {
+              "extendedTextMessage": {
+                "text": "Tachan - Mi Primera Television portatil (CPA Toy Group Trading S.L. 782T00443) \n https://amzn.eu/d/6oPRWQQ",
+                "matchedText": "https://amzn.eu/d/6oPRWQQ",
+                "description": "Televisión portatil con imágenes que pasan manualmente.",
+                "title": "Tachan - Mi Primera Television portatil (CPA Toy Group Trading S.L. 782T00443)",
+                "previewType": 0,
+                "JPEGThumbnail": "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",
+                "thumbnailDirectPath": "/v/t62.36144-24/557973004_1596994741291298_8529523935235220093_n.enc?ccb=11-4\u0026oh=01_Q5Aa3QGZ3uDMCNXbfQgW2jAzemSV91CHeN15pJqoIXs8m4-4jQ\u0026oe=697B5A38\u0026_nc_sid=5e03e0",
+                "thumbnailSHA256": "EoyV3b/cOXhPoIu+y2gv3594WHK3I6slBaIAQ0M3j4U=",
+                "thumbnailEncSHA256": "qgU8Emrmmji2nmlmdKo/E7LGTS4wvNuHv98sxc8d+Qo=",
+                "mediaKey": "3m/V6XoPzKuoOEsKauSpBMAXW1SeGvSgTSbXhtHdQ3k=",
+                "mediaKeyTimestamp": 1767100430,
+                "thumbnailHeight": 536,
+                "thumbnailWidth": 1024,
+                "inviteLinkGroupTypeV2": 0
+              },
+              "messageContextInfo": {
+                "messageSecret": "fOOaazBLzwipEVDA8vHHfEXQ05CULMDnTBJSMynrJcw="
+              }
+            },
+            "messageTimestamp": 1767100430,
+            "status": 4,
+            "messageC2STimestamp": 1767100431,
+            "userReceipt": [
+              {
+                "userJID": "34624230960@s.whatsapp.net",
+                "receiptTimestamp": 1767100432,
+                "readTimestamp": 1767101381,
+                "playedTimestamp": 0
+              }
+            ],
+            "messageSecret": "fOOaazBLzwipEVDA8vHHfEXQ05CULMDnTBJSMynrJcw=",
+            "originalSelfAuthorUserJIDString": "34624092504@s.whatsapp.net",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 257
+        },
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34624230960@s.whatsapp.net",
+              "fromMe": false,
+              "ID": "3EB015F0FB73F176AD8D6D"
+            },
+            "message": {
+              "conversation": "compralo",
+              "messageContextInfo": {
+                "messageSecret": "oHumQbdIPY2FIX8JK3UU8xIlvIRwfIyA3EQE37VVc2w="
+              }
+            },
+            "messageTimestamp": 1764532084,
+            "messageSecret": "oHumQbdIPY2FIX8JK3UU8xIlvIRwfIyA3EQE37VVc2w=",
+            "reportingTokenInfo": {
+              "reportingTag": "AQ2zErZ+wTEGhctYWRAR1cqOoRU="
+            },
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 239
+        },
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34624230960@s.whatsapp.net",
+              "fromMe": true,
+              "ID": "A5765E08CECE0BEA0E6239460FBEF16D"
+            },
+            "message": {
+              "extendedTextMessage": {
+                "text": "Mini Árboles De Navidad 30cm, Árbol de Navidad Artificial, Mini Árbol de Navidad Artificial con Luces LED, Arbol Navidad Pequeño, Árbol de Navidad de Mesa, para Decoración de Escritorio \n https://amzn.eu/d/1Vn3nEd",
+                "matchedText": "https://amzn.eu/d/1Vn3nEd",
+                "description": "【Juego de Árbol de Navidad】: El juego tiene un total de 15 piezas, incluido 1 árbol de Navidad artificial de 30 cm, 1 cadena de luces de 2 m, 1 estrella superior del árbol de Navidad, 1 Feliz Navidad, 2 * bolas navideñas rojas, 2 * lazos, 1 * caja, 1 *bastón pequeño, 1*cono de pino, 2*campanas pe...",
+                "title": "Mini Árboles De Navidad 30cm, Árbol de Navidad Artificial, Mini Árbol de Navidad Artificial con Luces LED, Arbol Navidad Pequeño, Árbol de Navidad de Mesa, para Decoración de Escritorio",
+                "previewType": 0,
+                "JPEGThumbnail": "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",
+                "thumbnailDirectPath": "/v/t62.36144-24/25473449_1937631173838250_3614971129484811821_n.enc?ccb=11-4\u0026oh=01_Q5Aa3AGwvGfptuDAcvhnfafBhEywGfX0xYq7CjCqj9RXjd49Hg\u0026oe=6953F822\u0026_nc_sid=5e03e0",
+                "thumbnailSHA256": "Vel5v9hjEnaxj/a1VlcktMAxYX/RBpAb7eamQVewmp0=",
+                "thumbnailEncSHA256": "bQhjHeCA3zTBFFo8q1KB8sUTy7XqFDWdC2VhZFHplw8=",
+                "mediaKey": "tUcQYIbU/LaPmOj1+bYO/vAG+zUCQa6T6ry7NfLxwNg=",
+                "mediaKeyTimestamp": 1764530388,
+                "thumbnailHeight": 536,
+                "thumbnailWidth": 1024,
+                "inviteLinkGroupTypeV2": 0
+              },
+              "messageContextInfo": {
+                "messageSecret": "+nhezHu6TG+hZB9I2PPIMUdE8jiydszSHFy4FkyF/O4="
+              }
+            },
+            "messageTimestamp": 1764530389,
+            "status": 4,
+            "userReceipt": [
+              {
+                "userJID": "34624230960@s.whatsapp.net",
+                "receiptTimestamp": 1764530389,
+                "readTimestamp": 1764532028,
+                "playedTimestamp": 0
+              }
+            ],
+            "messageSecret": "+nhezHu6TG+hZB9I2PPIMUdE8jiydszSHFy4FkyF/O4=",
+            "originalSelfAuthorUserJIDString": "34624092504@s.whatsapp.net",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 238
+        },
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34624230960@s.whatsapp.net",
+              "fromMe": true,
+              "ID": "A54816BEE9137081236F9B720FF0B96E"
+            },
+            "message": {
+              "extendedTextMessage": {
+                "text": "Oferta: HOMCOM Árbol de Navidad Plegable 150 cm con Nieve 408 Ramas 25 Bayas 21 Piñas Hojas Apertura Automática y Soporte Metálico Decoración Navideña para Interior Verde \n https://amzn.eu/d/10PB6yq",
+                "matchedText": "https://amzn.eu/d/10PB6yq",
+                "description": "Seguro que en más de una ocasión has pensado en comprar un árbol de Navidad natural por la falta de realismo que tienen muchos árboles artificiales. Si este es tu caso, estás en el lugar correcto. Este árbol artificial de HOMCOM tiene la belleza de un pino natural gracias al aspecto nevado de alg...",
+                "title": "Oferta: HOMCOM Árbol de Navidad Plegable 150 cm con Nieve 408 Ramas 25 Bayas 21 Piñas Hojas Apertura Automática y Soporte Metálico Decoración Navideña para Interior Verde",
+                "previewType": 0,
+                "JPEGThumbnail": "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",
+                "thumbnailDirectPath": "/v/t62.36144-24/590947657_1794655391226657_2138995296321293553_n.enc?ccb=11-4\u0026oh=01_Q5Aa3AHXGnNhTe2ktYM1V-lHD13DaZIjO-0TeNJBML-acO4REA\u0026oe=69528180\u0026_nc_sid=5e03e0",
+                "thumbnailSHA256": "tsHnDCXNLXChiT+WdCznfvhn8fxqZ7MOa9wVhArt5to=",
+                "thumbnailEncSHA256": "3A+FDlx5+Mr6FCyCbs8MN2A4rPbtiAxxPw3sKH/L2ho=",
+                "mediaKey": "ElA/ozNCjxtfgstAK+r1jbmCaoquSFpTWPr3hXyZl2U=",
+                "mediaKeyTimestamp": 1764423132,
+                "thumbnailHeight": 536,
+                "thumbnailWidth": 1024,
+                "inviteLinkGroupTypeV2": 0
+              },
+              "messageContextInfo": {
+                "messageSecret": "B1TIeqfP9u7MVJ6ZwoqCNn5wUSQUC7+rizlPEZAjP94="
+              }
+            },
+            "messageTimestamp": 1764423133,
+            "status": 4,
+            "messageC2STimestamp": 1764423134,
+            "userReceipt": [
+              {
+                "userJID": "34624230960@s.whatsapp.net",
+                "receiptTimestamp": 1764423134,
+                "readTimestamp": 1764433343,
+                "playedTimestamp": 0
+              }
+            ],
+            "messageSecret": "B1TIeqfP9u7MVJ6ZwoqCNn5wUSQUC7+rizlPEZAjP94=",
+            "originalSelfAuthorUserJIDString": "34624092504@s.whatsapp.net",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 235
+        },
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34624230960@s.whatsapp.net",
+              "fromMe": false,
+              "ID": "3EB00A480A379A18472754"
+            },
+            "message": {
+              "extendedTextMessage": {
+                "text": "me gusta más este",
+                "previewType": 0,
+                "contextInfo": {
+                  "stanzaID": "A572AAA950CB964C7EB39CCD1302D7BB",
+                  "participant": "34624092504@s.whatsapp.net",
+                  "quotedMessage": {
+                    "conversation": "Oferta: Rowenta Air Motion - Secador alisador de pelo con efecto Coanda, diseño ergonómico y ligero, motor de alta velocidad, aire frío, incluye neceser, CF8C20E0 \n https://amzn.eu/d/dXfbLgD"
+                  },
+                  "quotedType": 0
+                },
+                "inviteLinkGroupTypeV2": 0
+              },
+              "messageContextInfo": {
+                "messageSecret": "tiYaAEm6KU0A5saSr7yOKbhkFA/GxdVDvaz1f6DUDU4="
+              }
+            },
+            "messageTimestamp": 1764225790,
+            "messageSecret": "tiYaAEm6KU0A5saSr7yOKbhkFA/GxdVDvaz1f6DUDU4=",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 234
+        },
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34624230960@s.whatsapp.net",
+              "fromMe": true,
+              "ID": "A52A20232CC91F24E9EBCB4A0A626212"
+            },
+            "message": {
+              "extendedTextMessage": {
+                "text": "Oferta: Rowenta X-Clean 2, Fregona Eléctrica Sin Cable con Tecnología Wet \u0026 Dry, Autolimpieza, Aspira y friega, Modos ECO/MAX, Ligera, Limpieza de bordes, GZ2262E0 \n https://amzn.eu/d/i7cdqVW",
+                "matchedText": "https://amzn.eu/d/i7cdqVW",
+                "description": "La fregona que permite limpiar con el mínimo esfuerzo, aspira y friega todo tipo de residuos en suelos duros X-Clean 2 aspira y friega todo tipo de residuos 2 veces más rápido* con los modos ECO y MAX. La fregona permite limpiar con el mínimo esfuerzo, mientras ofrece una limpieza eficaz y un sec...",
+                "title": "Oferta: Rowenta X-Clean 2, Fregona Eléctrica Sin Cable con Tecnología Wet \u0026 Dry, Autolimpieza, Aspira y friega, Modos ECO/MAX, Ligera, Limpieza de bordes, GZ2262E0",
+                "previewType": 0,
+                "JPEGThumbnail": "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",
+                "inviteLinkGroupTypeV2": 0
+              },
+              "messageContextInfo": {
+                "messageSecret": "3eDbhOBknbHOTCPv+3c3n3tso9vPk29J+8ShNXbF1EY="
+              }
+            },
+            "messageTimestamp": 1764225736,
+            "status": 4,
+            "messageC2STimestamp": 1764225738,
+            "userReceipt": [
+              {
+                "userJID": "34624230960@s.whatsapp.net",
+                "receiptTimestamp": 1764225738,
+                "readTimestamp": 1764225744,
+                "playedTimestamp": 0
+              }
+            ],
+            "messageSecret": "3eDbhOBknbHOTCPv+3c3n3tso9vPk29J+8ShNXbF1EY=",
+            "originalSelfAuthorUserJIDString": "34624092504@s.whatsapp.net",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 233
+        },
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34624230960@s.whatsapp.net",
+              "fromMe": true,
+              "ID": "A597436EB20EED423B6B5B019152DD91"
+            },
+            "message": {
+              "conversation": "Mis reyes",
+              "messageContextInfo": {
+                "messageSecret": "N3c8zz43H87x1iDWOW3UpJrAgFojfVXReyfvFRMw+f8="
+              }
+            },
+            "messageTimestamp": 1764138649,
+            "status": 4,
+            "userReceipt": [
+              {
+                "userJID": "34624230960@s.whatsapp.net",
+                "receiptTimestamp": 1764138649,
+                "readTimestamp": 1764140621,
+                "playedTimestamp": 0
+              }
+            ],
+            "messageSecret": "N3c8zz43H87x1iDWOW3UpJrAgFojfVXReyfvFRMw+f8=",
+            "originalSelfAuthorUserJIDString": "34624092504@s.whatsapp.net",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 232
+        },
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34624230960@s.whatsapp.net",
+              "fromMe": true,
+              "ID": "A572AAA950CB964C7EB39CCD1302D7BB"
+            },
+            "message": {
+              "extendedTextMessage": {
+                "text": "Oferta: Rowenta Air Motion - Secador alisador de pelo con efecto Coanda, diseño ergonómico y ligero, motor de alta velocidad, aire frío, incluye neceser, CF8C20E0 \n https://amzn.eu/d/dXfbLgD",
+                "matchedText": "https://amzn.eu/d/dXfbLgD",
+                "description": "Air Motion de Rowenta es un secador de pelo de alto rendimiento diseñado para ofrecer la máxima comodidad. Con un diseño curvado muy ligero que pesa 2 veces menos**, es el preferido por el 100% de las mujeres*. Descubre un secador de pelo que garantiza resultados óptimos día tras día: motor digit...",
+                "title": "Oferta: Rowenta Air Motion - Secador alisador de pelo con efecto Coanda, diseño ergonómico y ligero, motor de alta velocidad, aire frío, incluye neceser, CF8C20E0",
+                "previewType": 0,
+                "JPEGThumbnail": "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",
+                "inviteLinkGroupTypeV2": 0
+              },
+              "messageContextInfo": {
+                "messageSecret": "GniracAaG8A/lQTJzNd+amFxhezjywtSZcPUfyLDsGk="
+              }
+            },
+            "messageTimestamp": 1764138644,
+            "status": 4,
+            "messageC2STimestamp": 1764138645,
+            "userReceipt": [
+              {
+                "userJID": "34624230960@s.whatsapp.net",
+                "receiptTimestamp": 1764138646,
+                "readTimestamp": 1764140621,
+                "playedTimestamp": 0
+              }
+            ],
+            "messageSecret": "GniracAaG8A/lQTJzNd+amFxhezjywtSZcPUfyLDsGk=",
+            "originalSelfAuthorUserJIDString": "34624092504@s.whatsapp.net",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 231
+        },
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34624230960@s.whatsapp.net",
+              "fromMe": false,
+              "ID": "ACDF7EAC531EF3FA7E3AF383E8CFCB66"
+            },
+            "message": {
+              "conversation": "Xq no es tu momento?",
+              "messageContextInfo": {
+                "messageSecret": "e4bw5s9BJ+B6EzuLS8euPeDov+knn66CeYViSh3byrA="
+              }
+            },
+            "messageTimestamp": 1764018768,
+            "messageSecret": "e4bw5s9BJ+B6EzuLS8euPeDov+knn66CeYViSh3byrA=",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 228
+        },
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34624230960@s.whatsapp.net",
+              "fromMe": true,
+              "ID": "A5B85F0F11F2D72D8BCD51B79553D616"
+            },
+            "message": {
+              "conversation": "Sin hubiera estado en otro momento de mi vida me hubiera encantado tenerla",
+              "messageContextInfo": {
+                "messageSecret": "bpP7A9zzpIIVcYYRmLT70dOuEQXJnW9xamDmFvu2bHc="
+              }
+            },
+            "messageTimestamp": 1764017206,
+            "status": 4,
+            "userReceipt": [
+              {
+                "userJID": "34624230960@s.whatsapp.net",
+                "receiptTimestamp": 1764017206,
+                "readTimestamp": 1764018725,
+                "playedTimestamp": 0
+              }
+            ],
+            "messageSecret": "bpP7A9zzpIIVcYYRmLT70dOuEQXJnW9xamDmFvu2bHc=",
+            "originalSelfAuthorUserJIDString": "34624092504@s.whatsapp.net",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 227
+        },
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34624230960@s.whatsapp.net",
+              "fromMe": true,
+              "ID": "A5CD166BEB38E1B514D26712D85EA064"
+            },
+            "message": {
+              "extendedTextMessage": {
+                "text": "instax SQ1 Square Cámara instantánea automática, tamaño de Foto Cuadrado. Chalk White \n https://amzn.eu/d/0VlP9Ip",
+                "matchedText": "https://amzn.eu/d/0VlP9Ip",
+                "description": "La instax SQ1 está diseñada para facilitarte la vida, adoptando simplicidad a través de sus funciones y diseño. Ésta estilizada cámara instantánea, hace evocadoras fotos cuadradas al momento fácilmente, para que tus recuerdos sean un poco más grandes. Con la exposición automática, nunca volverás ...",
+                "title": "instax SQ1 Square Cámara instantánea automática, tamaño de Foto Cuadrado. Chalk White",
+                "previewType": 0,
+                "JPEGThumbnail": "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",
+                "inviteLinkGroupTypeV2": 0
+              },
+              "messageContextInfo": {
+                "messageSecret": "8sWdeqTPysWauKIosBXRHkE+DZ/Cgivi/e+RQHCysQw="
+              }
+            },
+            "messageTimestamp": 1764017187,
+            "status": 4,
+            "messageC2STimestamp": 1764017188,
+            "userReceipt": [
+              {
+                "userJID": "34624230960@s.whatsapp.net",
+                "receiptTimestamp": 1764017188,
+                "readTimestamp": 1764018725,
+                "playedTimestamp": 0
+              }
+            ],
+            "messageSecret": "8sWdeqTPysWauKIosBXRHkE+DZ/Cgivi/e+RQHCysQw=",
+            "originalSelfAuthorUserJIDString": "34624092504@s.whatsapp.net",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 226
+        },
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34624230960@s.whatsapp.net",
+              "fromMe": true,
+              "ID": "A5A11FA068E2D5869C287DF1183304DC"
+            },
+            "message": {
+              "extendedTextMessage": {
+                "text": "KiBcsLic Temporizador de Semáforo para Cocina, Estudio Y Gestión Del para Niños-Temporizador Visual Silencioso con Luces Roja/Amarilla/Verde-Ideal para Cocina, Estudio y Gestión del Tiempo \n https://amzn.eu/d/2iF8Zk1",
+                "matchedText": "https://amzn.eu/d/2iF8Zk1",
+                "title": "KiBcsLic Temporizador de Semáforo para Cocina, Estudio Y Gestión Del para Niños-Temporizador Visual Silencioso con Luces Roja/Amarilla/Verde-Ideal para Cocina, Estudio y Gestión del Tiempo",
+                "previewType": 0,
+                "JPEGThumbnail": "/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAB9AH0DASIAAhEBAxEB/8QAHAABAAIDAQEBAAAAAAAAAAAAAAYHAwUIBAIB/8QAMBAAAgICAQIEBAUEAwAAAAAAAAECAwQRBQYSByExQRMiUWEIFHGhwWKBkbE0wtH/xAAZAQEAAgMAAAAAAAAAAAAAAAAAAwQBAgX/xAAlEQEAAgIBAwIHAAAAAAAAAAAAAQIDBBEFEiEjMUFRcZGh8PH/2gAMAwEAAhEDEQA/AOqQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB8XT+HW5fQqbrDxVo4bKyo43FZvJ0Yk/hZGRVOEK4T3pxj3Pcmn5PS9fItPkEpUKMkmm/NP0OH8vrGjKjOrJUVVVkW211qG1PunKX/Yhz3vSvNI5l0Oma2DZz9mxfsrx7/11XwHUlHUvB4nN9N5MlXZNQnVatdst6cZx9mm/wDHn9Cd0TlOmErI9s2vmjvemUJ+Hylx8OsrMUp1QzOTnaoLWktwj7r+kvbj7HbiVzcnLfuyWJmY8qWSK1tMVnmHoABloAAAAAAAAAAAAANJ1lmfkOnORy96/L4t12/p2wb/AIOa7eh+mLelcWjFrrVqx1bbnylLvlPXn76S9fL0L18ab50+HXPqlOVlmI6Ixj6t2NVpL9e45E6h4nqfgeJhiZua5YfYnOim9z+En5dsv/E2jm9Rx5MkUrjydk8/dNr7evrX9eOefEfV0Z4TULA8HOn4PSdnfbJ/XunOa/gt7iI9nGYy/oT/AM+ZWONjvA8OulsGPlJYdEX+qhHf+2Wlx8XHAxov1VcV+yOkhZwAAAAAAAAAAAAAAARPxD4i3nunc/j8a6NGTL4dlE5PSVlc42Q39u6KTKFs6O6t6gypcTk8Pk4Vd8lHLzcicHXCCa24NN970vLRYn4jL749FW148bJOzJgn2x3pLb3+yKY8H+R5TI8QuEw6+RzI0Stcp1RukoyUYOTTjvTXy+hXza2PNatrx5hT2NXFnvW+SOZr7Oh+pq4xy+LxK1qMNKMft6fwiwYx7YqK9EtETlXDI6lpUoqTrcUv7Lf8ktLC4AAAAAAAAAAAAAAB5srJjTJQlFvaA0vI0ys5XDuhkZEI1SnL4dctQsTjr517pe33NfLHlPk+Oy1PHj2St+I50Rc5pppan6x19vVEgsyMSySrlLsnra9mYLsDHyFqd83D07VpbX08vM1mL90Wifx8/wBnifhyz4avp+yOZ1BbdF/LHua+60kv9kuIdbZDhuoK7V/x5pKWl6LWv20mTCMlKKlFpxa2mvc2YfoAAAAAAAAAAAAAGk15pP8AUADBbh41r3ZRXJ/VxRjXH48VquPYvX5WesAR/kumoZuXXd+bsrUE12qKe/7m9x6lTRXVFtqEVFN+r0j7AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB//9k=",
+                "inviteLinkGroupTypeV2": 0
+              },
+              "messageContextInfo": {
+                "messageSecret": "wmI2gPMBmeX+LKTztEgwwaZkKCpGdLF+dd3Fr9zhhZw="
+              }
+            },
+            "messageTimestamp": 1763220196,
+            "status": 4,
+            "messageC2STimestamp": 1763220197,
+            "userReceipt": [
+              {
+                "userJID": "34624230960@s.whatsapp.net",
+                "receiptTimestamp": 1763220197,
+                "readTimestamp": 1763224387,
+                "playedTimestamp": 0
+              }
+            ],
+            "messageSecret": "wmI2gPMBmeX+LKTztEgwwaZkKCpGdLF+dd3Fr9zhhZw=",
+            "originalSelfAuthorUserJIDString": "34624092504@s.whatsapp.net",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 223
+        },
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34624230960@s.whatsapp.net",
+              "fromMe": false,
+              "ID": "AC715471A51F36096293861D0E83BFBA"
+            },
+            "message": {
+              "conversation": "El último",
+              "messageContextInfo": {
+                "messageSecret": "2z0q0PxW2cO5ILTheqSl2j5HbRZNKptFa0YGiBnpaO8="
+              }
+            },
+            "messageTimestamp": 1762785795,
+            "messageSecret": "2z0q0PxW2cO5ILTheqSl2j5HbRZNKptFa0YGiBnpaO8=",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 222
+        },
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34624230960@s.whatsapp.net",
+              "fromMe": true,
+              "ID": "A5F07184B41FA8DF72B63BBC098AFE09"
+            },
+            "message": {
+              "conversation": "Q hago?",
+              "messageContextInfo": {
+                "messageSecret": "7nK7CGxuXFU6UtavPKt2HtR/+qiaeTQizQhORFN568Q="
+              }
+            },
+            "messageTimestamp": 1762785788,
+            "status": 4,
+            "userReceipt": [
+              {
+                "userJID": "34624230960@s.whatsapp.net",
+                "receiptTimestamp": 1762785788,
+                "readTimestamp": 1762785791,
+                "playedTimestamp": 0
+              }
+            ],
+            "messageSecret": "7nK7CGxuXFU6UtavPKt2HtR/+qiaeTQizQhORFN568Q=",
+            "originalSelfAuthorUserJIDString": "34624092504@s.whatsapp.net",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 221
+        },
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34624230960@s.whatsapp.net",
+              "fromMe": false,
+              "ID": "AC9A03AB479A3E16FB9DC5D41E2AE0E1"
+            },
+            "message": {
+              "conversation": "No está mal",
+              "messageContextInfo": {
+                "messageSecret": "df08boJVbxs1s1LsruFww0Y7jwCjvdvOMXSsOCTbYq4="
+              }
+            },
+            "messageTimestamp": 1762785775,
+            "messageSecret": "df08boJVbxs1s1LsruFww0Y7jwCjvdvOMXSsOCTbYq4=",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 220
+        },
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34624230960@s.whatsapp.net",
+              "fromMe": true,
+              "ID": "A515F78B61250EF092D900D5EAB20218"
+            },
+            "message": {
+              "extendedTextMessage": {
+                "text": "Steelblade - Jamonero + Cubre Jamón Kukuxumusu + Cuchillo Jamonero y Chaira - Soporte Jamonero Fabricado en España \n https://amzn.eu/d/6c8FaNO",
+                "matchedText": "https://amzn.eu/d/6c8FaNO",
+                "description": "steelBlade - Jamonero + Cubre Jamón Kukuxumusu + Cuchillo Jamonero y Chaira - Soporte Jamonero ideal para Jamones y Paletas - Soporte para jamon económico que equilibra calidad y precio. Tabla jamonero Banqueta biselado con 2.2 cm de grosor en la madera que lo hace más resistente y aumenta su dur...",
+                "title": "Steelblade - Jamonero + Cubre Jamón Kukuxumusu + Cuchillo Jamonero y Chaira - Soporte Jamonero Fabricado en España",
+                "previewType": 0,
+                "inviteLinkGroupTypeV2": 0
+              },
+              "messageContextInfo": {
+                "messageSecret": "ATM+BGAvi1G1yxA8U4EnmxrN210ygoKKKWBhi0y/XQ0="
+              }
+            },
+            "messageTimestamp": 1762785683,
+            "status": 4,
+            "userReceipt": [
+              {
+                "userJID": "34624230960@s.whatsapp.net",
+                "receiptTimestamp": 1762785684,
+                "readTimestamp": 1762785746,
+                "playedTimestamp": 0
+              }
+            ],
+            "messageSecret": "ATM+BGAvi1G1yxA8U4EnmxrN210ygoKKKWBhi0y/XQ0=",
+            "originalSelfAuthorUserJIDString": "34624092504@s.whatsapp.net",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 219
+        },
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34624230960@s.whatsapp.net",
+              "fromMe": false,
+              "ID": "AC5D34B61FAA24DED4A81C88E6E3D556"
+            },
+            "message": {
+              "conversation": "Perfe",
+              "messageContextInfo": {
+                "messageSecret": "qYbn5gIJucCutSFe1+BSOScUFvFPEjEDWCT10gEnGII="
+              }
+            },
+            "messageTimestamp": 1762785601,
+            "messageSecret": "qYbn5gIJucCutSFe1+BSOScUFvFPEjEDWCT10gEnGII=",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 218
+        },
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34624230960@s.whatsapp.net",
+              "fromMe": true,
+              "ID": "A5AA6F53C071086F4CAC3A2A9FDBCDFA"
+            },
+            "message": {
+              "extendedTextMessage": {
+                "text": "Super Mundo - Jamonero de Madera, Soporte jamonero, jamoneros Profesional,Tabla de Jamon para Jamón Ibérico(Luna) \n https://amzn.eu/d/epPNx71",
+                "matchedText": "https://amzn.eu/d/epPNx71",
+                "title": "Super Mundo - Jamonero de Madera, Soporte jamonero, jamoneros Profesional,Tabla de Jamon para Jamón Ibérico(Luna)",
+                "previewType": 0,
+                "JPEGThumbnail": "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",
+                "inviteLinkGroupTypeV2": 0
+              },
+              "messageContextInfo": {
+                "messageSecret": "aEG4enkWUTeQJ6WmtgO+p1JQp3i73SRZIcSSP9N3SUU="
+              }
+            },
+            "messageTimestamp": 1762785482,
+            "status": 4,
+            "messageC2STimestamp": 1762785483,
+            "userReceipt": [
+              {
+                "userJID": "34624230960@s.whatsapp.net",
+                "receiptTimestamp": 1762785483,
+                "readTimestamp": 1762785551,
+                "playedTimestamp": 0
+              }
+            ],
+            "messageSecret": "aEG4enkWUTeQJ6WmtgO+p1JQp3i73SRZIcSSP9N3SUU=",
+            "originalSelfAuthorUserJIDString": "34624092504@s.whatsapp.net",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 217
+        },
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34624230960@s.whatsapp.net",
+              "fromMe": true,
+              "ID": "A5E86E31F3FE4F12FC83A2CF96AF69AB"
+            },
+            "message": {
+              "extendedTextMessage": {
+                "text": "JATA JECG2721 - Cocina de gas portátil de 1 fuego con parrilla. Apta para butano y propano. Con tapa protectora extraíble. Ideal para camping. Ocupa poco espacio \n https://amzn.eu/d/ihNLZL8",
+                "matchedText": "https://amzn.eu/d/ihNLZL8",
+                "description": "La cocina de gas portátil JECG2721 es ideal para tus días de camping. Podrás cocinar tus alimentos sobre su quemador de forma sencilla conectándola a la bombona de gas butano o propano. Cuenta con tapa protectora extraíble para que la puedas poner cuando no estés utilizando la cocina de gas. Ocup...",
+                "title": "JATA JECG2721 - Cocina de gas portátil de 1 fuego con parrilla. Apta para butano y propano. Con tapa protectora extraíble. Ideal para camping. Ocupa poco espacio",
+                "previewType": 0,
+                "JPEGThumbnail": "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",
+                "inviteLinkGroupTypeV2": 0
+              },
+              "messageContextInfo": {
+                "messageSecret": "LVDVpeL8TRgEAwEWY6hEel7KrloqDlA3Ce1kGe4w4k8="
+              }
+            },
+            "messageTimestamp": 1762085314,
+            "status": 4,
+            "messageC2STimestamp": 1762085315,
+            "userReceipt": [
+              {
+                "userJID": "34624230960@s.whatsapp.net",
+                "receiptTimestamp": 1762085316,
+                "readTimestamp": 1762085324,
+                "playedTimestamp": 0
+              }
+            ],
+            "messageSecret": "LVDVpeL8TRgEAwEWY6hEel7KrloqDlA3Ce1kGe4w4k8=",
+            "originalSelfAuthorUserJIDString": "34624092504@s.whatsapp.net",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 212
+        },
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34624230960@s.whatsapp.net",
+              "fromMe": true,
+              "ID": "A56ECA84A791683EDB52EF2E7F3F0DFA"
+            },
+            "message": {
+              "extendedTextMessage": {
+                "text": "JATA JECG2721 - Cocina de gas portátil de 1 fuego con parrilla. Apta para butano y propano. Con tapa protectora extraíble. Ideal para camping. Ocupa poco espacio \n https://amzn.eu/d/ccwTX1p",
+                "matchedText": "https://amzn.eu/d/ccwTX1p",
+                "description": "La cocina de gas portátil JECG2721 es ideal para tus días de camping. Podrás cocinar tus alimentos sobre su quemador de forma sencilla conectándola a la bombona de gas butano o propano. Cuenta con tapa protectora extraíble para que la puedas poner cuando no estés utilizando la cocina de gas. Ocup...",
+                "title": "JATA JECG2721 - Cocina de gas portátil de 1 fuego con parrilla. Apta para butano y propano. Con tapa protectora extraíble. Ideal para camping. Ocupa poco espacio",
+                "previewType": 0,
+                "JPEGThumbnail": "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",
+                "inviteLinkGroupTypeV2": 0
+              },
+              "messageContextInfo": {
+                "messageSecret": "tBrEj/vCTjhvPRJdo0YSgvrtKqisnqJZNdcdqT5DVVE="
+              }
+            },
+            "messageTimestamp": 1761851867,
+            "status": 4,
+            "userReceipt": [
+              {
+                "userJID": "34624230960@s.whatsapp.net",
+                "receiptTimestamp": 1761851868,
+                "readTimestamp": 1761853155,
+                "playedTimestamp": 0
+              }
+            ],
+            "messageSecret": "tBrEj/vCTjhvPRJdo0YSgvrtKqisnqJZNdcdqT5DVVE=",
+            "originalSelfAuthorUserJIDString": "34624092504@s.whatsapp.net",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 211
+        },
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34624230960@s.whatsapp.net",
+              "fromMe": true,
+              "ID": "A54A4B40B990534BBCAC70D777005768"
+            },
+            "message": {
+              "extendedTextMessage": {
+                "text": "https://www.liveworksheets.com/es/worksheet/es/educacion-especial-educacion-infantil/1482481",
+                "matchedText": "https://www.liveworksheets.com/es/worksheet/es/educacion-especial-educacion-infantil/1482481",
+                "description": "LiveWorksheets transforms your traditional printable worksheets into self-correcting interactive exercises that the students can do online and send to the teacher.",
+                "title": "Otoño online pdf worksheet",
+                "previewType": 0,
+                "inviteLinkGroupTypeV2": 0
+              },
+              "messageContextInfo": {
+                "messageSecret": "3tAMiQVe67XPBnDjyfsdWewrA/jgr5V7cyteu8pu/Ek="
+              }
+            },
+            "messageTimestamp": 1760723784,
+            "status": 4,
+            "messageC2STimestamp": 1760723785,
+            "userReceipt": [
+              {
+                "userJID": "34624230960@s.whatsapp.net",
+                "receiptTimestamp": 1760723785,
+                "readTimestamp": 1760724096,
+                "playedTimestamp": 0
+              }
+            ],
+            "messageSecret": "3tAMiQVe67XPBnDjyfsdWewrA/jgr5V7cyteu8pu/Ek=",
+            "originalSelfAuthorUserJIDString": "34624092504@s.whatsapp.net",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 202
+        },
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34624230960@s.whatsapp.net",
+              "fromMe": false,
+              "ID": "3EB05E196503307AA2342E"
+            },
+            "message": {
+              "conversation": "tu no eres robotnito, dime quien eres",
+              "messageContextInfo": {
+                "messageSecret": "kXjqwA/ObfGLt2i/ZzMmMPSiNReozI3qgZEt659gG5o="
+              }
+            },
+            "messageTimestamp": 1759728079,
+            "messageSecret": "kXjqwA/ObfGLt2i/ZzMmMPSiNReozI3qgZEt659gG5o=",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 189
+        },
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34624230960@s.whatsapp.net",
+              "fromMe": false,
+              "ID": "AC3B39E04C49E293E4345AFCF4C6678D"
+            },
+            "message": {
+              "conversation": "Mañana que clima hace en Sevilla?",
+              "messageContextInfo": {
+                "messageSecret": "23OlgkzDITCiVdwoi4pgKeKyBPj/I8/boGxd5WP9SOw="
+              }
+            },
+            "messageTimestamp": 1759700155,
+            "messageSecret": "23OlgkzDITCiVdwoi4pgKeKyBPj/I8/boGxd5WP9SOw=",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 187
+        },
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34624230960@s.whatsapp.net",
+              "fromMe": false,
+              "ID": "AC680670134BDBACBB0F88CECC15E6D3"
+            },
+            "message": {
+              "conversation": "Robotnito",
+              "messageContextInfo": {
+                "messageSecret": "XDJKm+qhzdvCji8NLZvMNyRxf2QZLmjY/gULqR06Gy8="
+              }
+            },
+            "messageTimestamp": 1759700132,
+            "messageSecret": "XDJKm+qhzdvCji8NLZvMNyRxf2QZLmjY/gULqR06Gy8=",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 185
+        },
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34624230960@s.whatsapp.net",
+              "fromMe": false,
+              "ID": "ACAB9711D6ACBA341BA05900A89E6A47"
+            },
+            "message": {
+              "conversation": "Otra cosa, cuando son los días del calendario escolar 2025 2026 en Sevilla?",
+              "messageContextInfo": {
+                "messageSecret": "KSbBNU7EH7INj6ITPN3I4H2kNw2xEyk6MpTdFYgttok="
+              }
+            },
+            "messageTimestamp": 1759686666,
+            "messageSecret": "KSbBNU7EH7INj6ITPN3I4H2kNw2xEyk6MpTdFYgttok=",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 183
+        },
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34624230960@s.whatsapp.net",
+              "fromMe": false,
+              "ID": "AC03FCCAF61F3A1FC5FE8BDFAC9B3B7C"
+            },
+            "message": {
+              "conversation": "Me ha salido genial!",
+              "messageContextInfo": {
+                "messageSecret": "tjV8P9seW9Zbu3pIhElDKdKvsptPbhPnAxgsgIVLqPY="
+              }
+            },
+            "messageTimestamp": 1759686343,
+            "messageSecret": "tjV8P9seW9Zbu3pIhElDKdKvsptPbhPnAxgsgIVLqPY=",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 178
+        },
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34624230960@s.whatsapp.net",
+              "fromMe": false,
+              "ID": "3EB0A8C213D4FFBFA52174"
+            },
+            "message": {
+              "conversation": "vamos con el paso 1?",
+              "messageContextInfo": {
+                "messageSecret": "D8wGMaY0Fn/09BM9DnnatdkXuJMvy8qVEuS/gYQcdZ8="
+              }
+            },
+            "messageTimestamp": 1759685514,
+            "messageSecret": "D8wGMaY0Fn/09BM9DnnatdkXuJMvy8qVEuS/gYQcdZ8=",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 176
+        },
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34624230960@s.whatsapp.net",
+              "fromMe": false,
+              "ID": "3EB047B8CFDC721EB7128F"
+            },
+            "message": {
+              "conversation": "lo intentamos?",
+              "messageContextInfo": {
+                "messageSecret": "xSNWB/NxeCVTKaxWtDULAkdMhSvXJuQ43sCs2Bl4SgE="
+              }
+            },
+            "messageTimestamp": 1759685447,
+            "messageSecret": "xSNWB/NxeCVTKaxWtDULAkdMhSvXJuQ43sCs2Bl4SgE=",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 173
+        },
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34624230960@s.whatsapp.net",
+              "fromMe": false,
+              "ID": "3EB08F6E255E25789C1CE9"
+            },
+            "message": {
+              "conversation": "vamos a ello?",
+              "messageContextInfo": {
+                "messageSecret": "Cog5pqHR5bkMkXF+hwuQKHUfQqokn9Xq0X/lPkRZDc4="
+              }
+            },
+            "messageTimestamp": 1759685232,
+            "messageSecret": "Cog5pqHR5bkMkXF+hwuQKHUfQqokn9Xq0X/lPkRZDc4=",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 172
+        },
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34624230960@s.whatsapp.net",
+              "fromMe": false,
+              "ID": "3EB0F4E07BFF89A5DB05DD"
+            },
+            "message": {
+              "conversation": "damelo paso a paso, por favor",
+              "messageContextInfo": {
+                "messageSecret": "evmucF/BNpcYyS20VZQ2g6ZsSisPcW2m0QdRIIflWfY="
+              }
+            },
+            "messageTimestamp": 1759685062,
+            "messageSecret": "evmucF/BNpcYyS20VZQ2g6ZsSisPcW2m0QdRIIflWfY=",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 171
+        }
+      ],
+      "unreadCount": 0,
+      "readOnly": false,
+      "ephemeralExpiration": 0,
+      "ephemeralSettingTimestamp": 0,
+      "conversationTimestamp": 1767101399,
+      "notSpam": true,
+      "archived": false,
+      "disappearingMode": {
+        "initiator": 0
+      },
+      "unreadMentionCount": 0,
+      "markedAsUnread": false,
+      "tcToken": "BAEd1plxm1x7tFo=",
+      "tcTokenTimestamp": 1767101399,
+      "contactPrimaryIdentityKey": "/84VPDUgiQluM/idb86qTY4X8FwnGPruz6DTzJNSMHo=",
+      "tcTokenSenderTimestamp": 1767100431,
+      "pnJID": "34624230960@s.whatsapp.net",
+      "shareOwnPn": true,
+      "lidOriginType": "general",
+      "commentsCount": 1000000,
+      "locked": false,
+      "accountLid": "256942157103233@lid"
+    },
+    {
+      "ID": "34627005637@s.whatsapp.net",
+      "messages": [
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34627005637@s.whatsapp.net",
+              "fromMe": true,
+              "ID": "A5E2BCE3D9A76B75CD5DA1821AB8121B"
+            },
+            "message": {
+              "extendedTextMessage": {
+                "text": "HOMCOM Chimenea Eléctrica 1000/2000W Chimenea Decorativa de Pie con Efecto de Llama Termostato Ajustable y Protección contra Sobrecalentamiento para Salas 20-25 m² 36,5x24x45,5 cm Blanco \n https://amzn.eu/d/9KQAZzK",
+                "matchedText": "https://amzn.eu/d/9KQAZzK",
+                "description": "¿Estás buscando una chimenea sin humos que mantenga tu espacio cálido y se vea genial en casa? Esta chimenea calefactora eléctrica de HOMCOM tiene un efecto de llama realista y 2 configuraciones de calor ajustables, proporcionando un ambiente perfecto para cualquier ocasión. Dispone de un disposi...",
+                "title": "HOMCOM Chimenea Eléctrica 1000/2000W Chimenea Decorativa de Pie con Efecto de Llama Termostato Ajustable y Protección contra Sobrecalentamiento para Salas 20-25 m² 36,5x24x45,5 cm Blanco",
+                "previewType": 0,
+                "JPEGThumbnail": "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",
+                "thumbnailDirectPath": "/v/t62.36144-24/549534836_705523919297466_8895271841861557379_n.enc?ccb=11-4\u0026oh=01_Q5Aa3AHA-6X8wTQkh29hnoH-A5lFunwZYcgI9dfPiE2WysEpxA\u0026oe=69552307\u0026_nc_sid=5e03e0",
+                "thumbnailSHA256": "dEyPDteWcwRMkeGzEqOYQVB1lrR/vvd6qVukWLtjsDU=",
+                "thumbnailEncSHA256": "MLY1avaDjEGbTfLHsh/T+DXc3LN3h6vdCgZExhT825Q=",
+                "mediaKey": "AHU0qzkf2CFuVnQimG8+IvV1EZ55cYAhS4rCmfcwMOg=",
+                "mediaKeyTimestamp": 1764597373,
+                "thumbnailHeight": 536,
+                "thumbnailWidth": 1024,
+                "inviteLinkGroupTypeV2": 0
+              },
+              "messageContextInfo": {
+                "messageSecret": "22FMtjDfs7bY61Hh60aCdzZwt0Cn5BfS0Xctd7NaToI="
+              }
+            },
+            "messageTimestamp": 1764597374,
+            "status": 3,
+            "messageC2STimestamp": 1764597421,
+            "userReceipt": [
+              {
+                "userJID": "34627005637@s.whatsapp.net",
+                "receiptTimestamp": 1764597422,
+                "readTimestamp": 0,
+                "playedTimestamp": 0
+              }
+            ],
+            "messageSecret": "22FMtjDfs7bY61Hh60aCdzZwt0Cn5BfS0Xctd7NaToI=",
+            "originalSelfAuthorUserJIDString": "34624092504@s.whatsapp.net",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 241
+        }
+      ],
+      "unreadCount": 0,
+      "readOnly": false,
+      "ephemeralExpiration": 0,
+      "ephemeralSettingTimestamp": 0,
+      "conversationTimestamp": 1764597374,
+      "notSpam": true,
+      "archived": false,
+      "disappearingMode": {
+        "initiator": 0
+      },
+      "unreadMentionCount": 0,
+      "markedAsUnread": false,
+      "contactPrimaryIdentityKey": "LP+6BH/iYXJa9z5eTfVHuv2ioufreR4zYcLf+H+dnGc=",
+      "tcTokenSenderTimestamp": 1764597421,
+      "pnJID": "34627005637@s.whatsapp.net",
+      "shareOwnPn": true,
+      "lidOriginType": "general",
+      "commentsCount": 1000000,
+      "locked": false,
+      "accountLid": "155439329231023@lid"
+    },
+    {
+      "ID": "34639641443@s.whatsapp.net",
+      "messages": [
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34639641443@s.whatsapp.net",
+              "fromMe": true,
+              "ID": "A5605C1FB4220144DC252463FEAF5E76"
+            },
+            "message": {
+              "extendedTextMessage": {
+                "text": "https://www.liveworksheets.com/es/worksheet/es/educacion-especial-educacion-infantil/1482481",
+                "matchedText": "https://www.liveworksheets.com/es/worksheet/es/educacion-especial-educacion-infantil/1482481",
+                "description": "LiveWorksheets transforms your traditional printable worksheets into self-correcting interactive exercises that the students can do online and send to the teacher.",
+                "title": "Otoño online pdf worksheet",
+                "previewType": 0,
+                "inviteLinkGroupTypeV2": 0
+              },
+              "messageContextInfo": {
+                "messageSecret": "sO1X6PX0jUMBOSfqNhd6GdtxkEiwyIiBLkSyNzBanDM="
+              }
+            },
+            "messageTimestamp": 1760723815,
+            "status": 3,
+            "messageC2STimestamp": 1760723816,
+            "userReceipt": [
+              {
+                "userJID": "34639641443@s.whatsapp.net",
+                "receiptTimestamp": 1760723820,
+                "readTimestamp": 0,
+                "playedTimestamp": 0
+              }
+            ],
+            "messageSecret": "sO1X6PX0jUMBOSfqNhd6GdtxkEiwyIiBLkSyNzBanDM=",
+            "originalSelfAuthorUserJIDString": "34624092504@s.whatsapp.net",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 203
+        }
+      ],
+      "unreadCount": 0,
+      "readOnly": false,
+      "ephemeralExpiration": 0,
+      "ephemeralSettingTimestamp": 0,
+      "conversationTimestamp": 1760723815,
+      "notSpam": true,
+      "archived": false,
+      "disappearingMode": {
+        "initiator": 0
+      },
+      "unreadMentionCount": 0,
+      "markedAsUnread": false,
+      "contactPrimaryIdentityKey": "SR7RX/wOVjhwlLRMB4YXrz4aB/2KpewbXPEj61rxGyM=",
+      "tcTokenSenderTimestamp": 1760723816,
+      "pnJID": "34639641443@s.whatsapp.net",
+      "lidOriginType": "general",
+      "commentsCount": 1000000,
+      "locked": false,
+      "accountLid": "153236010975287@lid"
+    },
+    {
+      "ID": "34655090792@s.whatsapp.net",
+      "messages": [
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34655090792@s.whatsapp.net",
+              "fromMe": false,
+              "ID": "ACC963B8D2676D81507D5818A9D8C07B"
+            },
+            "message": {
+              "conversation": "Hola. Me han pasado tú número. Quién eres??",
+              "messageContextInfo": {
+                "messageSecret": "a5ucmggjA4/PRnM5a0tnIH5jX1oF+vJIExJdh9e34vw="
+              }
+            },
+            "messageTimestamp": 1759686348,
+            "messageSecret": "a5ucmggjA4/PRnM5a0tnIH5jX1oF+vJIExJdh9e34vw=",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 180
+        }
+      ],
+      "unreadCount": 0,
+      "readOnly": false,
+      "ephemeralExpiration": 0,
+      "ephemeralSettingTimestamp": 0,
+      "conversationTimestamp": 1759686352,
+      "notSpam": true,
+      "archived": false,
+      "disappearingMode": {
+        "initiator": 0
+      },
+      "unreadMentionCount": 0,
+      "markedAsUnread": false,
+      "tcToken": "BAEUqOOnl//ssBQ=",
+      "tcTokenTimestamp": 1759686348,
+      "contactPrimaryIdentityKey": "f8YbsFLdbAigU6c9RHnztD6UoY2NP/tiNSKt5vN5SQE=",
+      "pnJID": "34655090792@s.whatsapp.net",
+      "lidOriginType": "general",
+      "commentsCount": 1000000,
+      "locked": false,
+      "accountLid": "50551899340833@lid"
+    },
+    {
+      "ID": "34679324504@s.whatsapp.net",
+      "messages": [
+        {
+          "message": {
+            "key": {
+              "remoteJID": "34679324504@s.whatsapp.net",
+              "fromMe": false,
+              "ID": "AC196E6C42320EE293EEFB09427281B4"
+            },
+            "message": {
+              "conversation": "Quien eres?",
+              "messageContextInfo": {
+                "messageSecret": "HMZFPOshH1S7+GrgyCIW2IFe9eQ4yesYRU7ipTlas3E="
+              }
+            },
+            "messageTimestamp": 1759677474,
+            "messageSecret": "HMZFPOshH1S7+GrgyCIW2IFe9eQ4yesYRU7ipTlas3E=",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 138
+        }
+      ],
+      "unreadCount": 0,
+      "readOnly": false,
+      "ephemeralExpiration": 0,
+      "ephemeralSettingTimestamp": 0,
+      "conversationTimestamp": 1759677474,
+      "notSpam": true,
+      "archived": false,
+      "disappearingMode": {
+        "initiator": 0
+      },
+      "unreadMentionCount": 0,
+      "markedAsUnread": false,
+      "tcToken": "BAEUzjhkWq1xIE8=",
+      "tcTokenTimestamp": 1759677474,
+      "contactPrimaryIdentityKey": "GX6M7JdgK4+NCvi21LK1RYd3jnOkFlrS2x1EaBCXqAI=",
+      "pnJID": "34679324504@s.whatsapp.net",
+      "lidOriginType": "general",
+      "commentsCount": 1000000,
+      "locked": false,
+      "accountLid": "114873346293992@lid"
+    },
+    {
+      "ID": "628123456789@s.whatsapp.net",
+      "messages": [
+        {
+          "message": {
+            "key": {
+              "remoteJID": "628123456789@s.whatsapp.net",
+              "fromMe": true,
+              "ID": "3EB0E29EFEDE289A884F41"
+            },
+            "message": {
+              "conversation": "test final con websocket"
+            },
+            "messageTimestamp": 1759677419,
+            "status": 2,
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 137
+        }
+      ],
+      "unreadCount": 0,
+      "readOnly": false,
+      "ephemeralExpiration": 0,
+      "ephemeralSettingTimestamp": 0,
+      "conversationTimestamp": 1759677419,
+      "notSpam": true,
+      "archived": false,
+      "disappearingMode": {
+        "initiator": 0
+      },
+      "unreadMentionCount": 0,
+      "markedAsUnread": false,
+      "pnJID": "628123456789@s.whatsapp.net",
+      "lidOriginType": "general",
+      "commentsCount": 1000000,
+      "locked": false,
+      "accountLid": "216015950635244@lid"
+    },
+    {
+      "ID": "123456789@s.whatsapp.net",
+      "messages": [
+        {
+          "message": {
+            "key": {
+              "remoteJID": "123456789@s.whatsapp.net",
+              "fromMe": true,
+              "ID": "3EB0BB0E429ABB58AF98B7"
+            },
+            "message": {
+              "conversation": "test"
+            },
+            "messageTimestamp": 1759606375,
+            "status": 2,
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 123
+        }
+      ],
+      "unreadCount": 0,
+      "readOnly": false,
+      "ephemeralExpiration": 0,
+      "ephemeralSettingTimestamp": 0,
+      "conversationTimestamp": 1759606375,
+      "notSpam": true,
+      "archived": false,
+      "disappearingMode": {
+        "initiator": 0
+      },
+      "unreadMentionCount": 0,
+      "markedAsUnread": false,
+      "pnJID": "123456789@s.whatsapp.net",
+      "lidOriginType": "general",
+      "commentsCount": 1000000,
+      "locked": false,
+      "accountLid": "1099528470528@lid"
+    },
+    {
+      "ID": "0@s.whatsapp.net",
+      "messages": [
+        {
+          "message": {
+            "key": {
+              "remoteJID": "0@s.whatsapp.net",
+              "fromMe": false,
+              "ID": "1475748823675862-1"
+            },
+            "message": {
+              "videoMessage": {
+                "mimetype": "video/mp4",
+                "fileSHA256": "aRJ8CCm+2jP25GYDXx+j+hfmPwc2nWk652AQVg87fe8=",
+                "fileLength": 3284023,
+                "seconds": 6,
+                "mediaKey": "uzUEWNYhge1OuCcP8QG9S0SKJpcUaRSf9bYF+j+0w9U=",
+                "caption": "*Te damos la bienvenida a WhatsApp Business* 🤩\n\nFelicitaciones por llevar tu empresa al próximo nivel. Ahora puedes acceder a nuestras valiosas herramientas gratuitas, como mensajes automáticos, catálogos y pedidos, que te ayudarán con lo siguiente:\n\n👋 Llegar a más clientes\n\n🏃 Responder más rápido\n\n📈 Aumentar tus ventas\n\nPara empezar y obtener más información, ve a la pestaña Herramientas.",
+                "height": 2314,
+                "width": 2196,
+                "fileEncSHA256": "TllMW6nMnbVy+jh8Q1VDTuNagecDirFZtbdF1/RcLug=",
+                "contextInfo": {
+                  "pairedMediaType": 0
+                },
+                "staticURL": "https://static.whatsapp.net/downloadable?category=PSA\u0026id=1029834798674866689\u0026num=8efdd6d4-1edc-4d97-9bc7-c882b72fd716\u0026_nc_cat=1"
+              },
+              "messageContextInfo": {
+                "messageSecret": "GhFA/PaGTtTqqsoZC/84DBSmzGjEFWtjuh+QRUdkoLk="
+              }
+            },
+            "messageTimestamp": 1759572466,
+            "mediaData": {
+              "localPath": "Media/WhatsApp Business Video/Private/VID-20251004-WA0000.mp4"
+            },
+            "messageSecret": "GhFA/PaGTtTqqsoZC/84DBSmzGjEFWtjuh+QRUdkoLk=",
+            "isMentionedInStatus": false
+          },
+          "msgOrderID": 35
+        }
+      ],
+      "unreadCount": 1,
+      "readOnly": false,
+      "ephemeralExpiration": 0,
+      "ephemeralSettingTimestamp": 0,
+      "conversationTimestamp": 1759572466,
+      "name": "WhatsApp Business",
+      "notSpam": false,
+      "archived": false,
+      "disappearingMode": {
+        "initiator": 0
+      },
+      "unreadMentionCount": 0,
+      "markedAsUnread": false,
+      "commentsCount": 1000000,
+      "locked": false
+    }
+  ],
+  "globalSettings": {},
+  "threadIDUserSecret": "WYEhMHMxuxjAM642IrFG9K+pwOmlpaCRLEXaInUuewQ=",
+  "threadDsTimeframeOffset": 19597,
+  "phoneNumberToLidMappings": [
+    {
+      "pnJID": "123456789@s.whatsapp.net",
+      "lidJID": "1099528470528@lid"
+    },
+    {
+      "pnJID": "34627005637@s.whatsapp.net",
+      "lidJID": "155439329231023@lid"
+    },
+    {
+      "pnJID": "34655090792@s.whatsapp.net",
+      "lidJID": "50551899340833@lid"
+    },
+    {
+      "pnJID": "628123456789@s.whatsapp.net",
+      "lidJID": "216015950635244@lid"
+    },
+    {
+      "pnJID": "34679324504@s.whatsapp.net",
+      "lidJID": "114873346293992@lid"
+    },
+    {
+      "pnJID": "34624230960@s.whatsapp.net",
+      "lidJID": "256942157103233@lid"
+    },
+    {
+      "pnJID": "34639641443@s.whatsapp.net",
+      "lidJID": "153236010975287@lid"
+    }
+  ],
+  "companionMetaNonce": "oI6UBTOVDRWrgPF0bodAFTKz9Ciz0pqF"
+}

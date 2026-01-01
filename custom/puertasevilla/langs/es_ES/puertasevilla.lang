@@ -1,0 +1,129 @@
+# Dolibarr language file - Source file is en_US - puertasevilla
+CHARSET=UTF-8
+
+################################################################################
+# Module PuertaSevilla
+################################################################################
+ModulePuertaSevillaName=PuertaSevilla
+ModulePuertaSevillaDesc=Módulo de gestión inmobiliaria completa
+
+################################################################################
+# Admin
+################################################################################
+PuertaSevillaSetup=Configuración del módulo PuertaSevilla
+PuertaSevillaSetupPage=Página de configuración del módulo PuertaSevilla
+PuertaSevillaAbout=Acerca de PuertaSevilla
+Settings=Configuración
+About=Acerca de
+
+################################################################################
+# Parámetros de configuración
+################################################################################
+PUERTASEVILLA_ENABLE_AUTO_INVOICE=Activar generación automática de facturas desde contratos
+PUERTASEVILLA_ENABLE_AUTO_INVOICETooltip=Si está activado, al activar una línea de contrato se generará automáticamente una factura plantilla recurrente
+PUERTASEVILLA_INVOICE_TEMPLATE_ID=ID de la plantilla de factura por defecto
+PUERTASEVILLA_INVOICE_TEMPLATE_IDTooltip=ID de la factura plantilla que se usará como base para las facturas automáticas
+
+################################################################################
+# Extrafields - Terceros (societe)
+################################################################################
+Rol (Propietario/Inquilino/Administrador)=Rol (Propietario/Inquilino/Administrador)
+ID Origen del Tercero (migración)=ID Origen del Tercero (migración)
+Nacionalidad=Nacionalidad
+Forma de Pago Origen=Forma de Pago Origen
+¿Auto-informe?=¿Auto-informe?
+
+################################################################################
+# Extrafields - Proyectos (projet)
+################################################################################
+ID Origen de Vivienda (migración)=ID Origen de Vivienda (migración)
+Referencia de Vivienda=Referencia de Vivienda
+Dirección Completa=Dirección Completa
+Localidad=Localidad
+Superficie (m²)=Superficie (m²)
+Nº Baños=Nº Baños
+Nº Dormitorios=Nº Dormitorios
+Referencia Catastral=Referencia Catastral
+Estado de la Vivienda=Estado de la Vivienda
+Compañía Suministros=Compañía Suministros
+Nº Contrato Suministros=Nº Contrato Suministros
+Nombre Compañía=Nombre Compañía
+
+################################################################################
+# Extrafields - Contratos (contrat)
+################################################################################
+ID Origen Contrato Usuario (migración)=ID Origen Contrato Usuario (migración)
+Día de Pago (1-31)=Día de Pago (1-31)
+Inventario=Inventario
+¿Auto-factura?=¿Auto-factura?
+
+################################################################################
+# Extrafields - Líneas de Contrato (contratdet)
+################################################################################
+Cuenta Bancaria (CCC/IBAN)=Cuenta Bancaria (CCC/IBAN)
+Entidad Bancaria=Entidad Bancaria
+
+################################################################################
+# Extrafields - Facturas (facture)
+################################################################################
+ID Origen Factura (migración)=ID Origen Factura (migración)
+Tipo de Factura=Tipo de Factura
+
+################################################################################
+# Extrafields - Pedidos (commande)
+################################################################################
+ID Origen Mantenimiento (migración)=ID Origen Mantenimiento (migración)
+Tipo de Mantenimiento=Tipo de Mantenimiento
+Horas Trabajadas=Horas Trabajadas
+Observaciones=Observaciones
+
+################################################################################
+# Diccionarios
+################################################################################
+TipoMantenimiento=Tipo de Mantenimiento
+CategoríaContable=Categoría Contable
+EstadoVivienda=Estado de Vivienda
+FormaPago=Forma de Pago
+
+################################################################################
+# Valores de diccionarios
+################################################################################
+# Tipos de mantenimiento
+Urgencia=Urgencia
+Suministros=Suministros
+Reparación=Reparación
+Limpieza=Limpieza
+Revisión=Revisión
+Otros=Otros
+
+# Categorías contables
+Alquiler=Alquiler
+Comunidad=Comunidad
+Mantenimiento=Mantenimiento
+
+# Estados de vivienda
+Ocupada=Ocupada
+Vacía=Vacía
+En Reforma=En Reforma
+Baja=Baja
+
+# Formas de pago
+Efectivo=Efectivo
+Transferencia=Transferencia
+Domiciliación=Domiciliación
+Tarjeta=Tarjeta
+Cheque=Cheque
+
+# Roles de terceros
+Propietario=Propietario
+Inquilino=Inquilino
+Administrador=Administrador
+
+################################################################################
+# Mensajes del sistema
+################################################################################
+InvoiceTemplateCreatedFromContract=Factura plantilla creada desde el contrato
+ErrorCreatingInvoiceTemplate=Error al crear la factura plantilla
+ContractHasNoThirdParty=El contrato no tiene un tercero asociado
+ContractLineActivated=Línea de contrato activada
+InvoiceTemplateGenerated=Factura plantilla generada automáticamente

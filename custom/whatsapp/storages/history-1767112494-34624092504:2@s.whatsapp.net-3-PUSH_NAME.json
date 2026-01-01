@@ -1,0 +1,31 @@
+{
+  "syncType": 4,
+  "pushnames": [
+    {
+      "ID": "34655090792@s.whatsapp.net",
+      "pushname": "Bosco"
+    },
+    {
+      "ID": "34624230960@s.whatsapp.net",
+      "pushname": "Beni"
+    },
+    {
+      "ID": "34679324504@s.whatsapp.net",
+      "pushname": "Lucia"
+    }
+  ],
+  "phoneNumberToLidMappings": [
+    {
+      "pnJID": "34679324504@s.whatsapp.net",
+      "lidJID": "114873346293992@lid"
+    },
+    {
+      "pnJID": "34624230960@s.whatsapp.net",
+      "lidJID": "256942157103233@lid"
+    },
+    {
+      "pnJID": "34655090792@s.whatsapp.net",
+      "lidJID": "50551899340833@lid"
+    }
+  ]
+}

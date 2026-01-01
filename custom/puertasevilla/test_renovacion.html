@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Test - Renovación de Contratos</title>
+	<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+	<link rel="stylesheet" href="./css/renovacion.css">
+	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+	<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+	<script src="./js/renovar_contrato_modal.js"></script>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			max-width: 800px;
+			margin: 50px auto;
+			padding: 20px;
+		}
+		.test-section {
+			border: 1px solid #ddd;
+			padding: 20px;
+			margin: 20px 0;
+			border-radius: 5px;
+		}
+		.success {
+			color: green;
+			font-weight: bold;
+		}
+		.error {
+			color: red;
+			font-weight: bold;
+		}
+		button {
+			background: #4CAF50;
+			color: white;
+			padding: 10px 20px;
+			border: none;
+			border-radius: 4px;
+			cursor: pointer;
+			font-size: 14px;
+		}
+		button:hover {
+			background: #45a049;
+		}
+		code {
+			background: #f4f4f4;
+			padding: 2px 6px;
+			border-radius: 3px;
+		}
+	</style>
+</head>
+<body>
+	<h1>🧪 Test - Sistema de Renovación de Contratos</h1>
+	
+	<div class="test-section">
+		<h2>1. Verificación de Funciones JavaScript</h2>
+		<p>Las siguientes funciones deben estar definidas:</p>
+		<ul>
+			<li><code>abrirModalRenovacion</code> - <span id="test-abrirModal"></span></li>
+			<li><code>obtenerIPCActual</code> - <span id="test-obtenerIPC"></span></li>
+			<li><code>actualizarLabelValor</code> - <span id="test-actualizarLabel"></span></li>
+			<li><code>actualizarPreview</code> - <span id="test-actualizarPreview"></span></li>
+			<li><code>procesarRenovacion</code> - <span id="test-procesarRenovacion"></span></li>
+		</ul>
+	</div>
+	
+	<div class="test-section">
+		<h2>2. Verificación de jQuery y jQuery UI</h2>
+		<ul>
+			<li>jQuery - <span id="test-jquery"></span></li>
+			<li>jQuery UI Dialog - <span id="test-jqueryui"></span></li>
+		</ul>
+	</div>
+	
+	<div class="test-section">
+		<h2>3. Prueba del Modal</h2>
+		<p>Haz clic en el botón para abrir el modal de renovación:</p>
+		<button onclick="abrirModalRenovacion(123, 'C-2024-001')">
+			Abrir Modal de Prueba
+		</button>
+	</div>
+	
+	<div class="test-section">
+		<h2>4. Resultados</h2>
+		<div id="resultados">
+			<p>Los resultados aparecerán aquí...</p>
+		</div>
+	</div>
+	
+	<script>
+		// Test de funciones
+		function testFunctions() {
+			var results = document.getElementById('resultados');
+			var html = '<h3>Resultados del Test:</h3>';
+			
+			// Test abrirModalRenovacion
+			if (typeof abrirModalRenovacion === 'function') {
+				document.getElementById('test-abrirModal').innerHTML = '<span class="success">✓ OK</span>';
+				html += '<p><span class="success">✓</span> <code>abrirModalRenovacion</code> está definida</p>';
+			} else {
+				document.getElementById('test-abrirModal').innerHTML = '<span class="error">✗ ERROR</span>';
+				html += '<p><span class="error">✗</span> <code>abrirModalRenovacion</code> NO está definida</p>';
+			}
+			
+			// Test obtenerIPCActual
+			if (typeof obtenerIPCActual === 'function') {
+				document.getElementById('test-obtenerIPC').innerHTML = '<span class="success">✓ OK</span>';
+				html += '<p><span class="success">✓</span> <code>obtenerIPCActual</code> está definida</p>';
+			} else {
+				document.getElementById('test-obtenerIPC').innerHTML = '<span class="error">✗ ERROR</span>';
+				html += '<p><span class="error">✗</span> <code>obtenerIPCActual</code> NO está definida</p>';
+			}
+			
+			// Test actualizarLabelValor
+			if (typeof actualizarLabelValor === 'function') {
+				document.getElementById('test-actualizarLabel').innerHTML = '<span class="success">✓ OK</span>';
+				html += '<p><span class="success">✓</span> <code>actualizarLabelValor</code> está definida</p>';
+			} else {
+				document.getElementById('test-actualizarLabel').innerHTML = '<span class="error">✗ ERROR</span>';
+				html += '<p><span class="error">✗</span> <code>actualizarLabelValor</code> NO está definida</p>';
+			}
+			
+			// Test actualizarPreview
+			if (typeof actualizarPreview === 'function') {
+				document.getElementById('test-actualizarPreview').innerHTML = '<span class="success">✓ OK</span>';
+				html += '<p><span class="success">✓</span> <code>actualizarPreview</code> está definida</p>';
+			} else {
+				document.getElementById('test-actualizarPreview').innerHTML = '<span class="error">✗ ERROR</span>';
+				html += '<p><span class="error">✗</span> <code>actualizarPreview</code> NO está definida</p>';
+			}
+			
+			// Test procesarRenovacion
+			if (typeof procesarRenovacion === 'function') {
+				document.getElementById('test-procesarRenovacion').innerHTML = '<span class="success">✓ OK</span>';
+				html += '<p><span class="success">✓</span> <code>procesarRenovacion</code> está definida</p>';
+			} else {
+				document.getElementById('test-procesarRenovacion').innerHTML = '<span class="error">✗ ERROR</span>';
+				html += '<p><span class="error">✗</span> <code>procesarRenovacion</code> NO está definida</p>';
+			}
+			
+			// Test jQuery
+			if (typeof jQuery !== 'undefined') {
+				document.getElementById('test-jquery').innerHTML = '<span class="success">✓ OK</span>';
+				html += '<p><span class="success">✓</span> jQuery está cargado (v' + jQuery.fn.jquery + ')</p>';
+			} else {
+				document.getElementById('test-jquery').innerHTML = '<span class="error">✗ ERROR</span>';
+				html += '<p><span class="error">✗</span> jQuery NO está cargado</p>';
+			}
+			
+			// Test jQuery UI Dialog
+			if (typeof jQuery !== 'undefined' && typeof jQuery.ui !== 'undefined' && typeof jQuery.ui.dialog !== 'undefined') {
+				document.getElementById('test-jqueryui').innerHTML = '<span class="success">✓ OK</span>';
+				html += '<p><span class="success">✓</span> jQuery UI Dialog está disponible</p>';
+			} else {
+				document.getElementById('test-jqueryui').innerHTML = '<span class="error">✗ ERROR</span>';
+				html += '<p><span class="error">✗</span> jQuery UI Dialog NO está disponible</p>';
+			}
+			
+			results.innerHTML = html;
+		}
+		
+		// Ejecutar test cuando cargue la página
+		window.addEventListener('load', testFunctions);
+	</script>
+</body>
+</html>
