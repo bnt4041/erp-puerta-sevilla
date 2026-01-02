@@ -7,11 +7,16 @@ if (!defined('NOREQUIREMENU')) define('NOREQUIREMENU', '1');
 if (!defined('NOREQUIREHTML')) define('NOREQUIREHTML', '1');
 
 // Load API environment
-require '../../../../main.inc.php';
+// Robust include using __DIR__
+require_once __DIR__ . '/../../../main.inc.php';
 require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
 
 // Log webhook headers and body for debugging
-$headers = getallheaders();
+if (function_exists('getallheaders')) {
+    $headers = getallheaders();
+} else {
+    $headers = $_SERVER;
+}
 $body = file_get_contents('php://input');
 dol_syslog("WhatsApp Webhook Header: " . print_r($headers, true), LOG_DEBUG);
 dol_syslog("WhatsApp Webhook Body: " . $body, LOG_DEBUG);

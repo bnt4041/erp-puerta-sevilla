@@ -1,0 +1,308 @@
+/* Docsig Module Styles */
+
+.docsig-request-btn {
+    color: #0066cc;
+    font-size: 18px;
+    padding: 5px;
+}
+
+.docsig-request-btn:hover {
+    color: #004080;
+}
+
+/* Modal */
+.docsig-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.6);
+}
+
+.docsig-modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 900px;
+    border-radius: 8px;
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+.docsig-modal-close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.docsig-modal-close:hover {
+    color: #000;
+}
+
+/* Signer list */
+.docsig-signers-list {
+    margin: 20px 0;
+}
+
+.docsig-signer-item {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.docsig-signer-info {
+    flex: 1;
+}
+
+.docsig-signer-status {
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    margin-left: 10px;
+}
+
+.status-pending { background: #ffc107; color: #000; }
+.status-sent { background: #17a2b8; color: #fff; }
+.status-opened { background: #007bff; color: #fff; }
+.status-signed { background: #28a745; color: #fff; }
+.status-failed { background: #dc3545; color: #fff; }
+.status-cancelled { background: #6c757d; color: #fff; }
+
+/* Form */
+.docsig-form-group {
+    margin-bottom: 15px;
+}
+
+.docsig-form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.docsig-form-group input,
+.docsig-form-group select,
+.docsig-form-group textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Public sign page */
+.docsig-public {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+.docsig-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    max-width: 600px;
+    width: 90%;
+    margin: 20px;
+}
+
+.docsig-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 12px 12px 0 0;
+    text-align: center;
+}
+
+.docsig-header h1 {
+    margin: 0;
+    font-size: 28px;
+}
+
+.docsig-info {
+    padding: 30px;
+    border-bottom: 1px solid #eee;
+}
+
+.docsig-info h3 {
+    margin-top: 0;
+    color: #333;
+}
+
+.docsig-form {
+    padding: 30px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.form-group small {
+    display: block;
+    margin-top: 5px;
+    color: #666;
+    font-size: 12px;
+}
+
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-primary {
+    background: #667eea;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #5568d3;
+}
+
+.btn-success {
+    background: #28a745;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #218838;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}
+
+.btn-lg {
+    padding: 15px 30px;
+    font-size: 18px;
+    width: 100%;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 14px;
+}
+
+/* Signature pad */
+.signature-pad-wrapper {
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+.signature-pad {
+    width: 100%;
+    height: 200px;
+    cursor: crosshair;
+}
+
+.form-check {
+    margin: 20px 0;
+}
+
+.form-check-input {
+    margin-right: 8px;
+}
+
+.form-check-label {
+    font-size: 14px;
+    color: #666;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.attempts-info {
+    margin-top: 15px;
+    font-size: 13px;
+    color: #666;
+}
+
+/* Messages */
+.docsig-message {
+    padding: 15px 30px;
+    margin: 0;
+    text-align: center;
+}
+
+.docsig-message.success {
+    background: #d4edda;
+    color: #155724;
+    border-bottom: 3px solid #28a745;
+}
+
+.docsig-message.error {
+    background: #f8d7da;
+    color: #721c24;
+    border-bottom: 3px solid #dc3545;
+}
+
+.docsig-error,
+.docsig-success {
+    padding: 40px;
+    text-align: center;
+}
+
+.docsig-error h2 {
+    color: #dc3545;
+}
+
+.success-icon {
+    font-size: 80px;
+    color: #28a745;
+    margin-bottom: 20px;
+}
+
+.docsig-footer {
+    padding: 20px;
+    text-align: center;
+    color: #666;
+    font-size: 13px;
+    border-top: 1px solid #eee;
+}

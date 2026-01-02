@@ -1,0 +1,43 @@
+/* Public sign page specific styles */
+
+@import url('docsig.css');
+
+/* Additional responsive styles */
+@media (max-width: 768px) {
+    .docsig-container {
+        width: 95%;
+        margin: 10px;
+    }
+
+    .docsig-header h1 {
+        font-size: 22px;
+    }
+
+    .docsig-info,
+    .docsig-form {
+        padding: 20px;
+    }
+
+    .btn-lg {
+        font-size: 16px;
+    }
+
+    .signature-pad {
+        height: 150px;
+    }
+}
+
+/* Loading spinner */
+.docsig-loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255,255,255,.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

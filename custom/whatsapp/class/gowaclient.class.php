@@ -40,17 +40,20 @@ class GoWAClient
 		// Clean phone number (remove +, spaces, etc.)
 		$to = preg_replace('/[^0-9]/', '', $to);
 
-		// Example implementation for a typical REST API
-		// Adjust this based on actual goWA API documentation if provided
-		$endpoint = rtrim($this->url, '/') . '/api/sendText';
+		// Verified endpoint
+		$endpoint = rtrim($this->url, '/') . '/send/message';
 		
 		$data = array(
-			'instance' => $this->instance,
-			'to' => $to,
+			// 'instance' => $this->instance, // Not required for this version? Or passed as header?
+            // Note: The verified payload uses 'phone' not 'to'
+			'phone' => $to,
 			'message' => $message
 		);
+        
+        // If instance is needed (multi-device), it might need to be passed differently or checked.
+        // For now, based on successful test, simple payload works.
 
-		return $this->callAPI($endpoint, $data);
+		return $this->callAPI($endpoint, $data, 'POST');
 	}
 
 	/**
@@ -68,6 +71,11 @@ class GoWAClient
 		$endpoint = rtrim($this->url, '/') . '/app/login';
 		$result = $this->callAPI($endpoint, array(), 'GET');
 		
+		// Handle "Already Logged In" error which comes as 400
+		if ($result['error'] == 1 && strpos($result['message'], 'ALREADY_LOGGED_IN') !== false) {
+			return array('error' => 0, 'data' => array('logged_in' => true, 'message' => 'Already logged in'));
+		}
+
 		if ($result['error'] == 0 && isset($result['data']['results']['qr_link'])) {
 			$qrUrl = $result['data']['results']['qr_link'];
 			
@@ -89,7 +97,7 @@ class GoWAClient
 			}
 		}
 		
-		// Check if already logged in
+		// Check if already logged in (case where API returns 200 but message says it)
 		if ($result['error'] == 0 && isset($result['data']['message']) && strpos($result['data']['message'], 'already') !== false) {
 			return array('error' => 0, 'data' => array('logged_in' => true, 'message' => $result['data']['message']));
 		}
@@ -110,8 +118,8 @@ class GoWAClient
 			return array('error' => 1, 'message' => 'GoWA URL not configured');
 		}
 
-		$endpoint = rtrim($this->url, '/') . '/api/status';
-		$data = array('instance' => $this->instance);
+		$endpoint = rtrim($this->url, '/') . '/app/status';
+		$data = array('instance' => $this->instance); // Keep passing instance just in case
 
 		return $this->callAPI($endpoint, $data);
 	}

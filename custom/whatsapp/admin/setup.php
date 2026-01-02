@@ -200,8 +200,7 @@ if ($tab == 'qr') {
                 }
             }
         }
-		print '<p>' . $result['data']['message'] . '</p>';
-		print '<p>' . $result['data']['message'] . '</p>';
+		// print '<p>' . $result['data']['message'] . '</p>';
 	} elseif ($result['error'] == 0 && !empty($result['data']['qr'])) {
 		// Show QR code
 		print '<h3>' . $langs->trans("ScanToLink") . '</h3>';

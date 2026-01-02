@@ -1,6 +1,6 @@
 👌 generación de contrato + facturas recurrentes - REALIZADO
 👌 renovación - REALIZADO
-* plantilla de contrato
+🤷‍♀️ plantilla de contrato
 * firma de documentos
 * mantenimientos
 * app
