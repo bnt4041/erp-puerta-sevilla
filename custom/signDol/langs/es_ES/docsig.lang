@@ -362,3 +362,93 @@ Company = Empresa
 NoContactsAvailable = No hay contactos disponibles. Use la búsqueda o cree uno nuevo.
 NoEmailAddress = Este contacto no tiene dirección de email
 ErrorInvalidEmail = Email no válido para el firmante
+Internal = Interno
+External = Externo
+
+# Canal de Notificaciones (FASE 3)
+NotificationChannelSection = Canal de Notificaciones
+DocSigNotificationChannel = Canal de notificación
+DocSigNotificationChannelHelp = Seleccione el canal por el que se enviarán las notificaciones de firma
+DocSigChannelEmail = Email
+DocSigChannelWhatsApp = WhatsApp
+DocSigChannelBoth = Email y WhatsApp
+DocSigWhatsAppNotConfigured = El módulo WhatsApp no está configurado. Para habilitar notificaciones por WhatsApp, configure primero el módulo WhatsApp.
+DocSigAutoReminderEnabled = Recordatorios automáticos
+DocSigAutoReminderEnabledHelp = Enviar recordatorios automáticos a firmantes pendientes
+DocSigReminderFirstDays = Días para primer recordatorio
+DocSigReminderFirstDaysHelp = Número de días después del envío para enviar el primer recordatorio
+DocSigMaxReminders = Máximo de recordatorios
+DocSigMaxRemindersHelp = Número máximo de recordatorios a enviar por firmante
+
+# Tipos de ActionComm para DocSig
+DocSigActionCommTypes = Tipos de eventos DocSig
+AC_DOCSIG = DocSig - Notificación
+AC_DOCSIG_REQUEST = DocSig - Solicitud de firma
+AC_DOCSIG_OTP = DocSig - Envío OTP
+AC_DOCSIG_REMINDER = DocSig - Recordatorio
+AC_DOCSIG_COMPLETED = DocSig - Firma completada
+AC_DOCSIG_CANCELLED = DocSig - Firma cancelada
+AC_DOCSIG_WHATSAPP = DocSig - WhatsApp enviado
+
+# Notificaciones WhatsApp
+WhatsAppMessageSent = Mensaje de WhatsApp enviado
+WhatsAppMessageError = Error al enviar WhatsApp
+WhatsAppNotAvailable = El módulo WhatsApp no está disponible
+NotificationSentBy = Notificación enviada por %s
+NotificationSentEmail = Notificación enviada por email
+NotificationSentWhatsApp = Notificación enviada por WhatsApp
+NotificationSentBoth = Notificación enviada por email y WhatsApp
+ChannelEmail = 📧 Email
+ChannelWhatsApp = 📱 WhatsApp
+ChannelSMS = 💬 SMS
+
+# Plantillas WhatsApp
+WhatsAppRequestBody = *Solicitud de firma*\n\nEstimado/a __SIGNER_NAME__,\n\nSe le solicita firmar el documento *__DOCUMENT_NAME__* (Ref: __REF__).\n\n🔗 Enlace de firma:\n__SIGN_URL__\n\n⏰ Este enlace expira el __EXPIRATION_DATE__.\n\nAtentamente,\n__COMPANY_NAME__
+WhatsAppOTPBody = 🔐 *Código de verificación DocSig*\n\nSu código es: *__CODE__*\n\nVálido por __EXPIRATION_MINUTES__ minutos.\n\nSi no ha solicitado este código, ignore este mensaje.
+WhatsAppReminderBody = ⏰ *Recordatorio de firma*\n\nEstimado/a __SIGNER_NAME__,\n\nLe recordamos que tiene pendiente firmar el documento *__DOCUMENT_NAME__*.\n\nEl enlace expira en __DAYS_LEFT__ días.\n\n🔗 __SIGN_URL__
+WhatsAppCompletedBody = ✅ *Firma completada*\n\nEl documento *__DOCUMENT_NAME__* ha sido firmado por todos los participantes.\n\nPuede descargarlo desde:\n__DOWNLOAD_URL__
+
+# Flujo de firma público (FASE 4 - OTP)
+Identity = Identidad
+Verification = Verificación
+Signature = Firma
+Completed = Completado
+VerifyYourIdentity = Verifique su identidad
+IdentityVerificationInfo = Para garantizar la seguridad del proceso, necesitamos verificar su identidad antes de proceder con la firma.
+VerificationMethod = Método de verificación
+Email = Email
+WhatsApp = WhatsApp
+EnterYourDNI = Introduzca su DNI/NIE para verificar su identidad
+EnterYourEmail = Introduzca su dirección de email completa
+EnterYourPhone = Introduzca su número de teléfono
+Continue = Continuar
+EnterVerificationCode = Introduzca el código de verificación
+OTPSentMessage = Se ha enviado un código de verificación
+OTPSentTo = Se ha enviado un código de verificación a %s
+CodeExpiresIn = El código expira en
+Expired = Expirado
+VerifyCode = Verificar código
+ResendCode = Reenviar código
+SignTheDocument = Firme el documento
+DrawYourSignatureBelow = Dibuje su firma en el recuadro de abajo
+DownloadSignedDocument = Descargar documento firmado
+DownloadCertificate = Descargar certificado
+NetworkError = Error de conexión. Por favor, inténtelo de nuevo.
+ErrorSignerBlocked = Su enlace de firma ha sido bloqueado por demasiados intentos fallidos. Contacte con el remitente.
+ErrorIdentityMismatch = Los datos introducidos no coinciden con los registrados.
+ErrorOTPRequired = Debe introducir el código de verificación.
+ErrorOTPInvalid = El código de verificación es incorrecto.
+ErrorOTPExpired = El código de verificación ha expirado. Solicite uno nuevo.
+ErrorOTPMaxAttempts = Demasiados intentos fallidos. Su enlace ha sido bloqueado.
+ErrorRateLimitExceeded = Demasiadas solicitudes. Por favor, espere unos minutos antes de reintentar.
+OTPVerifiedSuccessfully = Código verificado correctamente.
+SignatureSubmittedSuccessfully = Firma registrada correctamente.
+
+# Certificado de Conformidad
+DigitalSignatureRecord = Registro de Firma Digital
+SignersInformation = Información de Firmantes
+CertificateHash = Hash del Certificado
+GeneratedAt = Generado el
+DigitalSignaturesRecord = Registro de Firmas Digitales
+DateTime = Fecha/Hora
+Phone = Teléfono

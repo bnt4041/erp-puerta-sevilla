@@ -202,6 +202,202 @@ class DocSigSMSProvider implements DocSigNotificationProviderInterface
 }
 
 /**
+ * Proveedor de notificaciones por WhatsApp usando GoWAClient
+ */
+class DocSigWhatsAppProvider implements DocSigNotificationProviderInterface
+{
+    /**
+     * @var DoliDB Base de datos
+     */
+    private $db;
+
+    /**
+     * @var object GoWAClient instance
+     */
+    private $client;
+
+    /**
+     * @var bool Indica si el módulo WhatsApp está disponible
+     */
+    private $available = false;
+
+    /**
+     * Constructor
+     *
+     * @param DoliDB $db Base de datos
+     */
+    public function __construct($db)
+    {
+        global $conf;
+
+        $this->db = $db;
+
+        // Verificar si el módulo WhatsApp está habilitado y configurado
+        if (isModEnabled('whatsapp') && !empty($conf->global->WHATSAPP_GOWA_URL)) {
+            $clientPath = DOL_DOCUMENT_ROOT.'/custom/whatsapp/class/gowaclient.class.php';
+            if (file_exists($clientPath)) {
+                require_once $clientPath;
+                $this->client = new GoWAClient($db);
+                $this->available = true;
+            }
+        }
+    }
+
+    /**
+     * Verifica si el proveedor está disponible
+     *
+     * @return bool True si WhatsApp está configurado
+     */
+    public function isAvailable()
+    {
+        return $this->available;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function send($destination, $subject, $bodyText, $bodyHtml = '', $options = array())
+    {
+        $result = array(
+            'success' => false,
+            'messageId' => null,
+            'error' => null
+        );
+
+        // Verificar disponibilidad
+        if (!$this->available) {
+            $result['error'] = 'WhatsApp provider not available. Check module configuration.';
+            dol_syslog('DocSigWhatsAppProvider::send - WhatsApp not available', LOG_WARNING);
+            return $result;
+        }
+
+        // Limpiar número de teléfono
+        $phone = $this->normalizePhoneNumber($destination);
+        if (empty($phone)) {
+            $result['error'] = 'Invalid phone number: ' . $destination;
+            return $result;
+        }
+
+        // Construir mensaje - WhatsApp no usa HTML, usar texto plano
+        // Incluir asunto como título si existe
+        $message = '';
+        if (!empty($subject)) {
+            $message = "*" . $subject . "*\n\n";
+        }
+
+        // Usar texto plano o convertir HTML a texto si es necesario
+        if (!empty($bodyText)) {
+            $message .= $bodyText;
+        } elseif (!empty($bodyHtml)) {
+            // Convertir HTML a texto plano básico
+            $message .= $this->htmlToWhatsApp($bodyHtml);
+        }
+
+        // Añadir enlace si está en las opciones
+        if (!empty($options['signing_url'])) {
+            $message .= "\n\n🔗 *Enlace de firma:*\n" . $options['signing_url'];
+        }
+
+        // Enviar usando GoWAClient
+        try {
+            $apiResult = $this->client->sendMessage($phone, $message);
+
+            if ($apiResult['error'] == 0) {
+                $result['success'] = true;
+                $result['messageId'] = 'wa_' . uniqid();
+                dol_syslog('DocSigWhatsAppProvider::send - Message sent to ' . $phone, LOG_INFO);
+            } else {
+                $result['error'] = $apiResult['message'] ?? 'Unknown WhatsApp error';
+                dol_syslog('DocSigWhatsAppProvider::send - Error: ' . $result['error'], LOG_ERR);
+            }
+        } catch (Exception $e) {
+            $result['error'] = 'WhatsApp Exception: ' . $e->getMessage();
+            dol_syslog('DocSigWhatsAppProvider::send - Exception: ' . $e->getMessage(), LOG_ERR);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Normaliza un número de teléfono para WhatsApp
+     *
+     * @param string $phone Número original
+     * @return string Número normalizado o vacío si inválido
+     */
+    private function normalizePhoneNumber($phone)
+    {
+        // Eliminar todo excepto números y el símbolo +
+        $phone = preg_replace('/[^0-9+]/', '', $phone);
+
+        // Si empieza con 00, reemplazar por +
+        if (strpos($phone, '00') === 0) {
+            $phone = '+' . substr($phone, 2);
+        }
+
+        // Si no tiene código de país, asumir España (+34)
+        if (strpos($phone, '+') !== 0 && strlen($phone) == 9) {
+            $phone = '+34' . $phone;
+        }
+
+        // Verificar longitud mínima (código país + número)
+        $cleanPhone = preg_replace('/[^0-9]/', '', $phone);
+        if (strlen($cleanPhone) < 10) {
+            return '';
+        }
+
+        return $phone;
+    }
+
+    /**
+     * Convierte HTML básico a formato WhatsApp
+     *
+     * @param string $html Contenido HTML
+     * @return string Texto formateado para WhatsApp
+     */
+    private function htmlToWhatsApp($html)
+    {
+        // Reemplazar etiquetas comunes
+        $text = $html;
+
+        // Negritas
+        $text = preg_replace('/<(strong|b)[^>]*>(.*?)<\/(strong|b)>/i', '*$2*', $text);
+
+        // Itálicas
+        $text = preg_replace('/<(em|i)[^>]*>(.*?)<\/(em|i)>/i', '_$2_', $text);
+
+        // Saltos de línea
+        $text = preg_replace('/<br\s*\/?>/i', "\n", $text);
+        $text = preg_replace('/<\/(p|div|h[1-6]|tr)>/i', "\n\n", $text);
+
+        // Enlaces - mantener URL
+        $text = preg_replace('/<a[^>]*href=["\']([^"\']+)["\'][^>]*>(.*?)<\/a>/i', '$2: $1', $text);
+
+        // Listas
+        $text = preg_replace('/<li[^>]*>/i', "\n• ", $text);
+
+        // Eliminar todas las demás etiquetas
+        $text = strip_tags($text);
+
+        // Limpiar espacios múltiples y líneas vacías
+        $text = preg_replace('/\n{3,}/', "\n\n", $text);
+        $text = trim($text);
+
+        // Decodificar entidades HTML
+        $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
+
+        return $text;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getChannel()
+    {
+        return 'whatsapp';
+    }
+}
+
+/**
  * Servicio principal de notificaciones (Facade)
  */
 class DocSigNotificationService
@@ -222,6 +418,29 @@ class DocSigNotificationService
     public $error;
 
     /**
+     * Constantes para tipos de notificación
+     */
+    const TYPE_REQUEST = 'request';       // Solicitud de firma
+    const TYPE_OTP = 'otp';               // Envío de código OTP
+    const TYPE_REMINDER = 'reminder';     // Recordatorio
+    const TYPE_COMPLETED = 'completed';   // Firma completada
+    const TYPE_CANCELLED = 'cancelled';   // Firma cancelada
+    const TYPE_REJECTED = 'rejected';     // Firma rechazada
+
+    /**
+     * Mapeo de tipos a códigos de actioncomm
+     */
+    private static $actionCommTypes = array(
+        'request' => 'AC_DOCSIG_REQUEST',
+        'otp' => 'AC_DOCSIG_OTP',
+        'reminder' => 'AC_DOCSIG_REMINDER',
+        'completed' => 'AC_DOCSIG_COMPLETED',
+        'cancelled' => 'AC_DOCSIG_CANCELLED',
+        'rejected' => 'AC_DOCSIG_CANCELLED',
+        'general' => 'AC_DOCSIG',
+    );
+
+    /**
      * Constructor
      *
      * @param DoliDB $db Base de datos
@@ -233,12 +452,107 @@ class DocSigNotificationService
         // Registrar proveedores disponibles
         $this->providers['email'] = new DocSigEmailProvider($db);
         $this->providers['sms'] = new DocSigSMSProvider($db);
+
+        // Registrar WhatsApp si está disponible
+        $whatsappProvider = new DocSigWhatsAppProvider($db);
+        if ($whatsappProvider->isAvailable()) {
+            $this->providers['whatsapp'] = $whatsappProvider;
+        }
+    }
+
+    /**
+     * Obtiene el canal de notificación configurado
+     *
+     * @return string Canal configurado (email, whatsapp, both)
+     */
+    public function getConfiguredChannel()
+    {
+        return getDolGlobalString('DOCSIG_NOTIFICATION_CHANNEL', 'email');
+    }
+
+    /**
+     * Verifica si un canal está disponible
+     *
+     * @param string $channel Canal a verificar
+     * @return bool True si está disponible
+     */
+    public function isChannelAvailable($channel)
+    {
+        return isset($this->providers[$channel]);
+    }
+
+    /**
+     * Obtiene los canales disponibles
+     *
+     * @return array Array de canales disponibles
+     */
+    public function getAvailableChannels()
+    {
+        return array_keys($this->providers);
+    }
+
+    /**
+     * Envía una notificación usando el canal configurado
+     *
+     * @param string $destination Destino (email o teléfono según canal)
+     * @param string $subject Asunto
+     * @param string $bodyText Cuerpo texto
+     * @param string $bodyHtml Cuerpo HTML
+     * @param array $context Contexto (envelope_id, signer_id, contact_id, type, phone, email)
+     * @return array Array con resultados por canal
+     */
+    public function sendNotification($destination, $subject, $bodyText, $bodyHtml = '', $context = array())
+    {
+        $configuredChannel = $this->getConfiguredChannel();
+        $results = array();
+
+        // Determinar qué canales usar
+        $channelsToUse = array();
+
+        if ($configuredChannel === 'both') {
+            // Enviar por ambos canales si están disponibles
+            if ($this->isChannelAvailable('email') && !empty($context['email'])) {
+                $channelsToUse['email'] = $context['email'];
+            }
+            if ($this->isChannelAvailable('whatsapp') && !empty($context['phone'])) {
+                $channelsToUse['whatsapp'] = $context['phone'];
+            }
+        } elseif ($configuredChannel === 'whatsapp') {
+            // Solo WhatsApp
+            if ($this->isChannelAvailable('whatsapp')) {
+                $phone = $context['phone'] ?? $destination;
+                if (!empty($phone)) {
+                    $channelsToUse['whatsapp'] = $phone;
+                }
+            }
+        } else {
+            // Por defecto: email
+            if ($this->isChannelAvailable('email')) {
+                $email = $context['email'] ?? $destination;
+                if (!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    $channelsToUse['email'] = $email;
+                }
+            }
+        }
+
+        // Enviar por cada canal seleccionado
+        foreach ($channelsToUse as $channel => $dest) {
+            $result = $this->send($channel, $dest, $subject, $bodyText, $bodyHtml, $context);
+            $results[$channel] = array(
+                'destination' => $dest,
+                'success' => $result > 0,
+                'notification_id' => $result,
+                'error' => $result < 0 ? $this->error : null
+            );
+        }
+
+        return $results;
     }
 
     /**
      * Envía una notificación y la registra en la base de datos
      *
-     * @param string $channel Canal de notificación (email, sms)
+     * @param string $channel Canal de notificación (email, sms, whatsapp)
      * @param string $destination Destino
      * @param string $subject Asunto
      * @param string $bodyText Cuerpo texto
@@ -273,7 +587,12 @@ class DocSigNotificationService
             
             // Crear registro en actioncomm si hay contacto
             if (!empty($context['contact_id'])) {
-                $this->createActionComm($context['contact_id'], $subject, $bodyHtml ?: $bodyText, $context);
+                // Añadir canal y notification_id al contexto para actioncomm
+                $actionContext = array_merge($context, array(
+                    'channel' => $channel,
+                    'notification_id' => $notificationId
+                ));
+                $this->createActionComm($context['contact_id'], $subject, $bodyHtml ?: $bodyText, $actionContext);
             }
         } else {
             $this->updateNotificationStatus($notificationId, 2, $result['error']);
@@ -359,7 +678,7 @@ class DocSigNotificationService
      * @param int $contactId ID del contacto
      * @param string $subject Asunto
      * @param string $body Cuerpo
-     * @param array $context Contexto adicional
+     * @param array $context Contexto adicional (type, channel, envelope_id, notification_id)
      * @return int ID creado o -1 si falla
      */
     private function createActionComm($contactId, $subject, $body, $context = array())
@@ -375,11 +694,44 @@ class DocSigNotificationService
             return -1;
         }
 
+        // Determinar el tipo de actioncomm según el tipo de notificación
+        $notificationType = $context['type'] ?? 'general';
+        $typeCode = self::$actionCommTypes[$notificationType] ?? 'AC_DOCSIG';
+
+        // Si es WhatsApp, usar tipo específico
+        $channel = $context['channel'] ?? 'email';
+        if ($channel === 'whatsapp') {
+            $typeCode = 'AC_DOCSIG_WHATSAPP';
+        }
+
+        // Verificar que el tipo existe en la BD, si no usar AC_DOCSIG genérico
+        $sql = "SELECT id FROM ".MAIN_DB_PREFIX."c_actioncomm WHERE code = '".$this->db->escape($typeCode)."'";
+        $resql = $this->db->query($sql);
+        if (!$resql || $this->db->num_rows($resql) == 0) {
+            // Tipo no existe, usar genérico o AC_OTH
+            $typeCode = 'AC_OTH';
+        }
+
         $actioncomm = new ActionComm($this->db);
-        $actioncomm->type_code = 'AC_EMAIL';
-        $actioncomm->code = 'AC_DOCSIG';
-        $actioncomm->label = $subject;
-        $actioncomm->note_private = $body;
+        $actioncomm->type_code = $typeCode;
+        $actioncomm->code = $typeCode;
+        $actioncomm->label = '[DocSig] ' . $subject;
+        
+        // Añadir información del canal al cuerpo
+        $channelInfo = '';
+        switch ($channel) {
+            case 'whatsapp':
+                $channelInfo = "📱 Enviado por WhatsApp\n";
+                break;
+            case 'email':
+                $channelInfo = "📧 Enviado por Email\n";
+                break;
+            case 'sms':
+                $channelInfo = "💬 Enviado por SMS\n";
+                break;
+        }
+        
+        $actioncomm->note_private = $channelInfo . "\n" . $body;
         $actioncomm->datep = dol_now();
         $actioncomm->datef = dol_now();
         $actioncomm->percentage = -1; // Not applicable
@@ -400,6 +752,10 @@ class DocSigNotificationService
                 $sql .= " WHERE rowid = ".(int)$context['notification_id'];
                 $this->db->query($sql);
             }
+            
+            dol_syslog('DocSigNotificationService::createActionComm - Created actioncomm #' . $result . ' type ' . $typeCode, LOG_INFO);
+        } else {
+            dol_syslog('DocSigNotificationService::createActionComm - Error: ' . $actioncomm->error, LOG_ERR);
         }
 
         return $result;
@@ -444,5 +800,244 @@ class DocSigNotificationService
         }
 
         return $notifications;
+    }
+
+    /**
+     * Envía una solicitud de firma a un firmante
+     *
+     * @param DocSigEnvelope $envelope Envelope
+     * @param DocSigSigner $signer Firmante
+     * @param string $signUrl URL de firma
+     * @param string $customMessage Mensaje personalizado (opcional)
+     * @return int ID de notificación o -1 si falla
+     */
+    public function sendSignatureRequest($envelope, $signer, $signUrl, $customMessage = '')
+    {
+        global $conf, $langs;
+
+        $langs->load('docsig@signDol');
+
+        // Preparar variables de sustitución
+        $vars = array(
+            '__REF__' => $envelope->ref,
+            '__SIGNER_NAME__' => $signer->getFullName(),
+            '__DOCUMENT_NAME__' => basename($envelope->file_path),
+            '__SIGN_URL__' => $signUrl,
+            '__EXPIRATION_DATE__' => dol_print_date($envelope->expire_date, 'dayhour'),
+            '__COMPANY_NAME__' => getDolGlobalString('MAIN_INFO_SOCIETE_NOM', 'DocSig'),
+        );
+
+        // Asunto
+        $subject = getDolGlobalString('DOCSIG_EMAIL_SUBJECT_REQUEST', $langs->trans('SignatureRequest').': __REF__');
+        $subject = strtr($subject, $vars);
+
+        // Cuerpo
+        $bodyHtml = $langs->trans('EmailRequestBody');
+        $bodyHtml = strtr($bodyHtml, $vars);
+
+        if (!empty($customMessage)) {
+            $bodyHtml .= '<hr><p>'.$customMessage.'</p>';
+        }
+
+        $bodyText = strip_tags(str_replace(array('<br>', '<p>', '</p>'), array("\n", "\n", "\n"), $bodyHtml));
+
+        // Contexto
+        $context = array(
+            'envelope_id' => $envelope->id,
+            'envelope_ref' => $envelope->ref,
+            'signer_id' => $signer->id,
+            'contact_id' => $signer->fk_socpeople,
+            'type' => 'signature_request',
+            'email' => $signer->email,
+            'phone' => $signer->phone,
+        );
+
+        // Enviar notificación
+        $results = $this->sendNotification($signer->email, $subject, $bodyText, $bodyHtml, $context);
+
+        // Retornar el primer ID de notificación exitoso
+        foreach ($results as $channel => $result) {
+            if ($result['success'] && !empty($result['notification_id'])) {
+                return $result['notification_id'];
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * Envía un recordatorio a un firmante
+     *
+     * @param DocSigEnvelope $envelope Envelope
+     * @param DocSigSigner $signer Firmante
+     * @param string $signUrl URL de firma
+     * @return int ID de notificación o -1 si falla
+     */
+    public function sendReminder($envelope, $signer, $signUrl)
+    {
+        global $conf, $langs;
+
+        $langs->load('docsig@signDol');
+
+        // Calcular días restantes
+        $daysLeft = ceil(($envelope->expire_date - dol_now()) / (24 * 3600));
+        if ($daysLeft < 0) {
+            $daysLeft = 0;
+        }
+
+        // Preparar variables de sustitución
+        $vars = array(
+            '__REF__' => $envelope->ref,
+            '__SIGNER_NAME__' => $signer->getFullName(),
+            '__DOCUMENT_NAME__' => basename($envelope->file_path),
+            '__SIGN_URL__' => $signUrl,
+            '__DAYS_LEFT__' => $daysLeft,
+            '__COMPANY_NAME__' => getDolGlobalString('MAIN_INFO_SOCIETE_NOM', 'DocSig'),
+        );
+
+        // Asunto
+        $subject = getDolGlobalString('DOCSIG_EMAIL_SUBJECT_REMINDER', $langs->trans('ReminderNotification').': __REF__');
+        $subject = strtr($subject, $vars);
+
+        // Cuerpo
+        $bodyHtml = $langs->trans('EmailReminderBody');
+        $bodyHtml = strtr($bodyHtml, $vars);
+
+        $bodyText = strip_tags(str_replace(array('<br>', '<p>', '</p>'), array("\n", "\n", "\n"), $bodyHtml));
+
+        // Contexto
+        $context = array(
+            'envelope_id' => $envelope->id,
+            'envelope_ref' => $envelope->ref,
+            'signer_id' => $signer->id,
+            'contact_id' => $signer->fk_socpeople,
+            'type' => 'reminder',
+            'email' => $signer->email,
+            'phone' => $signer->phone,
+        );
+
+        // Enviar notificación
+        $results = $this->sendNotification($signer->email, $subject, $bodyText, $bodyHtml, $context);
+
+        // Retornar el primer ID de notificación exitoso
+        foreach ($results as $channel => $result) {
+            if ($result['success'] && !empty($result['notification_id'])) {
+                return $result['notification_id'];
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * Envía notificación de firma completada
+     *
+     * @param DocSigEnvelope $envelope Envelope
+     * @param DocSigSigner $signer Firmante
+     * @return int ID de notificación o -1 si falla
+     */
+    public function sendCompletionNotification($envelope, $signer)
+    {
+        global $conf, $langs;
+
+        $langs->load('docsig@signDol');
+
+        // URL de descarga
+        $downloadUrl = dol_buildpath('/signDol/public/download.php', 3).'?token='.$signer->token;
+
+        // Preparar variables de sustitución
+        $vars = array(
+            '__REF__' => $envelope->ref,
+            '__SIGNER_NAME__' => $signer->getFullName(),
+            '__DOCUMENT_NAME__' => basename($envelope->file_path),
+            '__DOWNLOAD_URL__' => $downloadUrl,
+            '__COMPANY_NAME__' => getDolGlobalString('MAIN_INFO_SOCIETE_NOM', 'DocSig'),
+        );
+
+        // Asunto
+        $subject = getDolGlobalString('DOCSIG_EMAIL_SUBJECT_COMPLETED', $langs->trans('CompletedNotification').': __REF__');
+        $subject = strtr($subject, $vars);
+
+        // Cuerpo
+        $bodyHtml = $langs->trans('EmailCompletedBody');
+        $bodyHtml = strtr($bodyHtml, $vars);
+
+        $bodyText = strip_tags(str_replace(array('<br>', '<p>', '</p>'), array("\n", "\n", "\n"), $bodyHtml));
+
+        // Contexto
+        $context = array(
+            'envelope_id' => $envelope->id,
+            'envelope_ref' => $envelope->ref,
+            'signer_id' => $signer->id,
+            'contact_id' => $signer->fk_socpeople,
+            'type' => 'completed',
+            'email' => $signer->email,
+            'phone' => $signer->phone,
+        );
+
+        // Enviar notificación
+        $results = $this->sendNotification($signer->email, $subject, $bodyText, $bodyHtml, $context);
+
+        // Retornar el primer ID de notificación exitoso
+        foreach ($results as $channel => $result) {
+            if ($result['success'] && !empty($result['notification_id'])) {
+                return $result['notification_id'];
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * Envía código OTP a un firmante
+     *
+     * @param DocSigSigner $signer Firmante
+     * @param string $code Código OTP
+     * @param string $channel Canal (email, whatsapp)
+     * @return int ID de notificación o -1 si falla
+     */
+    public function sendOTPNotification($signer, $code, $channel = 'email')
+    {
+        global $conf, $langs;
+
+        $langs->load('docsig@signDol');
+
+        $expirationMinutes = getDolGlobalInt('DOCSIG_OTP_EXPIRATION_MINUTES', 10);
+
+        // Preparar variables de sustitución
+        $vars = array(
+            '__CODE__' => $code,
+            '__SIGNER_NAME__' => $signer->getFullName(),
+            '__EXPIRATION_MINUTES__' => $expirationMinutes,
+        );
+
+        // Asunto
+        $subject = getDolGlobalString('DOCSIG_EMAIL_SUBJECT_OTP', $langs->trans('OTPNotification'));
+        $subject = strtr($subject, $vars);
+
+        // Cuerpo según canal
+        if ($channel === 'whatsapp') {
+            $bodyText = $langs->trans('WhatsAppOTPBody');
+        } else {
+            $bodyText = $langs->trans('EmailOTPBody');
+        }
+        $bodyText = strtr($bodyText, $vars);
+
+        $bodyHtml = '<p>'.nl2br($bodyText).'</p>';
+
+        // Destino según canal
+        $destination = ($channel === 'whatsapp') ? $signer->phone : $signer->email;
+
+        // Contexto
+        $context = array(
+            'signer_id' => $signer->id,
+            'contact_id' => $signer->fk_socpeople,
+            'type' => 'otp',
+            'email' => $signer->email,
+            'phone' => $signer->phone,
+        );
+
+        // Enviar por canal específico
+        return $this->send($channel, $destination, $subject, $bodyText, $bodyHtml, $context);
     }
 }

@@ -201,6 +201,59 @@ $item->nameText = $langs->trans('DocSigNotifyFichinter');
 $item->setAsYesNo();
 
 /*
+ * Canal de Notificaciones (Email vs WhatsApp)
+ */
+$formSetup->newItem('NotificationChannelSection')->setAsTitle();
+
+// Verificar si el módulo WhatsApp está disponible
+$whatsappAvailable = isModEnabled('whatsapp') && !empty($conf->global->WHATSAPP_GOWA_URL);
+
+// Opciones de canal
+$channelOptions = array(
+    'email' => $langs->trans('DocSigChannelEmail'),
+);
+if ($whatsappAvailable) {
+    $channelOptions['whatsapp'] = $langs->trans('DocSigChannelWhatsApp');
+    $channelOptions['both'] = $langs->trans('DocSigChannelBoth');
+}
+
+$item = $formSetup->newItem('DOCSIG_NOTIFICATION_CHANNEL');
+$item->nameText = $langs->trans('DocSigNotificationChannel');
+$item->helpText = $langs->trans('DocSigNotificationChannelHelp');
+$item->setAsSelect($channelOptions);
+
+// Mostrar info sobre WhatsApp si no está disponible
+if (!$whatsappAvailable) {
+    $formSetup->newItem('WhatsAppInfo')->setAsString($langs->trans('DocSigWhatsAppNotConfigured'));
+}
+
+// Habilitar recordatorios automáticos
+$item = $formSetup->newItem('DOCSIG_AUTO_REMINDER_ENABLED');
+$item->nameText = $langs->trans('DocSigAutoReminderEnabled');
+$item->helpText = $langs->trans('DocSigAutoReminderEnabledHelp');
+$item->setAsYesNo();
+
+// Días antes del primer recordatorio
+$item = $formSetup->newItem('DOCSIG_REMINDER_FIRST_DAYS');
+$item->nameText = $langs->trans('DocSigReminderFirstDays');
+$item->helpText = $langs->trans('DocSigReminderFirstDaysHelp');
+$item->defaultFieldValue = '3';
+$item->cssClass = 'minwidth100';
+$item->fieldAttr['type'] = 'number';
+$item->fieldAttr['min'] = '1';
+$item->fieldAttr['max'] = '30';
+
+// Máximo de recordatorios
+$item = $formSetup->newItem('DOCSIG_MAX_REMINDERS');
+$item->nameText = $langs->trans('DocSigMaxReminders');
+$item->helpText = $langs->trans('DocSigMaxRemindersHelp');
+$item->defaultFieldValue = '3';
+$item->cssClass = 'minwidth100';
+$item->fieldAttr['type'] = 'number';
+$item->fieldAttr['min'] = '1';
+$item->fieldAttr['max'] = '10';
+
+/*
  * Plantillas de Email
  */
 $formSetup->newItem('EmailTemplatesSection')->setAsTitle();

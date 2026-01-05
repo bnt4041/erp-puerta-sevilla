@@ -261,7 +261,7 @@ function docsig_get_pdf_info($element, $id, $requestedPath = '')
  */
 function docsig_get_object_contacts($db, $objectInfo, $element, $objectId)
 {
-    global $conf;
+    global $conf, $langs;
 
     $result = array(
         'thirdparty' => null,
@@ -270,7 +270,7 @@ function docsig_get_object_contacts($db, $objectInfo, $element, $objectId)
     );
 
     $socid = $objectInfo['socid'] ?? 0;
-    $addedContactIds = array(); // Para evitar duplicados
+    $addedExternalContactIds = array(); // Para evitar duplicados (solo externos)
 
     // 1) Obtener datos del tercero si existe
     if (!empty($socid)) {
@@ -287,6 +287,7 @@ function docsig_get_object_contacts($db, $objectInfo, $element, $objectId)
     }
 
     // 2) Obtener contactos VINCULADOS al objeto via element_contact
+    // Incluye contactos externos (socpeople) e internos (user) en la misma tabla.
     // Mapeo de element a element_type en la tabla element_contact
     $elementTypeMap = array(
         'facture' => 'facture',
@@ -297,35 +298,48 @@ function docsig_get_object_contacts($db, $objectInfo, $element, $objectId)
     );
     $elementType = $elementTypeMap[$element] ?? $element;
 
-    $sql = "SELECT DISTINCT c.rowid, c.firstname, c.lastname, c.email, c.phone_mobile, c.phone, c.poste,";
-    $sql .= " c.fk_soc, s.nom as socname, tc.libelle as role_label, tc.source";
+    $sql = "SELECT DISTINCT";
+    $sql .= " ec.fk_socpeople as linkid, tc.source, tc.libelle as role_label,";
+    $sql .= " CASE WHEN tc.source = 'external' THEN c.firstname ELSE u.firstname END as firstname,";
+    $sql .= " CASE WHEN tc.source = 'external' THEN c.lastname ELSE u.lastname END as lastname,";
+    $sql .= " CASE WHEN tc.source = 'external' THEN c.email ELSE u.email END as email,";
+    $sql .= " CASE WHEN tc.source = 'external' THEN (CASE WHEN c.phone_mobile <> '' THEN c.phone_mobile ELSE c.phone END)";
+    $sql .= " ELSE (CASE WHEN u.user_mobile <> '' THEN u.user_mobile ELSE u.office_phone END) END as phone,";
+    $sql .= " c.poste, c.fk_soc, s.nom as socname";
     $sql .= " FROM ".MAIN_DB_PREFIX."element_contact as ec";
     $sql .= " INNER JOIN ".MAIN_DB_PREFIX."c_type_contact as tc ON tc.rowid = ec.fk_c_type_contact";
-    $sql .= " INNER JOIN ".MAIN_DB_PREFIX."socpeople as c ON c.rowid = ec.fk_socpeople";
+    $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."socpeople as c ON (tc.source = 'external' AND c.rowid = ec.fk_socpeople)";
+    $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."user as u ON (tc.source = 'internal' AND u.rowid = ec.fk_socpeople)";
     $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON s.rowid = c.fk_soc";
     $sql .= " WHERE ec.element_id = ".(int)$objectId;
     $sql .= " AND tc.element = '".$db->escape($elementType)."'";
-    $sql .= " AND c.statut = 1";
-    $sql .= " ORDER BY tc.source DESC, c.lastname, c.firstname"; // Externos primero
+    $sql .= " AND ((tc.source = 'external' AND c.statut = 1 AND c.entity IN (".getEntity('contact')."))";
+    $sql .= " OR (tc.source = 'internal' AND u.statut = 1 AND u.entity IN (".getEntity('user').")))";
+    $sql .= " ORDER BY tc.source ASC, lastname, firstname"; // internal primero (ASC), luego apellidos
 
     $resql = $db->query($sql);
     if ($resql) {
         while ($obj = $db->fetch_object($resql)) {
-            $addedContactIds[] = $obj->rowid;
-            $sourceLabel = ($obj->source == 'external') ? 'Externo' : 'Interno';
+            $isInternal = ($obj->source === 'internal');
+            $sourceLabel = $isInternal ? $langs->trans('Internal') : $langs->trans('External');
+
+            if (!$isInternal) {
+                $addedExternalContactIds[] = (int) $obj->linkid;
+            }
+
             $result['object_contacts'][] = array(
-                'id' => $obj->rowid,
+                'id' => (int) $obj->linkid,
                 'firstname' => $obj->firstname,
                 'lastname' => $obj->lastname,
                 'name' => trim($obj->firstname.' '.$obj->lastname),
                 'email' => $obj->email,
-                'phone' => $obj->phone_mobile ?: $obj->phone,
+                'phone' => $obj->phone,
                 'poste' => $obj->poste,
                 'role' => $obj->role_label,
                 'source' => $sourceLabel,
-                'socid' => $obj->fk_soc,
+                'socid' => (int) $obj->fk_soc,
                 'socname' => $obj->socname,
-                'type' => 'object_contact',
+                'type' => $isInternal ? 'internal_user' : 'object_contact',
             );
         }
     }
@@ -339,8 +353,8 @@ function docsig_get_object_contacts($db, $objectInfo, $element, $objectId)
         $sql .= " WHERE c.fk_soc = ".(int)$socid;
         $sql .= " AND c.statut = 1";
         $sql .= " AND c.entity IN (".getEntity('contact').")";
-        if (!empty($addedContactIds)) {
-            $sql .= " AND c.rowid NOT IN (".implode(',', array_map('intval', $addedContactIds)).")";
+        if (!empty($addedExternalContactIds)) {
+            $sql .= " AND c.rowid NOT IN (".implode(',', array_map('intval', $addedExternalContactIds)).")";
         }
         $sql .= " ORDER BY c.lastname, c.firstname";
 
@@ -481,16 +495,32 @@ function docsig_generate_modal_html($objectInfo, $existingEnvelope, $pdfInfo, $t
         foreach ($thirdpartyContacts['object_contacts'] as $contact) {
             $hasAnyContact = true;
             $roleInfo = !empty($contact['role']) ? $contact['role'].' ('.$contact['source'].')' : $contact['source'];
-            $html .= docsig_render_signer_item(
-                'contact_'.$contact['id'],
-                $contact['name'],
-                $contact['email'],
-                $contact['phone'],
-                $roleInfo,
-                'object_contact',
-                $contact['id'],
-                !empty($contact['email']) // Checked si tiene email
-            );
+
+            if (($contact['type'] ?? '') === 'internal_user') {
+                $uniqueId = 'user_'.$contact['id'];
+                $html .= docsig_render_signer_item(
+                    $uniqueId,
+                    $contact['name'],
+                    $contact['email'],
+                    $contact['phone'],
+                    $roleInfo,
+                    'internal_user',
+                    0,
+                    !empty($contact['email'])
+                );
+            } else {
+                $uniqueId = 'contact_'.$contact['id'];
+                $html .= docsig_render_signer_item(
+                    $uniqueId,
+                    $contact['name'],
+                    $contact['email'],
+                    $contact['phone'],
+                    $roleInfo,
+                    'object_contact',
+                    $contact['id'],
+                    !empty($contact['email'])
+                );
+            }
         }
         $html .= '</div>';
     }
@@ -641,6 +671,7 @@ function docsig_render_signer_item($uniqueId, $name, $email, $phone, $poste = ''
     $typeConfig = array(
         'thirdparty' => array('label' => $langs->trans('ThirdParty'), 'badge' => 'badge-primary', 'icon' => 'fa-building'),
         'object_contact' => array('label' => $langs->trans('LinkedContact'), 'badge' => 'badge-success', 'icon' => 'fa-link'),
+        'internal_user' => array('label' => $langs->trans('Internal'), 'badge' => 'badge-warning', 'icon' => 'fa-user'),
         'thirdparty_contact' => array('label' => $langs->trans('Contact'), 'badge' => 'badge-secondary', 'icon' => 'fa-user'),
         'contact' => array('label' => $langs->trans('Contact'), 'badge' => 'badge-secondary', 'icon' => 'fa-user'),
         'new' => array('label' => $langs->trans('New'), 'badge' => 'badge-info', 'icon' => 'fa-plus'),

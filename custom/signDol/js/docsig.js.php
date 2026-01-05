@@ -495,6 +495,7 @@ var DocSig = DocSig || {};
         var typeConfig = {
             'thirdparty': { label: 'Tercero', badge: 'badge-primary', icon: 'fa-building' },
             'object_contact': { label: 'Vinculado', badge: 'badge-success', icon: 'fa-link' },
+            'internal_user': { label: 'Interno', badge: 'badge-warning', icon: 'fa-user' },
             'thirdparty_contact': { label: 'Contacto', badge: 'badge-secondary', icon: 'fa-user' },
             'contact': { label: 'Contacto', badge: 'badge-secondary', icon: 'fa-user' },
             'new': { label: 'Nuevo', badge: 'badge-info', icon: 'fa-plus' }

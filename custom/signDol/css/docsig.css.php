@@ -961,6 +961,11 @@ header('Cache-Control: max-age=3600');
     color: #fff;
 }
 
+.badge-warning {
+    background: linear-gradient(135deg, #ffc107, #fd7e14);
+    color: #212529;
+}
+
 /* Editable fields area */
 .docsig-signer-fields {
     grid-column: 2 / 4;

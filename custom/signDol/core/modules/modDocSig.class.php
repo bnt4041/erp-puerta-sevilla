@@ -195,8 +195,20 @@ class modDocSig extends DolibarrModules
             'contact:+docsig_notifications:DocSigNotifications:docsig@signDol:$user->hasRight("docsig", "read"):/signDol/contact_notifications.php?id=__ID__',
         );
 
-        // Diccionarios
-        $this->dictionaries = array();
+        // Diccionarios - Tipo de actioncomm para rastro de notificaciones
+        $this->dictionaries = array(
+            'langs' => 'docsig@signDol',
+            'tabname' => array(MAIN_DB_PREFIX.'c_actioncomm'),
+            'tablib' => array('DocSigActionCommTypes'),
+            'tabsql' => array('SELECT id as rowid, code, type, libelle, module, active, color, picto, position FROM '.MAIN_DB_PREFIX.'c_actioncomm WHERE module = \'docsig\''),
+            'tabsqlsort' => array('position ASC'),
+            'tabfield' => array('code,type,libelle,module,active,color,picto,position'),
+            'tabfieldvalue' => array('code,type,libelle,module,active,color,picto,position'),
+            'tabfieldinsert' => array('code,type,libelle,module,active,color,picto,position'),
+            'tabrowid' => array('rowid'),
+            'tabcond' => array(isModEnabled('docsig')),
+            'tabhelp' => array(array('code' => 'Código único del tipo de acción', 'libelle' => 'Etiqueta visible')),
+        );
 
         // Widgets/Boxes
         $this->boxes = array(
