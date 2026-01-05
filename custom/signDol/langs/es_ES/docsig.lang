@@ -1,0 +1,364 @@
+# DocSig - Document Signature Dolibarr
+# Copyright (C) 2026 DocSig Module
+# Archivo de traducciones en español
+
+# Módulo
+ModuleDocSigName = DocSig - Firma Digital
+ModuleDocSigDesc = Firma digital de documentos PDF con PAdES, sello de tiempo TSA, doble autenticación y certificado de cumplimiento
+
+# Menús
+DocSig = Firma Digital
+DocSigList = Lista de firmas
+DocSigNew = Nueva solicitud
+DocSigSetup = Configuración
+DocSigAbout = Acerca de
+
+# Setup - Títulos de sección
+TSASection = Configuración TSA (Time Stamping Authority)
+TokenOTPSection = Configuración de Tokens y OTP
+SignatureSection = Configuración de Firma
+NotificationSection = Notificaciones por Tipo de Objeto
+EmailTemplatesSection = Plantillas de Email
+SecuritySection = Seguridad
+CertificateSection = Certificado Interno
+
+# Setup - TSA
+DocSigTSAUrl = URL del servidor TSA
+DocSigTSAUrlHelp = URL del servidor de sellado de tiempo RFC3161. Por defecto: https://freetsa.org/tsr
+DocSigTSAUser = Usuario TSA
+DocSigTSAUserHelp = Usuario para autenticación en el servidor TSA (opcional)
+DocSigTSAPass = Contraseña TSA
+DocSigTSAPassHelp = Contraseña para autenticación en el servidor TSA (opcional)
+DocSigTSAPolicy = Política TSA (OID)
+DocSigTSAPolicyHelp = Identificador de política del servidor TSA (opcional)
+
+# Setup - Tokens y OTP
+DocSigTokenExpirationDays = Días de expiración del enlace
+DocSigTokenExpirationDaysHelp = Número de días que el enlace de firma estará activo
+DocSigOTPExpirationMinutes = Minutos de expiración del OTP
+DocSigOTPExpirationMinutesHelp = Tiempo en minutos que el código OTP será válido
+DocSigOTPMaxAttempts = Intentos máximos de OTP
+DocSigOTPMaxAttemptsHelp = Número máximo de intentos para introducir el código OTP
+DocSigOTPLength = Longitud del código OTP
+DocSigOTPLengthHelp = Número de dígitos del código OTP (entre 4 y 8)
+
+# Setup - Firma
+DocSigSignatureMode = Modo de firma
+DocSigSignatureModeHelp = Paralelo: todos los firmantes pueden firmar a la vez. Secuencial: firman en orden.
+DocSigModeParallel = Paralelo
+DocSigModeSequential = Secuencial
+DocSigSignatureVisible = Firma visible en PDF
+DocSigSignatureVisibleHelp = Si está activo, la imagen de la firma manuscrita será visible en el PDF
+DocSigSignaturePosition = Posición de la firma
+DocSigSignaturePositionHelp = Ubicación de la firma visible en el documento
+DocSigPositionBottomRight = Abajo derecha
+DocSigPositionBottomLeft = Abajo izquierda
+DocSigPositionTopRight = Arriba derecha
+DocSigPositionTopLeft = Arriba izquierda
+
+# Setup - Notificaciones
+DocSigNotifyFacture = Facturas
+DocSigNotifyCommande = Pedidos
+DocSigNotifyPropal = Presupuestos
+DocSigNotifyContrat = Contratos
+DocSigNotifyFichinter = Intervenciones
+
+# Setup - Plantillas Email
+DocSigEmailSubjectRequest = Asunto solicitud de firma
+DocSigEmailSubjectRequestHelp = Variables: __REF__, __SIGNER_NAME__, __DOCUMENT_NAME__
+DocSigEmailSubjectOTP = Asunto código OTP
+DocSigEmailSubjectOTPHelp = Variables: __CODE__, __SIGNER_NAME__
+DocSigEmailSubjectCompleted = Asunto documento completado
+DocSigEmailSubjectCompletedHelp = Variables: __REF__, __DOCUMENT_NAME__
+DocSigEmailSubjectReminder = Asunto recordatorio
+DocSigEmailSubjectReminderHelp = Variables: __REF__, __SIGNER_NAME__, __DAYS_LEFT__
+
+# Setup - Seguridad
+DocSigPublicDownloadEnabled = Permitir descarga pública
+DocSigPublicDownloadEnabledHelp = Permite descargar el PDF firmado desde el enlace público una vez completado
+DocSigRateLimitOTP = Límite de OTPs por minuto
+DocSigRateLimitOTPHelp = Número máximo de solicitudes de OTP por minuto desde la misma IP
+
+# Setup - Certificado
+DocSigCertKeySize = Tamaño de clave RSA
+DocSigCertKeySizeHelp = Tamaño en bits de la clave RSA para el certificado interno
+DocSigCertValidityDays = Días de validez
+DocSigCertValidityDaysHelp = Número de días que el certificado interno será válido
+DocSigCertCN = Nombre común (CN)
+DocSigCertCNHelp = Common Name del certificado interno
+DocSigCertOrg = Organización
+DocSigCertOrgHelp = Nombre de la organización en el certificado
+
+# Setup - Info Certificado
+DocSigCertificateInfo = Información del Certificado Interno
+DocSigCertStatus = Estado
+DocSigCertSubject = Sujeto
+DocSigCertValidFrom = Válido desde
+DocSigCertValidTo = Válido hasta
+DocSigCertSerial = Número de serie
+DocSigRegenerateCert = Regenerar certificado
+DocSigConfirmRegenerateCert = ¿Está seguro de regenerar el certificado interno? Los documentos firmados anteriormente seguirán siendo válidos.
+DocSigCertRegenerated = Certificado interno regenerado correctamente
+DocSigCertRegenerateError = Error al regenerar el certificado interno
+DocSigTestTSA = Probar conexión TSA
+DocSigTSATestSuccess = Conexión TSA exitosa. Sello de tiempo: %s
+DocSigTSATestError = Error en conexión TSA: %s
+NotGenerated = No generado
+
+# About
+DocSigAboutDescription = DocSig es un módulo para Dolibarr que permite solicitar y recoger firmas digitales sobre documentos PDF generados en el sistema.
+DocSigFeature1 = Firma digital PAdES con sello de tiempo TSA RFC3161
+DocSigFeature2 = Doble autenticación: DNI + Email/Teléfono + OTP
+DocSigFeature3 = Firma manuscrita capturada en canvas
+DocSigFeature4 = Certificado de cumplimiento con registro de auditoría
+DocSigFeature5 = Notificaciones por email con historial en contactos
+
+# Estados del Envelope
+Draft = Borrador
+Sent = Enviado
+PartiallySigned = Parcialmente firmado
+Completed = Completado
+Canceled = Cancelado
+Expired = Expirado
+
+# Estados del Firmante
+Pending = Pendiente
+Viewed = Visto
+OTPSent = OTP enviado
+OTPVerified = OTP verificado
+Signed = Firmado
+Rejected = Rechazado
+Blocked = Bloqueado
+
+# Listas y tarjetas
+EnvelopeList = Solicitudes de firma
+EnvelopeCard = Solicitud de firma
+NewEnvelope = Nueva solicitud de firma
+CreateEnvelope = Crear solicitud
+EditEnvelope = Modificar solicitud
+DeleteEnvelope = Eliminar solicitud
+CancelEnvelope = Cancelar solicitud
+ConfirmCancelEnvelope = ¿Está seguro de cancelar esta solicitud de firma? Se invalidarán todos los enlaces de firma.
+
+# Campos
+EnvelopeRef = Referencia
+OriginalDocument = Documento original
+SignedDocument = Documento firmado
+ComplianceCertificate = Certificado de cumplimiento
+SignatureMode = Modo de firma
+ExpirationDate = Fecha de expiración
+CreatedBy = Creado por
+CreatedAt = Creado el
+CompletedAt = Completado el
+CancelReason = Motivo de cancelación
+
+# Firmantes
+Signers = Firmantes
+AddSigner = Añadir firmante
+RemoveSigner = Eliminar firmante
+SignerName = Nombre
+SignerEmail = Email
+SignerPhone = Teléfono
+SignerDNI = DNI/NIE
+SignerStatus = Estado
+SignerOrder = Orden
+SignedAt = Firmado el
+SignatureImage = Imagen de firma
+
+# Acciones
+RequestSignature = Solicitar firma
+SendRequest = Enviar solicitud
+SendReminder = Enviar recordatorio
+ResendOTP = Reenviar OTP
+CopySignLink = Copiar enlace de firma
+DownloadSigned = Descargar firmado
+DownloadCertificate = Descargar certificado
+ViewAuditTrail = Ver registro de auditoría
+
+# Página pública
+WelcomeToSign = Bienvenido al proceso de firma
+PleaseAuthenticate = Por favor, verifique su identidad
+EnterDNI = Introduzca su DNI/NIE
+EnterEmail = Introduzca su email
+EnterPhone = Introduzca su teléfono
+AuthMethodEmail = Verificar por email
+AuthMethodPhone = Verificar por teléfono
+RequestOTP = Solicitar código
+EnterOTP = Introduzca el código recibido
+VerifyOTP = Verificar código
+OTPSentTo = Se ha enviado un código a %s
+OTPExpiredResend = El código ha expirado. Solicite uno nuevo.
+OTPInvalid = Código incorrecto. Intentos restantes: %s
+OTPBlocked = Demasiados intentos fallidos. El enlace ha sido bloqueado.
+DrawSignature = Dibuje su firma
+ClearSignature = Borrar
+ConfirmSignature = Confirmar firma
+SignatureRequired = Debe dibujar su firma para continuar
+SignatureSuccess = Documento firmado correctamente
+SignatureError = Error al procesar la firma
+TokenInvalid = El enlace no es válido o ha expirado
+TokenExpired = El enlace ha expirado
+AlreadySigned = Ya ha firmado este documento
+DownloadSignedDocument = Descargar documento firmado
+DownloadComplianceCert = Descargar certificado de cumplimiento
+
+# Notificaciones
+NotificationHistory = Historial de notificaciones
+NotificationType = Tipo
+NotificationChannel = Canal
+NotificationSubject = Asunto
+NotificationSentAt = Enviado el
+NotificationStatus = Estado
+SignatureRequest = Solicitud de firma
+OTPNotification = Código de verificación
+ReminderNotification = Recordatorio
+CompletedNotification = Firma completada
+CanceledNotification = Firma cancelada
+
+# Eventos de auditoría
+AuditTrail = Registro de auditoría
+EventType = Tipo de evento
+EventDate = Fecha/Hora
+EventIP = Dirección IP
+EventUserAgent = Navegador
+EventCreated = Solicitud creada
+EventSent = Solicitud enviada
+EventOpened = Enlace abierto
+EventOTPRequested = OTP solicitado
+EventOTPSent = OTP enviado
+EventOTPVerified = OTP verificado
+EventOTPFailed = OTP fallido
+EventSigned = Documento firmado
+EventRejected = Firma rechazada
+EventCanceled = Solicitud cancelada
+EventExpired = Solicitud expirada
+EventCompleted = Firma completada
+EventReminderSent = Recordatorio enviado
+EventDownloaded = Documento descargado
+
+# Errores
+ErrorEnvelopeNotFound = Solicitud de firma no encontrada
+ErrorSignerNotFound = Firmante no encontrado
+ErrorDocumentNotFound = Documento no encontrado
+ErrorInvalidDNI = El DNI/NIE introducido no es válido
+ErrorDNINotMatch = El DNI no coincide con el registrado
+ErrorEmailNotMatch = El email no coincide con el registrado
+ErrorPhoneNotMatch = El teléfono no coincide con el registrado
+ErrorOTPGeneration = Error al generar el código OTP
+ErrorOTPSend = Error al enviar el código OTP
+ErrorSignatureProcess = Error al procesar la firma
+ErrorTSA = Error al obtener el sello de tiempo
+ErrorPDFSign = Error al firmar el PDF
+ErrorCertificate = Error con el certificado interno
+ErrorRateLimit = Demasiadas solicitudes. Intente de nuevo en unos minutos.
+
+# Emails - Plantillas
+EmailRequestBody = <p>Estimado/a __SIGNER_NAME__,</p><p>Se le solicita firmar el documento <strong>__DOCUMENT_NAME__</strong> (Ref: __REF__).</p><p>Para proceder con la firma, haga clic en el siguiente enlace:</p><p><a href="__SIGN_URL__">Firmar documento</a></p><p>Este enlace expira el __EXPIRATION_DATE__.</p><p>Atentamente,<br>__COMPANY_NAME__</p>
+EmailOTPBody = <p>Su código de verificación es: <strong>__CODE__</strong></p><p>Este código expira en __EXPIRATION_MINUTES__ minutos.</p><p>Si no ha solicitado este código, ignore este mensaje.</p>
+EmailCompletedBody = <p>Estimado/a __SIGNER_NAME__,</p><p>El documento <strong>__DOCUMENT_NAME__</strong> (Ref: __REF__) ha sido firmado por todos los participantes.</p><p>Puede descargar el documento firmado y el certificado de cumplimiento desde el siguiente enlace:</p><p><a href="__DOWNLOAD_URL__">Descargar documentos</a></p><p>Atentamente,<br>__COMPANY_NAME__</p>
+EmailReminderBody = <p>Estimado/a __SIGNER_NAME__,</p><p>Le recordamos que tiene pendiente firmar el documento <strong>__DOCUMENT_NAME__</strong> (Ref: __REF__).</p><p>El enlace de firma expira en __DAYS_LEFT__ días.</p><p>Para proceder con la firma, haga clic en el siguiente enlace:</p><p><a href="__SIGN_URL__">Firmar documento</a></p><p>Atentamente,<br>__COMPANY_NAME__</p>
+
+# Permisos
+Permission6000001001 = Leer solicitudes de firma
+Permission6000001002 = Crear solicitudes de firma
+Permission6000001003 = Cancelar solicitudes de firma
+Permission6000001004 = Descargar documentos firmados
+Permission6000001005 = Administrar configuración de firmas
+
+# Tabs contacto
+DocSigNotifications = Notificaciones de firma
+# Página pública de firma (FASE 2)
+SignDocument = Firmar documento
+SignDocumentDescription = Hola %s, se le solicita firmar el siguiente documento
+DocumentInformation = Información del documento
+ReviewDocument = Revisar documento
+DrawYourSignature = Dibuje su firma
+Clear = Borrar
+AcceptSignatureTerms = Acepto que mi firma digital tiene el mismo valor legal que una firma manuscrita y autorizo el tratamiento de mis datos para este proceso.
+SignNow = Firmar ahora
+Processing = Procesando
+SignatureRecordedSuccessfully = ¡Documento firmado correctamente!
+SignatureRecordedDescription = Su firma ha sido registrada. Recibirá un correo cuando todos los firmantes hayan completado el proceso.
+ErrorInvalidToken = El enlace de firma no es válido
+ErrorTokenExpired = El enlace de firma ha expirado
+ErrorAlreadySigned = Ya ha firmado este documento
+ErrorEnvelopeCanceled = Esta solicitud de firma ha sido cancelada
+ErrorEnvelopeExpired = Esta solicitud de firma ha expirado
+ErrorEnvelopeNotFound = Solicitud de firma no encontrada
+ErrorSignatureRequired = Debe dibujar su firma
+ErrorAcceptTermsRequired = Debe aceptar los términos para continuar
+ErrorRecordingSignature = Error al registrar la firma
+
+# Card y List (FASE 2)
+DocSigEnvelopeList = Lista de solicitudes de firma
+DocSigEnvelope = Solicitud de firma
+LinkedObject = Objeto vinculado
+ParallelMode = Modo paralelo (todos firman a la vez)
+SequentialMode = Modo secuencial (firman en orden)
+FileNotFound = Archivo no encontrado
+FileHash = Hash del archivo
+ExpireDate = Fecha de expiración
+AuditTrail = Registro de auditoría
+Event = Evento
+Description = Descripción
+IPAddress = Dirección IP
+UserAgent = Navegador
+NoEvents = No hay eventos registrados
+SignedDocuments = Documentos firmados
+SignedPDF = PDF firmado
+NotAvailable = No disponible
+ResendNotification = Reenviar notificación
+ReminderSentSuccessfully = Recordatorio enviado correctamente
+ErrorSendingReminder = Error al enviar el recordatorio
+NoSigners = No hay firmantes
+EnvelopeCanceledSuccessfully = Solicitud cancelada correctamente
+ConfirmCancelEnvelope = ¿Está seguro de que desea cancelar esta solicitud de firma?
+BackToList = Volver a la lista
+
+# Otros
+Order = Orden
+Name = Nombre
+Actions = Acciones
+Status = Estado
+Document = Documento
+Reference = Referencia
+Object = Objeto
+Type = Tipo
+DateCreation = Fecha de creación
+NoRecordFound = No se encontraron registros
+Error = Error
+
+# Modal de firma mejorado (FASE 2 - actualizado)
+SearchOtherContact = Buscar otro contacto
+TypeToSearchContact = Escriba para buscar contacto...
+CreateNewContact = Crear nuevo contacto
+DoNotSaveContact = No guardar en Dolibarr
+SaveAsNewContact = Guardar como nuevo contacto
+AddSigner = Añadir firmante
+NoSignersSelected = No hay firmantes seleccionados
+ThirdParty = Tercero
+Contact = Contacto
+SendSignatureRequest = Enviar solicitud de firma
+CustomMessage = Mensaje personalizado
+CustomMessagePlaceholder = Escriba un mensaje personalizado para los firmantes (opcional)
+Optional = opcional
+ParallelModeDesc = Todos firman a la vez
+SequentialModeDesc = Firman en orden
+NoPDFAvailable = No hay PDF disponible para firmar
+DocSigExistingEnvelope = Solicitud de firma existente
+ViewDetails = Ver detalles
+DNI = DNI/NIE
+Phone = Teléfono
+FirstName = Nombre
+LastName = Apellidos
+Cancel = Cancelar
+New = Nuevo
+
+# Modal - Nuevos textos para grupos y tipos de contacto
+LinkedContacts = Contactos vinculados al documento
+OtherContacts = Otros contactos del tercero
+LinkedContact = Vinculado
+Company = Empresa
+NoContactsAvailable = No hay contactos disponibles. Use la búsqueda o cree uno nuevo.
+NoEmailAddress = Este contacto no tiene dirección de email
+ErrorInvalidEmail = Email no válido para el firmante

@@ -1,0 +1,140 @@
+Eres un desarrollador senior experto en Dolibarr (módulos), PHP 8.1+, MariaDB/MySQL, firmas PDF PAdES, TSA RFC3161, seguridad y auditoría. 
+Genera un módulo completo para Dolibarr llamado "signDol" (Document Signature Dolibarr) con ID 60000010 con las siguientes condiciones.  
+Usa patrones Dolibarr (actions_xxx.class.php, modXxx.class.php, lib, class, ajax, core/triggers, hooks). 
+Evita dependencias innecesarias;
+
+OBJETIVO
+Permitir solicitar y recoger firmas sobre PDFs ya generados en Dolibarr, añadir sello de tiempo TSA, registrar evidencias (audit trail) y producir:
+1) PDF firmado (PAdES) guardado en el mismo destino del documento original
+2) Certificado de cumplimiento (PDF o JSON+PDF) al finalizar la firma (de uno o de todos los firmantes según el caso)
+3) Registro de notificaciones enviadas (asunto + cuerpo) asociado al contacto
+
+FUNCIONALIDAD DETALLADA
+A) Solicitud de firma
+- La firma se solicita sobre un PDF existente generado por Dolibarr (factura, pedido, contrato, etc.) o cualquier documento en listados.
+- La solicitud crea un "envelope" de firma con N firmantes y orden configurable (por defecto paralelo).
+- Firmantes:
+  1) Si viene de un objeto Dolibarr (factura/contrato/pedido/propal/etc), añadirlos como firmantes: el tercero del objeto si su tva_intra tiene formato DNI/NIE 
+  y sus contactos actuales. Los contactos (socpeople) no tiene el campo tva_intra, crear desde el descriptor.
+  2) Permitir añadir tantos contactos como se desee.
+  3) Permitir crear nuevos contactos desde el mismo modal sin salir (AJAX).
+- Generar un enlace público de firma (token seguro, largo, aleatorio, expiración configurable) que se muestre en UI aunque también se envíe por cada firmante.
+- Permitir cancelar solicitud (cambia estado, invalida tokens, registra motivo).
+- Permitir descargar el PDF firmado cuando exista.
+- Al firmar uno o todos, guardar el PDF firmado con sufijo "_signed" y que aparezca en listados.
+
+B) Proceso de firma (doble autenticación)
+- Doble autenticación basada en DNI (documento de identidad, campo texto) + email o telefono.
+- Flujo:
+  1) Usuario abre link público (token).
+  2) Introduce DNI + email (debe coincidir con contacto/tercero firmante) o telefono (debe coincidir con el contacto/tercero firmante).
+  3) Se envía OTP (6 dígitos, caduca en 10 min, 5 intentos).
+  4) Valida OTP.
+  5) Captura firma manuscrita en canvas (base64) + nombre.
+  6) Confirma firma.
+- Registrar evidencia: IP, user-agent, fecha/hora, hash del PDF original (SHA-256), hash del PDF final, datos del firmante (rowid contacto, email, DNI), método de autenticación, eventos del flujo (opened, otp_sent, otp_ok, signed), y la imagen de firma (base64 o binario).
+- Si falla OTP demasiadas veces, bloquear token.
+
+C) Firmado del PDF y TSA
+- Generar un certificado interno al instalar el módulo (par de claves RSA/ECDSA) para firmar evidencias y/o para aplicar firma PAdES. Guardar clave privada cifrada en configuración Dolibarr (con secret key) y restringir acceso.
+- Añadir sello TSA RFC3161 al PDF firmado (PAdES). Configurar URL TSA, credenciales opcionales, política.
+- Formato:
+  - PAdES-BES mínimo; si es viable, PAdES-LT (incluye OCSP/CRL) usando lo disponible.
+- Firmado:
+  - Insertar firma visible opcional: colocar imagen manuscrita + texto (nombre, fecha, email) en la última página, esquina inferior.
+  - Mantener integridad: cualquier cambio debe invalidar.
+- Guardar PDF firmado en mismo path/área que el original, con sufijo "_signed.pdf". Mantener referencia en envelope.
+
+D) Notificaciones y registro en contacto
+- Toda notificación (solicitud, OTP, recordatorios, completado) se envía por email u otro sistema, de momento email, pero con posibilidad de crear una arquitectura hexagonal para cambiar de proveedores (sms, whatsapp...).
+- Registrar en actioncomm asociado al contacto destino: asunto y cuerpo exacto (texto/html) + fecha/hora + id envelope. No uses sólo logs; guárdalo en tabla actioncomm y muestra en ficha contacto (pestaña o bloque).
+- Permitir reenviar solicitud, recordatorios y cancelar firmas.
+
+E) Certificado de cumplimiento al finalizar
+- Al terminar (uno o todos según configuración), generar un documento “Certificado de cumplimiento” con:
+  - Identificador envelope
+  - Documento original (nombre, ruta, hash SHA-256)
+  - Documento firmado (nombre, ruta, hash)
+  - Lista de firmantes y su estado + fecha/hora + evidencias principales
+  - TSA usada (URL, serial, fecha del sello)
+  - Firma del sistema (certificado interno) sobre el certificado (hash)
+- Guardar certificado junto al PDF firmado (mismo sitio).
+- Exponer descarga desde UI.
+
+UX/UI (Dolibarr)
+- En cada listado de documentos (facturas, pedidos, contratos, etc.) añadir icono de firma (hook para list).
+- Al pulsar el icono:
+  - Abrir modal con dos vistas: “Crear solicitud” y “Revisar”.
+  - Si existe envelope activo: mostrar estado de firmas, enlaces, acciones (cancelar, reenviar, descargar).
+  - Si no existe: formulario para crear solicitud:
+    - Lista firmantes precargada (tercero + contactos del objeto si aplica)
+    - Añadir firmante (buscar contacto autobusqueda por email,telefono,dni, nombre)
+    - Crear contacto inline (AJAX: nombre, email, DNI opcional, tercero opcional)
+    - poder modificar datos faltantes del contacto/tercero en el mismo modal.
+    - Config: modo (paralelo/ordenado), expiración, mensaje email personalizado.
+- En la vista de revisar:
+  1) Ver link para firma (copiable)
+  2) Ver estado de cada firmante (pendiente, firmado, fallido, expirado)
+  3) Botón cancelar
+  4) Botón descargar (si existe) aunque el listado muestre "_signed"
+
+SEGURIDAD
+- Tokens: aleatorios 32+ bytes, hash en DB, sólo comparar hash.
+- Rate limit OTP por firmante y por IP.
+- Sanitización inputs.
+- Permisos Dolibarr: sólo usuarios con permiso pueden solicitar/cancelar/descargar desde backoffice. El link público sólo permite firmar y descargar certificado una vez completado (configurable).
+- Logs de auditoría inmutables: usa tabla append-only; no borres.
+
+ARQUITECTURA DOLIBARR / ESTRUCTURA
+Genera estos componentes con código:
+1) Descriptor módulo: htdocs/custom/docsig/core/modules/modDocSig.class.php con permisos, menús, constantes, configuración.
+2) Tablas SQL (llx_docsig_envelope, llx_docsig_signer, llx_docsig_event, llx_docsig_otp, llx_docsig_notification)
+   - Envelope: ref, fk_object, element, file_path, status, created_by, dates, signed_file_path, certificate_path, original_hash, signed_hash, settings_json
+   - Signer: fk_envelope, fk_socpeople (contact), email, dni, status, signed_at, signature_image_path/blob, auth_method, order_index
+   - Event: fk_envelope, fk_signer, type, ip, ua, payload_json, created_at
+   - OTP: fk_signer, code_hash, expires_at, attempts, sent_at
+   - Notification: fk_signer OR fk_contact, subject, body, sent_at, channel=email, envelope_ref
+3) Classes: class/docsigenvelope.class.php, class/docsigsigner.class.php, class/docsigevent.class.php etc con CRUD y methods (createEnvelope, addSigner, sendRequest, sendOTP, verifyOTP, applySignatureToPdf, finalizeEnvelope).
+4) Hooks:
+   - add icon in list views for known elements (facture, commande, contrat, propal, etc.) via hook list rendering
+   - add tab/box to contact card to show notification history
+5) Pages/backoffice:
+   - /custom/docsig/list.php (lista de envelopes)
+   - /custom/docsig/card.php (detalle)
+   - /custom/docsig/ajax/modal.php (render modal)
+   - /custom/docsig/ajax/contact_create.php (crear contacto)
+   - /custom/docsig/ajax/envelope_create.php (crear envelope)
+   - /custom/docsig/ajax/envelope_status.php (estado)
+   - /custom/docsig/ajax/envelope_cancel.php (cancelar)
+6) Página pública:
+   - /custom/docsig/public/sign.php?token=...
+   - flujo OTP + canvas firma + submit
+   - endpoint POST /custom/docsig/public/api.php para: start, send_otp, verify_otp, submit_signature
+7) PDF signing:
+   - Implementa con una librería PHP compatible (p. ej. setasign/fpdi + setasign/fpdi_pdf-parser y una librería de firma PAdES si viable). Si PAdES completo es complejo, implementa un enfoque híbrido:
+     - Inserta apariencia visible (firma manuscrita) + calcula hash del PDF + genera contenedor de firma (CMS/PKCS#7) con OpenSSL + integra TSA RFC3161.
+     - Deja el código organizado para sustituir por servicio externo en el futuro.
+   - Implementa TSA RFC3161: construir TimeStampReq, enviar a TSA, parsear respuesta, adjuntar.
+8) Emails:
+   - Usa las funciones mail Dolibarr.
+   - Plantillas configurables desde setup del módulo.
+   - Cada envío crea registro en llx_docsig_notification y visible en contacto.
+9) Setup:
+   - Página de configuración: TSA URL, credenciales, expiración tokens, expiración OTP, modo firma por defecto, posición firma visible, activar descarga pública.
+   - Generación de certificado interno en enable del módulo: par de claves + certificado autofirmado, persistir seguro.
+10) Tests:
+   - Incluye al menos pruebas unitarias simples (phpunit si procede) para OTP, token hashing y creación envelope.
+
+REQUISITOS DE SALIDA
+- Añade instrucciones de instalación en Dolibarr (copiar a htdocs/custom, activar módulo, ejecutar migrations).
+- Mantén estilo y convenciones Dolibarr (dol_include_once, GETPOST, securitytoken, etc.)
+
+
+FASES DE CREACION
+1) creación módulo + setup:
+  -  seleccion de notificaciones por defecto email por objeto dolibarr
+  -  configuracion TSA
+  -  valores prederteminado
+2) modal de creación de firma/estado de firma.
+3) notificaciones de aviso.
+4) flujo de firma completo + certificado

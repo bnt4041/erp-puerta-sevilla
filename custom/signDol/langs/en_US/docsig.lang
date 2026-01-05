@@ -1,0 +1,331 @@
+# DocSig - Document Signature Dolibarr
+# Copyright (C) 2026 DocSig Module
+# English translation file
+
+# Module
+ModuleDocSigName = DocSig - Digital Signature
+ModuleDocSigDesc = Digital signature for PDF documents with PAdES, TSA timestamp, two-factor authentication and compliance certificate
+
+# Menus
+DocSig = Digital Signature
+DocSigList = Signature list
+DocSigNew = New request
+DocSigSetup = Configuration
+DocSigAbout = About
+
+# Setup - Section titles
+TSASection = TSA Configuration (Time Stamping Authority)
+TokenOTPSection = Token and OTP Configuration
+SignatureSection = Signature Configuration
+NotificationSection = Notifications by Object Type
+EmailTemplatesSection = Email Templates
+SecuritySection = Security
+CertificateSection = Internal Certificate
+
+# Setup - TSA
+DocSigTSAUrl = TSA server URL
+DocSigTSAUrlHelp = URL of the RFC3161 timestamp server. Default: https://freetsa.org/tsr
+DocSigTSAUser = TSA user
+DocSigTSAUserHelp = Username for TSA server authentication (optional)
+DocSigTSAPass = TSA password
+DocSigTSAPassHelp = Password for TSA server authentication (optional)
+DocSigTSAPolicy = TSA Policy (OID)
+DocSigTSAPolicyHelp = TSA server policy identifier (optional)
+
+# Setup - Tokens and OTP
+DocSigTokenExpirationDays = Link expiration days
+DocSigTokenExpirationDaysHelp = Number of days the signature link will be active
+DocSigOTPExpirationMinutes = OTP expiration minutes
+DocSigOTPExpirationMinutesHelp = Time in minutes the OTP code will be valid
+DocSigOTPMaxAttempts = Maximum OTP attempts
+DocSigOTPMaxAttemptsHelp = Maximum number of attempts to enter the OTP code
+DocSigOTPLength = OTP code length
+DocSigOTPLengthHelp = Number of digits of the OTP code (between 4 and 8)
+
+# Setup - Signature
+DocSigSignatureMode = Signature mode
+DocSigSignatureModeHelp = Parallel: all signers can sign at once. Sequential: sign in order.
+DocSigModeParallel = Parallel
+DocSigModeSequential = Sequential
+DocSigSignatureVisible = Visible signature in PDF
+DocSigSignatureVisibleHelp = If active, the handwritten signature image will be visible in the PDF
+DocSigSignaturePosition = Signature position
+DocSigSignaturePositionHelp = Location of the visible signature in the document
+DocSigPositionBottomRight = Bottom right
+DocSigPositionBottomLeft = Bottom left
+DocSigPositionTopRight = Top right
+DocSigPositionTopLeft = Top left
+
+# Setup - Notifications
+DocSigNotifyFacture = Invoices
+DocSigNotifyCommande = Orders
+DocSigNotifyPropal = Proposals
+DocSigNotifyContrat = Contracts
+DocSigNotifyFichinter = Interventions
+
+# Setup - Email Templates
+DocSigEmailSubjectRequest = Signature request subject
+DocSigEmailSubjectRequestHelp = Variables: __REF__, __SIGNER_NAME__, __DOCUMENT_NAME__
+DocSigEmailSubjectOTP = OTP code subject
+DocSigEmailSubjectOTPHelp = Variables: __CODE__, __SIGNER_NAME__
+DocSigEmailSubjectCompleted = Completed document subject
+DocSigEmailSubjectCompletedHelp = Variables: __REF__, __DOCUMENT_NAME__
+DocSigEmailSubjectReminder = Reminder subject
+DocSigEmailSubjectReminderHelp = Variables: __REF__, __SIGNER_NAME__, __DAYS_LEFT__
+
+# Setup - Security
+DocSigPublicDownloadEnabled = Allow public download
+DocSigPublicDownloadEnabledHelp = Allows downloading the signed PDF from the public link once completed
+DocSigRateLimitOTP = OTP rate limit per minute
+DocSigRateLimitOTPHelp = Maximum number of OTP requests per minute from the same IP
+
+# Setup - Certificate
+DocSigCertKeySize = RSA key size
+DocSigCertKeySizeHelp = RSA key size in bits for the internal certificate
+DocSigCertValidityDays = Validity days
+DocSigCertValidityDaysHelp = Number of days the internal certificate will be valid
+DocSigCertCN = Common Name (CN)
+DocSigCertCNHelp = Common Name of the internal certificate
+DocSigCertOrg = Organization
+DocSigCertOrgHelp = Organization name in the certificate
+
+# Setup - Certificate Info
+DocSigCertificateInfo = Internal Certificate Information
+DocSigCertStatus = Status
+DocSigCertSubject = Subject
+DocSigCertValidFrom = Valid from
+DocSigCertValidTo = Valid to
+DocSigCertSerial = Serial number
+DocSigRegenerateCert = Regenerate certificate
+DocSigConfirmRegenerateCert = Are you sure you want to regenerate the internal certificate? Previously signed documents will remain valid.
+DocSigCertRegenerated = Internal certificate regenerated successfully
+DocSigCertRegenerateError = Error regenerating internal certificate
+DocSigTestTSA = Test TSA connection
+DocSigTSATestSuccess = TSA connection successful. Timestamp: %s
+DocSigTSATestError = TSA connection error: %s
+NotGenerated = Not generated
+
+# About
+DocSigAboutDescription = DocSig is a module for Dolibarr that allows requesting and collecting digital signatures on PDF documents generated in the system.
+DocSigFeature1 = PAdES digital signature with TSA RFC3161 timestamp
+DocSigFeature2 = Two-factor authentication: ID + Email/Phone + OTP
+DocSigFeature3 = Handwritten signature captured on canvas
+DocSigFeature4 = Compliance certificate with audit trail
+DocSigFeature5 = Email notifications with history in contacts
+
+# Envelope statuses
+Draft = Draft
+Sent = Sent
+PartiallySigned = Partially signed
+Completed = Completed
+Canceled = Canceled
+Expired = Expired
+
+# Signer statuses
+Pending = Pending
+Viewed = Viewed
+OTPSent = OTP sent
+OTPVerified = OTP verified
+Signed = Signed
+Rejected = Rejected
+Blocked = Blocked
+
+# Lists and cards
+EnvelopeList = Signature requests
+EnvelopeCard = Signature request
+NewEnvelope = New signature request
+CreateEnvelope = Create request
+EditEnvelope = Edit request
+DeleteEnvelope = Delete request
+CancelEnvelope = Cancel request
+ConfirmCancelEnvelope = Are you sure you want to cancel this signature request? All signature links will be invalidated.
+
+# Fields
+EnvelopeRef = Reference
+OriginalDocument = Original document
+SignedDocument = Signed document
+ComplianceCertificate = Compliance certificate
+SignatureMode = Signature mode
+ExpirationDate = Expiration date
+CreatedBy = Created by
+CreatedAt = Created on
+CompletedAt = Completed on
+CancelReason = Cancel reason
+
+# Signers
+Signers = Signers
+AddSigner = Add signer
+RemoveSigner = Remove signer
+SignerName = Name
+SignerEmail = Email
+SignerPhone = Phone
+SignerDNI = ID/Passport
+SignerStatus = Status
+SignerOrder = Order
+SignedAt = Signed on
+SignatureImage = Signature image
+
+# Actions
+RequestSignature = Request signature
+SendRequest = Send request
+SendReminder = Send reminder
+ResendOTP = Resend OTP
+CopySignLink = Copy signature link
+DownloadSigned = Download signed
+DownloadCertificate = Download certificate
+ViewAuditTrail = View audit trail
+
+# Public page
+WelcomeToSign = Welcome to the signature process
+PleaseAuthenticate = Please verify your identity
+EnterDNI = Enter your ID number
+EnterEmail = Enter your email
+EnterPhone = Enter your phone
+AuthMethodEmail = Verify by email
+AuthMethodPhone = Verify by phone
+RequestOTP = Request code
+EnterOTP = Enter the code received
+VerifyOTP = Verify code
+OTPSentTo = A code has been sent to %s
+OTPExpiredResend = The code has expired. Request a new one.
+OTPInvalid = Incorrect code. Remaining attempts: %s
+OTPBlocked = Too many failed attempts. The link has been blocked.
+DrawSignature = Draw your signature
+ClearSignature = Clear
+ConfirmSignature = Confirm signature
+SignatureRequired = You must draw your signature to continue
+SignatureSuccess = Document signed successfully
+SignatureError = Error processing signature
+TokenInvalid = The link is not valid or has expired
+TokenExpired = The link has expired
+AlreadySigned = You have already signed this document
+DownloadSignedDocument = Download signed document
+DownloadComplianceCert = Download compliance certificate
+
+# Notifications
+NotificationHistory = Notification history
+NotificationType = Type
+NotificationChannel = Channel
+NotificationSubject = Subject
+NotificationSentAt = Sent on
+NotificationStatus = Status
+SignatureRequest = Signature request
+OTPNotification = Verification code
+ReminderNotification = Reminder
+CompletedNotification = Signature completed
+CanceledNotification = Signature canceled
+
+# Audit events
+AuditTrail = Audit trail
+EventType = Event type
+EventDate = Date/Time
+EventIP = IP address
+EventUserAgent = Browser
+EventCreated = Request created
+EventSent = Request sent
+EventOpened = Link opened
+EventOTPRequested = OTP requested
+EventOTPSent = OTP sent
+EventOTPVerified = OTP verified
+EventOTPFailed = OTP failed
+EventSigned = Document signed
+EventRejected = Signature rejected
+EventCanceled = Request canceled
+EventExpired = Request expired
+EventCompleted = Signature completed
+EventReminderSent = Reminder sent
+EventDownloaded = Document downloaded
+
+# Errors
+ErrorEnvelopeNotFound = Signature request not found
+ErrorSignerNotFound = Signer not found
+ErrorDocumentNotFound = Document not found
+ErrorInvalidDNI = The ID number entered is not valid
+ErrorDNINotMatch = The ID does not match the registered one
+ErrorEmailNotMatch = The email does not match the registered one
+ErrorPhoneNotMatch = The phone does not match the registered one
+ErrorOTPGeneration = Error generating OTP code
+ErrorOTPSend = Error sending OTP code
+ErrorSignatureProcess = Error processing signature
+ErrorTSA = Error obtaining timestamp
+ErrorPDFSign = Error signing PDF
+ErrorCertificate = Internal certificate error
+ErrorRateLimit = Too many requests. Please try again in a few minutes.
+
+# Emails - Templates
+EmailRequestBody = <p>Dear __SIGNER_NAME__,</p><p>You are requested to sign the document <strong>__DOCUMENT_NAME__</strong> (Ref: __REF__).</p><p>To proceed with the signature, click on the following link:</p><p><a href="__SIGN_URL__">Sign document</a></p><p>This link expires on __EXPIRATION_DATE__.</p><p>Best regards,<br>__COMPANY_NAME__</p>
+EmailOTPBody = <p>Your verification code is: <strong>__CODE__</strong></p><p>This code expires in __EXPIRATION_MINUTES__ minutes.</p><p>If you did not request this code, please ignore this message.</p>
+EmailCompletedBody = <p>Dear __SIGNER_NAME__,</p><p>The document <strong>__DOCUMENT_NAME__</strong> (Ref: __REF__) has been signed by all participants.</p><p>You can download the signed document and compliance certificate from the following link:</p><p><a href="__DOWNLOAD_URL__">Download documents</a></p><p>Best regards,<br>__COMPANY_NAME__</p>
+EmailReminderBody = <p>Dear __SIGNER_NAME__,</p><p>This is a reminder that you have a pending signature for the document <strong>__DOCUMENT_NAME__</strong> (Ref: __REF__).</p><p>The signature link expires in __DAYS_LEFT__ days.</p><p>To proceed with the signature, click on the following link:</p><p><a href="__SIGN_URL__">Sign document</a></p><p>Best regards,<br>__COMPANY_NAME__</p>
+
+# Permissions
+Permission6000001001 = Read signature requests
+Permission6000001002 = Create signature requests
+Permission6000001003 = Cancel signature requests
+Permission6000001004 = Download signed documents
+Permission6000001005 = Manage signature configuration
+
+# Contact tabs
+DocSigNotifications = Signature notifications
+# Public signing page (PHASE 2)
+SignDocument = Sign document
+SignDocumentDescription = Hello %s, you are requested to sign the following document
+DocumentInformation = Document information
+ReviewDocument = Review document
+DrawYourSignature = Draw your signature
+Clear = Clear
+AcceptSignatureTerms = I accept that my digital signature has the same legal value as a handwritten signature and I authorize the processing of my data for this process.
+SignNow = Sign now
+Processing = Processing
+SignatureRecordedSuccessfully = Document signed successfully!
+SignatureRecordedDescription = Your signature has been recorded. You will receive an email when all signers have completed the process.
+ErrorInvalidToken = The signature link is not valid
+ErrorTokenExpired = The signature link has expired
+ErrorAlreadySigned = You have already signed this document
+ErrorEnvelopeCanceled = This signature request has been canceled
+ErrorEnvelopeExpired = This signature request has expired
+ErrorEnvelopeNotFound = Signature request not found
+ErrorSignatureRequired = You must draw your signature
+ErrorAcceptTermsRequired = You must accept the terms to continue
+ErrorRecordingSignature = Error recording signature
+
+# Card and List (PHASE 2)
+DocSigEnvelopeList = Signature requests list
+DocSigEnvelope = Signature request
+LinkedObject = Linked object
+ParallelMode = Parallel mode (all sign at once)
+SequentialMode = Sequential mode (sign in order)
+FileNotFound = File not found
+FileHash = File hash
+ExpireDate = Expiration date
+AuditTrail = Audit trail
+Event = Event
+Description = Description
+IPAddress = IP address
+UserAgent = Browser
+NoEvents = No events recorded
+SignedDocuments = Signed documents
+SignedPDF = Signed PDF
+NotAvailable = Not available
+ResendNotification = Resend notification
+ReminderSentSuccessfully = Reminder sent successfully
+ErrorSendingReminder = Error sending reminder
+NoSigners = No signers
+EnvelopeCanceledSuccessfully = Request canceled successfully
+ConfirmCancelEnvelope = Are you sure you want to cancel this signature request?
+BackToList = Back to list
+
+# Others
+Order = Order
+Name = Name
+Actions = Actions
+Status = Status
+Document = Document
+Reference = Reference
+Object = Object
+Type = Type
+DateCreation = Creation date
+NoRecordFound = No records found
+Error = Error
+PartialSigned = Partial Signed
+Partial = Partial

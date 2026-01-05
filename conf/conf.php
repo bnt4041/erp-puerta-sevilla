@@ -6,9 +6,9 @@
 // and explanations for all possibles parameters.
 //
 $dolibarr_main_url_root='http://doli.puertasevillainmobiliaria.online';
-$dolibarr_main_document_root="/var/www/html/htdocs";
+$dolibarr_main_document_root="/var/www/html/";
 $dolibarr_main_url_root_alt='/custom';
-$dolibarr_main_document_root_alt="/var/www/html/htdocs/custom";
+$dolibarr_main_document_root_alt="/var/www/html/custom";
 $dolibarr_main_data_root="/var/www/html/documents";
 $dolibarr_main_db_host='mariadb_erp';
 $dolibarr_main_db_port='0';
