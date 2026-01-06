@@ -506,11 +506,11 @@ class DocSigEnvelope extends CommonObject
         }
 
         $sql = "INSERT INTO ".MAIN_DB_PREFIX."docsig_event (";
-        $sql .= "fk_envelope, event_type, event_description, ip_address, user_agent, date_creation";
+        $sql .= "fk_envelope, event_type, payload_json, ip_address, user_agent, created_at";
         $sql .= ") VALUES (";
         $sql .= (int)$this->id.",";
         $sql .= " '".$this->db->escape($eventType)."',";
-        $sql .= " '".$this->db->escape($description)."',";
+        $sql .= " '".$this->db->escape(json_encode(array('description' => $description)))."',";
         $sql .= " '".$this->db->escape($ipAddress)."',";
         $sql .= " '".$this->db->escape(substr($userAgent, 0, 512))."',";
         $sql .= " '".$this->db->idate(dol_now())."'";
@@ -535,7 +535,7 @@ class DocSigEnvelope extends CommonObject
 
         $sql = "SELECT * FROM ".MAIN_DB_PREFIX."docsig_event";
         $sql .= " WHERE fk_envelope = ".(int)$this->id;
-        $sql .= " ORDER BY date_creation ASC";
+        $sql .= " ORDER BY created_at ASC";
         if ($limit > 0) {
             $sql .= " LIMIT ".(int)$limit;
         }
@@ -543,14 +543,15 @@ class DocSigEnvelope extends CommonObject
         $resql = $this->db->query($sql);
         if ($resql) {
             while ($obj = $this->db->fetch_object($resql)) {
+                $payload = json_decode($obj->payload_json, true);
                 $events[] = array(
                     'id' => $obj->rowid,
                     'type' => $obj->event_type,
-                    'description' => $obj->event_description,
+                    'description' => $payload['description'] ?? '',
                     'signer_id' => $obj->fk_signer,
                     'ip_address' => $obj->ip_address,
                     'user_agent' => $obj->user_agent,
-                    'date' => $this->db->jdate($obj->date_creation),
+                    'date' => $this->db->jdate($obj->created_at),
                 );
             }
         }

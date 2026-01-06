@@ -19,9 +19,10 @@ class GoWAClient
 	{
 		global $conf;
 		$this->db = $db;
-		$this->url = $conf->global->WHATSAPP_GOWA_URL;
-		$this->token = $conf->global->WHATSAPP_GOWA_TOKEN;
-		$this->instance = $conf->global->WHATSAPP_GOWA_INSTANCE;
+		// Usar helpers de Dolibarr para evitar warnings si la constante no existe
+		$this->url = function_exists('getDolGlobalString') ? getDolGlobalString('WHATSAPP_GOWA_URL', '') : (!empty($conf->global->WHATSAPP_GOWA_URL) ? $conf->global->WHATSAPP_GOWA_URL : '');
+		$this->token = function_exists('getDolGlobalString') ? getDolGlobalString('WHATSAPP_GOWA_TOKEN', '') : (!empty($conf->global->WHATSAPP_GOWA_TOKEN) ? $conf->global->WHATSAPP_GOWA_TOKEN : '');
+		$this->instance = function_exists('getDolGlobalString') ? getDolGlobalString('WHATSAPP_GOWA_INSTANCE', '') : (!empty($conf->global->WHATSAPP_GOWA_INSTANCE) ? $conf->global->WHATSAPP_GOWA_INSTANCE : '');
 	}
 
 	/**
@@ -63,6 +64,9 @@ class GoWAClient
 
 		// Clean phone number (remove +, spaces, etc.)
 		$to = preg_replace('/[^0-9]/', '', $to);
+		if (strlen($to) < 10) {
+			return array('error' => 1, 'message' => 'Invalid phone number (too short)');
+		}
 
 		// Verified endpoint
 		$endpoint = rtrim($this->url, '/') . '/send/message';

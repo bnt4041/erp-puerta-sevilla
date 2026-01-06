@@ -255,10 +255,10 @@ try {
         // Generar URL de firma
         $signUrl = docsig_get_public_sign_url($token);
 
-        // Enviar email
-        $result = $notificationService->sendSignatureRequest($envelope, $signer, $signUrl, $customMessage);
-        if (!$result['success']) {
-            dol_syslog('DocSig: Error sending notification to '.$signer->email.': '.$result['error'], LOG_WARNING);
+        // Enviar notificación (devuelve ID de notificación o -1 si falla)
+        $notificationResult = $notificationService->sendSignatureRequest($envelope, $signer, $signUrl, $customMessage);
+        if ($notificationResult < 0) {
+            dol_syslog('DocSig: Error sending notification to '.$signer->email, LOG_WARNING);
         }
     }
 

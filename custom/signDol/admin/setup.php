@@ -292,6 +292,15 @@ $item->nameText = $langs->trans('DocSigPublicDownloadEnabled');
 $item->helpText = $langs->trans('DocSigPublicDownloadEnabledHelp');
 $item->setAsYesNo();
 
+$item = $formSetup->newItem('DOCSIG_DOWNLOAD_EXPIRATION_HOURS');
+$item->nameText = $langs->trans('DocSigDownloadExpirationHours');
+$item->helpText = $langs->trans('DocSigDownloadExpirationHoursHelp');
+$item->defaultFieldValue = '168';
+$item->cssClass = 'minwidth100';
+$item->fieldAttr['type'] = 'number';
+$item->fieldAttr['min'] = '0';
+$item->fieldAttr['max'] = '8760';
+
 $item = $formSetup->newItem('DOCSIG_RATE_LIMIT_OTP');
 $item->nameText = $langs->trans('DocSigRateLimitOTP');
 $item->helpText = $langs->trans('DocSigRateLimitOTPHelp');

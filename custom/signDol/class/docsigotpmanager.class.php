@@ -162,16 +162,6 @@ class DocSigOTPManager
         // Determinar destino
         $destination = ($channel === 'whatsapp' || $channel === 'phone') ? $signerData['phone'] : $signerData['email'];
 
-        // Preparar asunto y cuerpo
-        $subject = getDolGlobalString('DOCSIG_EMAIL_SUBJECT_OTP', $langs->trans('DocSigOTPSubject'));
-        $subject = str_replace('__CODE__', $code, $subject);
-
-        $expirationMinutes = getDolGlobalInt('DOCSIG_OTP_EXPIRATION_MINUTES', 10);
-        
-        // Cuerpo del mensaje
-        $bodyText = $langs->trans('DocSigOTPBodyText', $code, $expirationMinutes);
-        $bodyHtml = $langs->trans('DocSigOTPBodyHtml', $code, $expirationMinutes);
-
         // Usar el servicio de notificaciones
         dol_include_once('/signDol/class/docsignotification.class.php');
         $notificationService = new DocSigNotificationService($this->db);
@@ -202,8 +192,22 @@ class DocSigOTPManager
             $actualChannel = 'sms';
         }
 
-        // Enviar
-        $sendResult = $notificationService->send($actualChannel, $destination, $subject, $bodyText, $bodyHtml, $context);
+        // Construir firmante (preferimos el objeto real para usar getFullName y plantillas)
+        dol_include_once('/signDol/class/docsigsigner.class.php');
+        $signerObj = new DocSigSigner($this->db);
+        if ($signerObj->fetch((int) $signerId) <= 0) {
+            // Fallback con los datos aportados por el flujo público
+            $signerObj->id = (int) $signerId;
+            $signerObj->rowid = (int) $signerId;
+            $signerObj->firstname = $signerData['firstname'] ?? '';
+            $signerObj->lastname = $signerData['lastname'] ?? '';
+            $signerObj->email = $signerData['email'] ?? '';
+            $signerObj->phone = $signerData['phone'] ?? '';
+            $signerObj->fk_socpeople = (!empty($contactId) ? (int) $contactId : null);
+        }
+
+        // Enviar (usa textos/plantillas correctas, p.ej. WhatsAppOTPBody)
+        $sendResult = $notificationService->sendOTPNotification($signerObj, $code, $actualChannel);
 
         if ($sendResult > 0) {
             $result['success'] = true;

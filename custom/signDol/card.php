@@ -91,17 +91,17 @@ if ($action == 'resend' && $user->hasRight('docsig', 'envelope', 'write')) {
             // Regenerar token
             $newToken = $signer->regenerateToken();
 
-            // Enviar email
+            // Enviar notificación
             dol_include_once('/signDol/class/docsignotification.class.php');
             $notificationService = new DocSigNotificationService($db);
             $signUrl = docsig_get_public_sign_url($newToken);
             $result = $notificationService->sendReminder($object, $signer, $signUrl);
 
-            if ($result['success']) {
+            if ($result > 0) {
                 $object->logEvent('REMINDER_SENT', 'Reminder sent to '.$signer->email);
                 setEventMessages($langs->trans('ReminderSentSuccessfully'), null, 'mesgs');
             } else {
-                setEventMessages($langs->trans('ErrorSendingReminder').': '.$result['error'], null, 'errors');
+                setEventMessages($langs->trans('ErrorSendingReminder').': '.$notificationService->error, null, 'errors');
             }
         }
     }

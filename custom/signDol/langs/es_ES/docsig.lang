@@ -74,10 +74,17 @@ DocSigEmailSubjectReminder = Asunto recordatorio
 DocSigEmailSubjectReminderHelp = Variables: __REF__, __SIGNER_NAME__, __DAYS_LEFT__
 
 # Setup - Seguridad
-DocSigPublicDownloadEnabled = Permitir descarga pública
-DocSigPublicDownloadEnabledHelp = Permite descargar el PDF firmado desde el enlace público una vez completado
-DocSigRateLimitOTP = Límite de OTPs por minuto
-DocSigRateLimitOTPHelp = Número máximo de solicitudes de OTP por minuto desde la misma IP
+DocSigPublicDownloadEnabled = Permitir descarga publica
+DocSigPublicDownloadEnabledHelp = Permite descargar el PDF firmado desde el enlace publico una vez completado
+DocSigDownloadExpirationHours = Horas de validez del enlace de descarga
+DocSigDownloadExpirationHoursHelp = Tiempo en horas que el enlace de descarga sera valido despues de completar la firma (0 = sin limite)
+DocSigRateLimitOTP = Limite de OTPs por minuto
+DocSigRateLimitOTPHelp = Numero maximo de solicitudes de OTP por minuto desde la misma IP
+
+# Errores de descarga
+ErrorDownloadLinkExpired = El enlace de descarga ha expirado. Contacte con el remitente para obtener uno nuevo.
+ErrorDocumentNotCompleted = El documento aun no ha sido firmado por todos los participantes.
+ErrorEnvelopeNotFound = No se encontro el sobre de firma.
 
 # Setup - Certificado
 DocSigCertKeySize = Tamaño de clave RSA
@@ -398,15 +405,15 @@ NotificationSentBy = Notificación enviada por %s
 NotificationSentEmail = Notificación enviada por email
 NotificationSentWhatsApp = Notificación enviada por WhatsApp
 NotificationSentBoth = Notificación enviada por email y WhatsApp
-ChannelEmail = 📧 Email
-ChannelWhatsApp = 📱 WhatsApp
-ChannelSMS = 💬 SMS
+ChannelEmail = [Email]
+ChannelWhatsApp = [WhatsApp]
+ChannelSMS = [SMS]
 
 # Plantillas WhatsApp
-WhatsAppRequestBody = *Solicitud de firma*\n\nEstimado/a __SIGNER_NAME__,\n\nSe le solicita firmar el documento *__DOCUMENT_NAME__* (Ref: __REF__).\n\n🔗 Enlace de firma:\n__SIGN_URL__\n\n⏰ Este enlace expira el __EXPIRATION_DATE__.\n\nAtentamente,\n__COMPANY_NAME__
-WhatsAppOTPBody = 🔐 *Código de verificación DocSig*\n\nSu código es: *__CODE__*\n\nVálido por __EXPIRATION_MINUTES__ minutos.\n\nSi no ha solicitado este código, ignore este mensaje.
-WhatsAppReminderBody = ⏰ *Recordatorio de firma*\n\nEstimado/a __SIGNER_NAME__,\n\nLe recordamos que tiene pendiente firmar el documento *__DOCUMENT_NAME__*.\n\nEl enlace expira en __DAYS_LEFT__ días.\n\n🔗 __SIGN_URL__
-WhatsAppCompletedBody = ✅ *Firma completada*\n\nEl documento *__DOCUMENT_NAME__* ha sido firmado por todos los participantes.\n\nPuede descargarlo desde:\n__DOWNLOAD_URL__
+WhatsAppRequestBody = *Solicitud de firma*\n\nEstimado/a __SIGNER_NAME__,\n\nSe le solicita firmar el documento *__DOCUMENT_NAME__* (Ref: __REF__).\n\nEnlace de firma:\n__SIGN_URL__\n\nEste enlace expira el __EXPIRATION_DATE__.\n\nAtentamente,\n__COMPANY_NAME__
+WhatsAppOTPBody = *Codigo de verificacion DocSig*\n\nSu codigo es: *__CODE__*\n\nValido por __EXPIRATION_MINUTES__ minutos.\n\nSi no ha solicitado este codigo, ignore este mensaje.
+WhatsAppReminderBody = *Recordatorio de firma*\n\nEstimado/a __SIGNER_NAME__,\n\nLe recordamos que tiene pendiente firmar el documento *__DOCUMENT_NAME__*.\n\nEl enlace expira en __DAYS_LEFT__ dias.\n\n__SIGN_URL__
+WhatsAppCompletedBody = *Firma completada*\n\nEl documento *__DOCUMENT_NAME__* ha sido firmado por todos los participantes.\n\nPuede descargarlo desde:\n__DOWNLOAD_URL__
 
 # Flujo de firma público (FASE 4 - OTP)
 Identity = Identidad

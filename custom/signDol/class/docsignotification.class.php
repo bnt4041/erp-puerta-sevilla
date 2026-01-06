@@ -295,7 +295,7 @@ class DocSigWhatsAppProvider implements DocSigNotificationProviderInterface
 
         // Añadir enlace si está en las opciones
         if (!empty($options['signing_url'])) {
-            $message .= "\n\n🔗 *Enlace de firma:*\n" . $options['signing_url'];
+            $message .= "\n\n*Enlace de firma:*\n" . $options['signing_url'];
         }
 
         // Enviar usando GoWAClient
@@ -624,17 +624,15 @@ class DocSigNotificationService
         if ($result['success']) {
             $this->updateNotificationStatus($notificationId, 1, null, dol_now());
             
-            // Crear registro en actioncomm si hay contacto
-            // Crear registro en actioncomm si hay contacto válido
+            // Crear registro en actioncomm (siempre, aunque no haya contacto vinculado)
             $actionContactId = isset($context['contact_id']) ? (int)$context['contact_id'] : 0;
-            if ($actionContactId > 0) {
-                // Añadir canal y notification_id al contexto para actioncomm
-                $actionContext = array_merge($context, array(
-                    'channel' => $channel,
-                    'notification_id' => $notificationId
-                ));
-                $this->createActionComm($actionContactId, $subject, $channelBodyHtml ?: $channelBodyText, $actionContext);
-            }
+            // Añadir canal y notification_id al contexto para actioncomm
+            $actionContext = array_merge($context, array(
+                'channel' => $channel,
+                'notification_id' => $notificationId,
+                'destination' => $destination
+            ));
+            $this->createActionComm($actionContactId, $subject, $bodyHtml ?: $bodyText, $actionContext);
         } else {
             $this->updateNotificationStatus($notificationId, 2, $result['error']);
             $this->error = $result['error'];
@@ -715,12 +713,12 @@ class DocSigNotificationService
     }
 
     /**
-     * Crea un registro en actioncomm vinculado al contacto
+     * Crea un registro en actioncomm vinculado al contacto (o sin contacto si no existe)
      *
-     * @param int $contactId ID del contacto
+     * @param int $contactId ID del contacto (puede ser 0 si no hay contacto vinculado)
      * @param string $subject Asunto
      * @param string $body Cuerpo
-     * @param array $context Contexto adicional (type, channel, envelope_id, notification_id)
+     * @param array $context Contexto adicional (type, channel, envelope_id, notification_id, destination)
      * @return int ID creado o -1 si falla
      */
     private function createActionComm($contactId, $subject, $body, $context = array())
@@ -730,10 +728,17 @@ class DocSigNotificationService
         require_once DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php';
         require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
 
-        // Cargar contacto para obtener el tercero
-        $contact = new Contact($this->db);
-        if ($contact->fetch($contactId) <= 0) {
-            return -1;
+        // Intentar cargar contacto si existe
+        $contact = null;
+        $socid = 0;
+        if ($contactId > 0) {
+            $contact = new Contact($this->db);
+            if ($contact->fetch($contactId) > 0) {
+                $socid = $contact->socid;
+            } else {
+                $contact = null;
+                $contactId = 0;
+            }
         }
 
         // Determinar el tipo de actioncomm según el tipo de notificación
@@ -759,17 +764,18 @@ class DocSigNotificationService
         $actioncomm->code = $typeCode;
         $actioncomm->label = '[DocSig] ' . $subject;
         
-        // Añadir información del canal al cuerpo
+        // Añadir información del canal y destino al cuerpo
         $channelInfo = '';
+        $destination = $context['destination'] ?? '';
         switch ($channel) {
             case 'whatsapp':
-                $channelInfo = "📱 Enviado por WhatsApp\n";
+                $channelInfo = "[WhatsApp]" . ($destination ? " Enviado a $destination" : "") . "\n";
                 break;
             case 'email':
-                $channelInfo = "📧 Enviado por Email\n";
+                $channelInfo = "[Email]" . ($destination ? " Enviado a $destination" : "") . "\n";
                 break;
             case 'sms':
-                $channelInfo = "💬 Enviado por SMS\n";
+                $channelInfo = "[SMS]" . ($destination ? " Enviado a $destination" : "") . "\n";
                 break;
         }
         
@@ -777,8 +783,8 @@ class DocSigNotificationService
         $actioncomm->datep = dol_now();
         $actioncomm->datef = dol_now();
         $actioncomm->percentage = -1; // Not applicable
-        $actioncomm->socid = $contact->socid;
-        $actioncomm->contact_id = $contactId;
+        $actioncomm->socid = $socid;
+        $actioncomm->contact_id = $contactId > 0 ? $contactId : null;
         $actioncomm->authorid = $user->id ?? 0;
         $actioncomm->userownerid = $user->id ?? 0;
         $actioncomm->fk_element = $context['envelope_id'] ?? 0;
@@ -995,7 +1001,9 @@ class DocSigNotificationService
         $langs->load('docsig@signDol');
 
         // URL de descarga
-        $downloadUrl = dol_buildpath('/signDol/public/download.php', 3).'?token='.$signer->token;
+        // - En backend no tenemos el token en claro (solo token_hash). Permitimos que download.php acepte ambos formatos.
+        $downloadToken = (!empty($signer->plain_token) ? $signer->plain_token : $signer->token_hash);
+        $downloadUrl = dol_buildpath('/signDol/public/download.php', 3).'?type=signed&token='.$downloadToken;
 
         // Preparar variables de sustitución
         $vars = array(
@@ -1025,6 +1033,10 @@ class DocSigNotificationService
             'type' => 'completed',
             'email' => $signer->email,
             'phone' => $signer->phone,
+            // Variables para templates WhatsApp
+            'signer_name' => $signer->getFullName(),
+            'document_name' => basename($envelope->file_path),
+            'download_url' => $downloadUrl,
         );
 
         // Enviar notificación
