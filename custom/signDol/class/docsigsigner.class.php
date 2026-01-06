@@ -50,6 +50,7 @@ class DocSigSigner extends CommonObject
     public $rowid;
     public $fk_envelope;
     public $fk_contact;
+    public $fk_socpeople;
     public $email;
     public $phone;
     public $firstname;
@@ -102,11 +103,12 @@ class DocSigSigner extends CommonObject
         $this->db->begin();
 
         $sql = "INSERT INTO ".MAIN_DB_PREFIX.$this->table_element." (";
-        $sql .= "fk_envelope, fk_contact, email, phone, firstname, lastname, dni,";
+        $sql .= "fk_envelope, fk_contact, fk_socpeople, email, phone, firstname, lastname, dni,";
         $sql .= "sign_order, token_hash, token_expire, status, date_creation";
         $sql .= ") VALUES (";
         $sql .= (int)$this->fk_envelope.",";
         $sql .= " ".($this->fk_contact > 0 ? (int)$this->fk_contact : "null").",";
+        $sql .= " ".($this->fk_socpeople > 0 ? (int)$this->fk_socpeople : "null").",";
         $sql .= " '".$this->db->escape($this->email)."',";
         $sql .= " ".($this->phone ? "'".$this->db->escape($this->phone)."'" : "null").",";
         $sql .= " '".$this->db->escape($this->firstname)."',";
@@ -166,6 +168,7 @@ class DocSigSigner extends CommonObject
                 $this->rowid = $obj->rowid;
                 $this->fk_envelope = $obj->fk_envelope;
                 $this->fk_contact = $obj->fk_contact;
+                $this->fk_socpeople = $obj->fk_socpeople;
                 $this->email = $obj->email;
                 $this->phone = $obj->phone;
                 $this->firstname = $obj->firstname;
@@ -220,6 +223,7 @@ class DocSigSigner extends CommonObject
 
         $sql = "UPDATE ".MAIN_DB_PREFIX.$this->table_element." SET";
         $sql .= " fk_contact = ".($this->fk_contact > 0 ? (int)$this->fk_contact : "null").",";
+        $sql .= " fk_socpeople = ".($this->fk_socpeople > 0 ? (int)$this->fk_socpeople : "null").",";
         $sql .= " email = '".$this->db->escape($this->email)."',";
         $sql .= " phone = ".($this->phone ? "'".$this->db->escape($this->phone)."'" : "null").",";
         $sql .= " firstname = '".$this->db->escape($this->firstname)."',";

@@ -422,10 +422,13 @@ function docsig_generate_modal_html($objectInfo, $existingEnvelope, $pdfInfo, $t
                 $html .= '<td>'.$signer->email.'</td>';
                 $html .= '<td>'.$signer->getLibStatut(2).'</td>';
                 $html .= '<td>'.($signer->date_signed ? dol_print_date($signer->date_signed, 'dayhour') : '-').'</td>';
-                $html .= '<td class="right">';
+                $html .= '<td class="right nowraponall">';
                 if ($signer->status == 0 && $user->hasRight('docsig', 'envelope', 'write')) {
-                    $html .= '<a href="#" class="docsig-resend-btn" data-signer-id="'.$signer->id.'" title="'.$langs->trans('ResendNotification').'">';
+                    $html .= '<a href="#" class="docsig-resend-btn paddingright" data-signer-id="'.$signer->id.'" title="'.$langs->trans('ResendNotification').'">';
                     $html .= '<span class="fa fa-paper-plane"></span>';
+                    $html .= '</a>';
+                    $html .= '<a href="#" class="docsig-copy-url-btn" data-signer-id="'.$signer->id.'" title="'.$langs->trans('CopySignUrl').'">';
+                    $html .= '<span class="fa fa-copy"></span>';
                     $html .= '</a>';
                 }
                 $html .= '</td>';
@@ -705,7 +708,7 @@ function docsig_render_signer_item($uniqueId, $name, $email, $phone, $poste = ''
     $html .= '<div class="docsig-field-group">';
     $html .= '<span class="fa fa-envelope docsig-field-icon"></span>';
     $html .= '<input type="email" name="signers['.$uniqueId.'][email]" value="'.dol_escape_htmltag($email).'" ';
-    $html .= 'class="docsig-input" placeholder="'.$langs->trans('Email').'"'.($email ? '' : ' required').'>';
+    $html .= 'class="docsig-input" placeholder="'.$langs->trans('Email').'">';
     $html .= '</div>';
     
     // Teléfono

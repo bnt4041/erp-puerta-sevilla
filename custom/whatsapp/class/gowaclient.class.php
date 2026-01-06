@@ -37,6 +37,30 @@ class GoWAClient
 			return array('error' => 1, 'message' => 'GoWA URL not configured');
 		}
 
+		// WhatsApp no interpreta HTML. Si llega contenido HTML desde otros módulos, convertir a texto plano.
+		if (is_string($message) && $message !== '') {
+			$message = html_entity_decode($message, ENT_QUOTES, 'UTF-8');
+
+			// Algunos sistemas envuelven URLs en <...> (no es HTML real) y strip_tags() las borraría.
+			// Convertir <https://...> o <www...> a texto plano antes de limpiar.
+			$message = preg_replace('/<((?:https?:\/\/|www\.)[^>\s]+)>/i', '$1', $message);
+
+			if (preg_match('/<[^>]+>/', $message)) {
+				// Links
+				$message = preg_replace('/<a[^>]*href=["\']([^"\']+)["\'][^>]*>(.*?)<\/a>/i', '$2: $1', $message);
+				// Saltos
+				$message = preg_replace('/<br\s*\/?\s*>/i', "\n", $message);
+				$message = preg_replace('/<\/(p|div|h[1-6]|tr)>/i', "\n\n", $message);
+				// Listas
+				$message = preg_replace('/<li[^>]*>/i', "\n• ", $message);
+				$message = preg_replace('/<\/(li|ul|ol)>/i', "\n", $message);
+
+				$message = strip_tags($message);
+				$message = preg_replace("/\n{3,}/", "\n\n", $message);
+				$message = trim($message);
+			}
+		}
+
 		// Clean phone number (remove +, spaces, etc.)
 		$to = preg_replace('/[^0-9]/', '', $to);
 

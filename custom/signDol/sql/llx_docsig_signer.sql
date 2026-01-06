@@ -24,7 +24,7 @@ CREATE TABLE llx_docsig_signer(
     
     -- Token de acceso
     token_hash VARCHAR(128) NOT NULL,                   -- Hash SHA-256 del token (no guardar token plano)
-    token_expires DATETIME NOT NULL,                    -- Fecha de expiración del token
+    token_expire DATETIME DEFAULT NULL,                 -- Fecha de expiración del token
     
     -- Estado de firma
     status INTEGER DEFAULT 0 NOT NULL,                  -- 0=pendiente, 1=visto, 2=otp_enviado, 3=otp_verificado, 4=firmado, 5=rechazado, 6=expirado, 7=bloqueado

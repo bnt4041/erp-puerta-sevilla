@@ -182,6 +182,7 @@ try {
         $signer = new DocSigSigner($db);
         $signer->fk_envelope = $envelopeId;
         $signer->fk_contact = $signerInfo['contact_id'];
+        $signer->fk_socpeople = $signerInfo['contact_id'];  // Same ID - contact_id refers to socpeople.rowid
         $signer->email = $signerInfo['email'];
         $signer->phone = $signerInfo['phone'];
         

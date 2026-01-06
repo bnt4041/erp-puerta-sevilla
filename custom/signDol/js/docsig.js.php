@@ -219,7 +219,7 @@ var DocSig = DocSig || {};
         if (createForm) {
             createForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-                DocSig.createEnvelope(new FormData(createForm));
+                DocSig.createEnvelope(createForm);
             });
         }
 
@@ -538,6 +538,20 @@ var DocSig = DocSig || {};
     };
 
     /**
+     * Find signer container when closest() is not available
+     */
+    DocSig.findSignerContainer = function(element) {
+        var current = element;
+        while (current && current !== document) {
+            if (current.classList && current.classList.contains('docsig-signer-item')) {
+                return current;
+            }
+            current = current.parentElement;
+        }
+        return null;
+    };
+
+    /**
      * Update submit button state based on selected signers
      */
     DocSig.updateSubmitButtonState = function() {
@@ -553,12 +567,78 @@ var DocSig = DocSig || {};
     /**
      * Create envelope via AJAX
      */
-    DocSig.createEnvelope = function(formData) {
+    DocSig.createEnvelope = function(form) {
+        if (!form) {
+            return;
+        }
+
         var submitBtn = document.getElementById('docsig-submit-btn');
+        var checkedSigners = form.querySelectorAll('.docsig-signer-item input[type="checkbox"]:checked');
+        var validationError = '';
+
+        checkedSigners.forEach(function(checkbox) {
+            if (validationError) {
+                return;
+            }
+
+            var container = checkbox.closest ? checkbox.closest('.docsig-signer-item') : DocSig.findSignerContainer(checkbox);
+            if (!container) {
+                return;
+            }
+
+            var emailInput = container.querySelector('input[name^="signers"][name$="[email]"]');
+            var emailValue = emailInput ? emailInput.value.trim() : '';
+            var signerNameNode = container.querySelector('.docsig-signer-name');
+            var signerName = signerNameNode ? signerNameNode.textContent.trim() : '';
+
+            if (!emailValue) {
+                validationError = 'Añade un email para cada firmante seleccionado' + (signerName ? ' (' + signerName + ')' : '');
+                if (emailInput) {
+                    emailInput.focus();
+                }
+                return;
+            }
+
+            if (!DocSig.validateEmail(emailValue)) {
+                validationError = 'El email del firmante seleccionado no es válido' + (signerName ? ' (' + signerName + ')' : '');
+                if (emailInput) {
+                    emailInput.focus();
+                }
+            }
+        });
+
+        if (validationError) {
+            alert(validationError);
+            return;
+        }
+
         if (submitBtn) {
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span class="fa fa-spinner fa-spin"></span> Enviando...';
         }
+
+        // Disable inputs from unselected signers so they are not sent
+        var allSignerItems = form.querySelectorAll('.docsig-signer-item');
+        allSignerItems.forEach(function(item) {
+            var checkbox = item.querySelector('input[type="checkbox"]');
+            if (!checkbox || !checkbox.checked) {
+                // Disable all inputs in this signer item so they are not serialized
+                var inputs = item.querySelectorAll('input, select, textarea');
+                inputs.forEach(function(input) {
+                    input.disabled = true;
+                });
+            }
+        });
+
+        var formData = new FormData(form);
+
+        // Re-enable inputs after serialization (in case user needs to retry)
+        allSignerItems.forEach(function(item) {
+            var inputs = item.querySelectorAll('input, select, textarea');
+            inputs.forEach(function(input) {
+                input.disabled = false;
+            });
+        });
 
         var xhr = new XMLHttpRequest();
         xhr.open('POST', DocSig.config.ajaxUrl + 'envelope_create.php', true);
@@ -631,7 +711,7 @@ var DocSig = DocSig || {};
             }
         };
 
-        xhr.send('envelope_id=' + encodeURIComponent(envelopeId) + 
+        xhr.send('id=' + encodeURIComponent(envelopeId) + 
                  '&reason=' + encodeURIComponent(reason || '') + 
                  '&token=' + encodeURIComponent(DocSig.config.csrfToken));
     };

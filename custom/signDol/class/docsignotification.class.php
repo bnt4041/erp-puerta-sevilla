@@ -617,6 +617,11 @@ class DocSigNotificationService
     {
         global $user, $conf;
 
+        $contactId = 0;
+        if (isset($context['contact_id'])) {
+            $contactId = (int) $context['contact_id'];
+        }
+
         $sql = "INSERT INTO ".MAIN_DB_PREFIX."docsig_notification (";
         $sql .= "fk_envelope, fk_signer, fk_socpeople, envelope_ref,";
         $sql .= "notification_type, channel, destination,";
@@ -625,7 +630,8 @@ class DocSigNotificationService
         $sql .= ") VALUES (";
         $sql .= (isset($context['envelope_id']) ? (int)$context['envelope_id'] : "NULL").",";
         $sql .= (isset($context['signer_id']) ? (int)$context['signer_id'] : "NULL").",";
-        $sql .= (isset($context['contact_id']) ? (int)$context['contact_id'] : "NULL").",";
+        $sql .= ($contactId > 0 ? (int)$contactId : "NULL").",";
+        // fk_socpeople: nunca insertar 0 por la FK. Usar NULL si no hay contacto válido.
         $sql .= (isset($context['envelope_ref']) ? "'".$this->db->escape($context['envelope_ref'])."'" : "NULL").",";
         $sql .= "'".$this->db->escape($context['type'] ?? 'general')."',";
         $sql .= "'".$this->db->escape($channel)."',";
@@ -721,13 +727,13 @@ class DocSigNotificationService
         $channelInfo = '';
         switch ($channel) {
             case 'whatsapp':
-                $channelInfo = "📱 Enviado por WhatsApp\n";
+                $channelInfo = "Enviado por WhatsApp\n";
                 break;
             case 'email':
-                $channelInfo = "📧 Enviado por Email\n";
+                $channelInfo = "Enviado por Email\n";
                 break;
             case 'sms':
-                $channelInfo = "💬 Enviado por SMS\n";
+                $channelInfo = "Enviado por SMS\n";
                 break;
         }
         

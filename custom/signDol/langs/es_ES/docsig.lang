@@ -452,3 +452,15 @@ GeneratedAt = Generado el
 DigitalSignaturesRecord = Registro de Firmas Digitales
 DateTime = Fecha/Hora
 Phone = Teléfono
+# Copy URL
+CopySignUrl = Copiar URL de firma
+UrlCopiedToClipboard = URL copiada al portapapeles
+TokenRegeneratedSuccessfully = Token regenerado correctamente
+ErrorSignerAlreadySigned = El firmante ya ha firmado o rechazado
+
+# Document viewing
+ViewDocument = Ver documento
+HideDocument = Ocultar documento
+
+# DNI field
+DNIWillBeVerified = (Se verificará que coincida)

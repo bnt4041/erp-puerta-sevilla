@@ -59,7 +59,7 @@ if (empty($token)) {
 $tokenHash = docsig_hash_token($token);
 
 // Find signer by token hash
-$sql = "SELECT s.rowid, s.fk_envelope, s.token_expires as token_expire, e.file_path, e.status as envelope_status";
+$sql = "SELECT s.rowid, s.fk_envelope, s.token_expire as token_expire, e.file_path, e.status as envelope_status";
 $sql .= " FROM ".MAIN_DB_PREFIX."docsig_signer as s";
 $sql .= " INNER JOIN ".MAIN_DB_PREFIX."docsig_envelope as e ON s.fk_envelope = e.rowid";
 $sql .= " WHERE s.token_hash = '".$db->escape($tokenHash)."'";

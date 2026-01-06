@@ -742,21 +742,28 @@ $companyName = getDolGlobalString('MAIN_INFO_SOCIETE_NOM', 'DocSig');
                 <div class="document-info-row">
                     <span class="document-info-label"><?php echo $langs->trans('ExpireDate'); ?></span>
                     <span class="document-info-value"><?php echo dol_print_date($envelope->expire_date, 'dayhour'); ?></span>
-                </div>
+            </div>
+            </div>
+
+            <!-- Document Preview Toggle -->
+            <div class="document-preview-toggle">
+                <button type="button" class="btn btn-secondary btn-block" id="toggle-document-preview">
+                    <i class="fas fa-eye"></i>
+                    <?php echo $langs->trans('ViewDocument'); ?>
+                </button>
+            </div>
+            <div class="document-preview-container" id="document-preview-container" style="display: none; margin-bottom: 20px;">
+                <iframe id="identity-pdf-frame" src="<?php echo dol_buildpath('/signDol/public/viewpdf.php', 1).'?token='.urlencode($token); ?>" style="width: 100%; height: 400px; border: 1px solid var(--gray-300); border-radius: 8px;"></iframe>
             </div>
 
             <form id="identity-form">
-                <?php if ($signerData['has_dni']): ?>
                 <div class="form-group">
                     <label for="dni"><?php echo $langs->trans('DNI'); ?> *</label>
                     <input type="text" id="dni" name="dni" placeholder="12345678A" required 
                            pattern="[0-9]{8}[A-Za-z]" maxlength="9"
                            style="text-transform: uppercase;">
-                    <div class="hint"><?php echo $langs->trans('EnterYourDNI'); ?></div>
+                    <div class="hint"><?php echo $langs->trans('EnterYourDNI'); ?><?php if ($signerData['has_dni']) { echo ' '.$langs->trans('DNIWillBeVerified'); } ?></div>
                 </div>
-                <?php else: ?>
-                <input type="hidden" id="dni" name="dni" value="">
-                <?php endif; ?>
 
                 <div class="form-group">
                     <label for="auth-method"><?php echo $langs->trans('VerificationMethod'); ?></label>
@@ -928,6 +935,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const loading = document.getElementById('loading');
     const steps = document.querySelectorAll('.step');
     const sections = document.querySelectorAll('.form-section');
+    
+    // Toggle document preview
+    const togglePreviewBtn = document.getElementById('toggle-document-preview');
+    const previewContainer = document.getElementById('document-preview-container');
+    if (togglePreviewBtn && previewContainer) {
+        togglePreviewBtn.addEventListener('click', function() {
+            if (previewContainer.style.display === 'none') {
+                previewContainer.style.display = 'block';
+                this.innerHTML = '<i class="fas fa-eye-slash"></i> <?php echo $langs->trans("HideDocument"); ?>';   
+            } else {
+                previewContainer.style.display = 'none';
+                this.innerHTML = '<i class="fas fa-eye"></i> <?php echo $langs->trans("ViewDocument"); ?>'; 
+            }
+        });
+    }
     
     // Initialize Signature Pad
     const canvas = document.getElementById('signature-pad');

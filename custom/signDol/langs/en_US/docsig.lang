@@ -374,3 +374,15 @@ SignersInformation = Signers Information
 CertificateHash = Certificate Hash
 GeneratedAt = Generated at
 DigitalSignaturesRecord = Digital Signatures Record
+# Copy URL
+CopySignUrl = Copy Sign URL
+UrlCopiedToClipboard = URL copied to clipboard
+TokenRegeneratedSuccessfully = Token regenerated successfully
+ErrorSignerAlreadySigned = Signer has already signed or rejected
+
+# Document viewing
+ViewDocument = View document
+HideDocument = Hide document
+
+# DNI field
+DNIWillBeVerified = (Will be verified)

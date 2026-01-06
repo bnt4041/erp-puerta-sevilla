@@ -177,9 +177,18 @@ class DocSigOTPManager
         $notificationService = new DocSigNotificationService($this->db);
 
         // Contexto para el registro
+        $contactId = 0;
+        if (!empty($signerData['fk_socpeople'])) {
+            $contactId = (int) $signerData['fk_socpeople'];
+        } elseif (!empty($signerData['fk_contact'])) {
+            // Backward-compat: algunos flujos antiguos metían el id de socpeople en fk_contact
+            $contactId = (int) $signerData['fk_contact'];
+        }
+
         $context = array(
             'signer_id' => $signerId,
-            'contact_id' => $signerData['fk_contact'] ?? null,
+            // Importante: si no hay contacto válido, debe ser NULL (no 0) por la FK
+            'contact_id' => ($contactId > 0 ? $contactId : null),
             'type' => 'otp',
             'email' => $signerData['email'],
             'phone' => $signerData['phone']
@@ -368,6 +377,11 @@ class DocSigOTPManager
      */
     public function isSignerBlocked($signerId)
     {
+        // En contexto público (NOLOGIN), algunas libs de Dolibarr pueden no estar cargadas.
+        if (!function_exists('dol_time_plus_duree')) {
+            require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
+        }
+
         $sql = "SELECT COUNT(*) as cnt FROM ".MAIN_DB_PREFIX."docsig_otp";
         $sql .= " WHERE fk_signer = ".(int)$signerId;
         $sql .= " AND status = ".self::STATUS_BLOCKED;

@@ -307,7 +307,8 @@ function handleSendOTP($signer, $envelope, $otpManager, $ipAddress)
         'lastname' => $signer->lastname,
         'email' => $signer->email,
         'phone' => $signer->phone,
-        'fk_contact' => $signer->fk_contact
+        'fk_contact' => $signer->fk_contact,
+        'fk_socpeople' => $signer->fk_socpeople
     );
 
     $sendResult = $otpManager->sendOTP($signer->id, $result['code'], $channel, $signerData);

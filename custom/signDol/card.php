@@ -244,6 +244,9 @@ if ($object->id > 0) {
                 print '<a class="paddingleft paddingright" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=resend&signerid='.$signer->id.'&token='.newToken().'" title="'.$langs->trans('ResendNotification').'">';
                 print img_picto($langs->trans('ResendNotification'), 'send');
                 print '</a>';
+                print '<a class="paddingleft paddingright docsig-copy-url-link" href="#" data-signerid="'.$signer->id.'" title="'.$langs->trans('CopySignUrl').'">';
+                print img_picto($langs->trans('CopySignUrl'), 'copy');
+                print '</a>';
             }
             if ($signer->date_signed) {
                 print '<span class="small opacitymedium paddingleft">'.dol_print_date($signer->date_signed, 'dayhour').'</span>';
@@ -355,6 +358,51 @@ if ($object->id > 0) {
     }
 
     print '</div>';
+
+    // JavaScript for copy URL
+    ?>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.docsig-copy-url-link').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                var signerId = this.dataset.signerid;
+                
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '<?php echo dol_buildpath('/signDol/ajax/get_sign_url.php', 1); ?>', true);
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        try {
+                            var response = JSON.parse(xhr.responseText);
+                            if (response.success) {
+                                if (navigator.clipboard && navigator.clipboard.writeText) {
+                                    navigator.clipboard.writeText(response.url).then(function() {
+                                        alert('<?php echo $langs->trans('UrlCopiedToClipboard'); ?>:\n\n' + response.url);
+                                    }).catch(function() {
+                                        prompt('<?php echo $langs->trans('CopySignUrl'); ?>:', response.url);
+                                    });
+                                } else {
+                                    prompt('<?php echo $langs->trans('CopySignUrl'); ?>:', response.url);
+                                }
+                            } else {
+                                alert('Error: ' + response.error);
+                            }
+                        } catch(e) {
+                            alert('Error al procesar la respuesta');
+                        }
+                    }
+                };
+
+                xhr.send('signer_id=' + encodeURIComponent(signerId) + 
+                         '&regenerate=1' +
+                         '&token=<?php echo newToken(); ?>');
+            });
+        });
+    });
+    </script>
+    <?php
 
 } else {
     // No object found
