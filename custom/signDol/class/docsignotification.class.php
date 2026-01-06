@@ -537,7 +537,46 @@ class DocSigNotificationService
 
         // Enviar por cada canal seleccionado
         foreach ($channelsToUse as $channel => $dest) {
-            $result = $this->send($channel, $dest, $subject, $bodyText, $bodyHtml, $context);
+            // Preparar cuerpo específico por canal
+            $channelBodyText = $bodyText;
+            $channelBodyHtml = $bodyHtml;
+            
+            // Si es WhatsApp, usar template específico si existe
+            if ($channel === 'whatsapp' && !empty($context['type'])) {
+                global $langs;
+                $langs->load('docsig@signDol');
+                
+                $typeToTemplate = array(
+                    'signature_request' => 'WhatsAppRequestBody',
+                    'reminder' => 'WhatsAppReminderBody',
+                    'completed' => 'WhatsAppCompletedBody',
+                    'otp' => 'WhatsAppOTPBody',
+                );
+                
+                $templateKey = $typeToTemplate[$context['type']] ?? null;
+                if ($templateKey) {
+                    $waTemplate = $langs->trans($templateKey);
+                    if ($waTemplate !== $templateKey) {
+                        // Sustituir variables en el template de WhatsApp
+                        $vars = array(
+                            '__REF__' => $context['envelope_ref'] ?? '',
+                            '__SIGNER_NAME__' => $context['signer_name'] ?? '',
+                            '__DOCUMENT_NAME__' => $context['document_name'] ?? '',
+                            '__SIGN_URL__' => $context['signing_url'] ?? '',
+                            '__EXPIRATION_DATE__' => $context['expiration_date'] ?? '',
+                            '__DAYS_LEFT__' => $context['days_left'] ?? '',
+                            '__DOWNLOAD_URL__' => $context['download_url'] ?? '',
+                            '__CODE__' => $context['otp_code'] ?? '',
+                            '__EXPIRATION_MINUTES__' => $context['expiration_minutes'] ?? '10',
+                            '__COMPANY_NAME__' => getDolGlobalString('MAIN_INFO_SOCIETE_NOM', 'DocSig'),
+                        );
+                        $channelBodyText = strtr($waTemplate, $vars);
+                        $channelBodyHtml = '';
+                    }
+                }
+            }
+            
+            $result = $this->send($channel, $dest, $subject, $channelBodyText, $channelBodyHtml, $context);
             $results[$channel] = array(
                 'destination' => $dest,
                 'success' => $result > 0,
@@ -586,13 +625,15 @@ class DocSigNotificationService
             $this->updateNotificationStatus($notificationId, 1, null, dol_now());
             
             // Crear registro en actioncomm si hay contacto
-            if (!empty($context['contact_id'])) {
+            // Crear registro en actioncomm si hay contacto válido
+            $actionContactId = isset($context['contact_id']) ? (int)$context['contact_id'] : 0;
+            if ($actionContactId > 0) {
                 // Añadir canal y notification_id al contexto para actioncomm
                 $actionContext = array_merge($context, array(
                     'channel' => $channel,
                     'notification_id' => $notificationId
                 ));
-                $this->createActionComm($context['contact_id'], $subject, $bodyHtml ?: $bodyText, $actionContext);
+                $this->createActionComm($actionContactId, $subject, $channelBodyHtml ?: $channelBodyText, $actionContext);
             }
         } else {
             $this->updateNotificationStatus($notificationId, 2, $result['error']);
@@ -617,11 +658,6 @@ class DocSigNotificationService
     {
         global $user, $conf;
 
-        $contactId = 0;
-        if (isset($context['contact_id'])) {
-            $contactId = (int) $context['contact_id'];
-        }
-
         $sql = "INSERT INTO ".MAIN_DB_PREFIX."docsig_notification (";
         $sql .= "fk_envelope, fk_signer, fk_socpeople, envelope_ref,";
         $sql .= "notification_type, channel, destination,";
@@ -630,8 +666,8 @@ class DocSigNotificationService
         $sql .= ") VALUES (";
         $sql .= (isset($context['envelope_id']) ? (int)$context['envelope_id'] : "NULL").",";
         $sql .= (isset($context['signer_id']) ? (int)$context['signer_id'] : "NULL").",";
-        $sql .= ($contactId > 0 ? (int)$contactId : "NULL").",";
-        // fk_socpeople: nunca insertar 0 por la FK. Usar NULL si no hay contacto válido.
+        $contactId = isset($context['contact_id']) ? (int)$context['contact_id'] : 0;
+        $sql .= ($contactId > 0 ? $contactId : "NULL").",";
         $sql .= (isset($context['envelope_ref']) ? "'".$this->db->escape($context['envelope_ref'])."'" : "NULL").",";
         $sql .= "'".$this->db->escape($context['type'] ?? 'general')."',";
         $sql .= "'".$this->db->escape($channel)."',";
@@ -727,13 +763,13 @@ class DocSigNotificationService
         $channelInfo = '';
         switch ($channel) {
             case 'whatsapp':
-                $channelInfo = "Enviado por WhatsApp\n";
+                $channelInfo = "📱 Enviado por WhatsApp\n";
                 break;
             case 'email':
-                $channelInfo = "Enviado por Email\n";
+                $channelInfo = "📧 Enviado por Email\n";
                 break;
             case 'sms':
-                $channelInfo = "Enviado por SMS\n";
+                $channelInfo = "💬 Enviado por SMS\n";
                 break;
         }
         
@@ -847,7 +883,7 @@ class DocSigNotificationService
 
         $bodyText = strip_tags(str_replace(array('<br>', '<p>', '</p>'), array("\n", "\n", "\n"), $bodyHtml));
 
-        // Contexto
+        // Contexto (incluir toda la info para templates WhatsApp)
         $context = array(
             'envelope_id' => $envelope->id,
             'envelope_ref' => $envelope->ref,
@@ -856,6 +892,11 @@ class DocSigNotificationService
             'type' => 'signature_request',
             'email' => $signer->email,
             'phone' => $signer->phone,
+            // Variables para templates WhatsApp
+            'signer_name' => $signer->getFullName(),
+            'document_name' => basename($envelope->file_path),
+            'signing_url' => $signUrl,
+            'expiration_date' => dol_print_date($envelope->expire_date, 'dayhour'),
         );
 
         // Enviar notificación
@@ -911,7 +952,7 @@ class DocSigNotificationService
 
         $bodyText = strip_tags(str_replace(array('<br>', '<p>', '</p>'), array("\n", "\n", "\n"), $bodyHtml));
 
-        // Contexto
+        // Contexto (incluir toda la info para templates WhatsApp)
         $context = array(
             'envelope_id' => $envelope->id,
             'envelope_ref' => $envelope->ref,
@@ -920,6 +961,11 @@ class DocSigNotificationService
             'type' => 'reminder',
             'email' => $signer->email,
             'phone' => $signer->phone,
+            // Variables para templates WhatsApp
+            'signer_name' => $signer->getFullName(),
+            'document_name' => basename($envelope->file_path),
+            'signing_url' => $signUrl,
+            'days_left' => $daysLeft,
         );
 
         // Enviar notificación

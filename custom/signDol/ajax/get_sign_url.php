@@ -84,9 +84,14 @@ try {
         throw new Exception($langs->trans('ErrorSignerAlreadySigned'));
     }
 
-    // Regenerar token para obtener la URL
-    $newToken = $signer->regenerateToken();
-    $signUrl = docsig_get_public_sign_url($newToken);
+    // Obtener o regenerar token según se solicite
+    if ($regenerate) {
+        $token = $signer->regenerateToken();
+    } else {
+        // Usar token existente si está disponible
+        $token = $signer->plain_token ?: $signer->regenerateToken();
+    }
+    $signUrl = docsig_get_public_sign_url($token);
 
     $response = array(
         'success' => true,

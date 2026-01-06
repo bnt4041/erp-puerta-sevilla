@@ -748,6 +748,47 @@ var DocSig = DocSig || {};
     };
 
     /**
+     * Copy sign URL to clipboard
+     */
+    DocSig.copySignUrl = function(signerId) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', DocSig.config.ajaxUrl + 'get_sign_url.php', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    try {
+                        var response = JSON.parse(xhr.responseText);
+                        if (response.success && response.url) {
+                            if (navigator.clipboard && navigator.clipboard.writeText) {
+                                navigator.clipboard.writeText(response.url).then(function() {
+                                    alert('URL copiada:\n\n' + response.url);
+                                }).catch(function() {
+                                    prompt('Copie esta URL:', response.url);
+                                });
+                            } else {
+                                prompt('Copie esta URL:', response.url);
+                            }
+                        } else {
+                            alert('Error: ' + (response.error || 'Unknown error'));
+                        }
+                    } catch(e) {
+                        console.error('Parse error:', e);
+                        alert('Error al procesar respuesta');
+                    }
+                } else {
+                    alert('Error HTTP ' + xhr.status);
+                }
+            }
+        };
+
+        xhr.send('signer_id=' + encodeURIComponent(signerId) + 
+                 '&regenerate=0' +
+                 '&token=' + encodeURIComponent(DocSig.config.csrfToken));
+    };
+
+    /**
      * Validate email format
      */
     DocSig.validateEmail = function(email) {

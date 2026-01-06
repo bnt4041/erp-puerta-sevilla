@@ -37,6 +37,7 @@ if (!$res) {
 
 require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
+require_once DOL_DOCUMENT_ROOT.'/user/class/user.class.php';
 dol_include_once('/signDol/class/docsigenvelope.class.php');
 dol_include_once('/signDol/class/docsigsigner.class.php');
 dol_include_once('/signDol/class/docsignotification.class.php');
@@ -181,8 +182,37 @@ try {
     foreach ($processedSigners as $signerInfo) {
         $signer = new DocSigSigner($db);
         $signer->fk_envelope = $envelopeId;
-        $signer->fk_contact = $signerInfo['contact_id'];
-        $signer->fk_socpeople = $signerInfo['contact_id'];  // Same ID - contact_id refers to socpeople.rowid
+
+        // Resolver contacto (socpeople) real para cumplir la FK.
+        // - Para internal_user, contact_id contiene el id del usuario; se mapea a user->contact_id (fk_socpeople)
+        // - Para el resto, contact_id debería ser un socpeople.rowid (o 0 si no existe)
+        $socpeopleId = 0;
+        if (($signerInfo['type'] ?? '') === 'internal_user') {
+            $userId = (int) ($signerInfo['contact_id'] ?? 0);
+            if ($userId > 0) {
+                $usertmp = new User($db);
+                if ($usertmp->fetch($userId) > 0 && !empty($usertmp->contact_id)) {
+                    $socpeopleId = (int) $usertmp->contact_id;
+                }
+            }
+        } else {
+            $socpeopleId = (int) ($signerInfo['contact_id'] ?? 0);
+        }
+
+        $contactObj = null;
+        if ($socpeopleId > 0) {
+            $contactObj = new Contact($db);
+            if ($contactObj->fetch($socpeopleId) <= 0) {
+                $socpeopleId = 0;
+                $contactObj = null;
+            }
+        }
+
+        // Guardar solo ids válidos (nunca 0) para no romper las FK
+        $signer->fk_socpeople = ($socpeopleId > 0 ? $socpeopleId : null);
+        // fk_contact se usa en card.php para enlazar con Contact; guarda el mismo socpeople id o NULL
+        $signer->fk_contact = ($socpeopleId > 0 ? $socpeopleId : 0);
+        $signer->fk_soc = (!empty($contactObj) && !empty($contactObj->socid) ? (int) $contactObj->socid : null);
         $signer->email = $signerInfo['email'];
         $signer->phone = $signerInfo['phone'];
         
