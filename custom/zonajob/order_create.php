@@ -191,7 +191,7 @@ zonaempleado_print_header($title);
                         <label><?php echo $langs->trans('Customer'); ?> *</label>
                         <?php 
                         $selected = $socid > 0 ? $socid : '';
-                        echo $form->select_company($selected, 'socid', 's.client IN (1,2,3)', 'SelectThirdParty', 0, 0, array(), 0, 'minwidth300');
+                        echo $form->select_company($selected, 'socid', '((client:=:1) OR (client:=:2) OR (client:=:3))', 'SelectThirdParty', 0, 0, array(), 0, 'minwidth300');
                         ?>
                     </div>
                 </div>
