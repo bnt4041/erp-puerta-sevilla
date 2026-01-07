@@ -4,6 +4,21 @@
  * AJAX endpoint to search contacts and thirdparties for signer selection
  */
 
+if (!defined('NOTOKENRENEWAL')) {
+    define('NOTOKENRENEWAL', '1');
+}
+if (!defined('NOREQUIREMENU')) {
+    define('NOREQUIREMENU', '1');
+}
+if (!defined('NOREQUIREHTML')) {
+    define('NOREQUIREHTML', '1');
+}
+if (!defined('NOREQUIREAJAX')) {
+    define('NOREQUIREAJAX', '1');
+}
+
+@ob_end_clean();
+
 // Load Dolibarr environment
 $res = 0;
 if (!$res && file_exists("../../main.inc.php")) {
@@ -12,52 +27,63 @@ if (!$res && file_exists("../../main.inc.php")) {
 if (!$res && file_exists("../../../main.inc.php")) {
     $res = @include "../../../main.inc.php";
 }
+
+header('Content-Type: application/json; charset=utf-8');
+
 if (!$res) {
-    die(json_encode(['error' => 'Include of main fails']));
+    print json_encode(['error' => 'Include failed', 'success' => false, 'contacts' => [], 'thirdparties' => []]);
+    exit;
 }
 
 // Check module enabled
 if (!isModEnabled('docsig')) {
-    http_response_code(403);
-    die(json_encode(['error' => 'Module not enabled']));
+    print json_encode(['error' => 'Module disabled', 'success' => false, 'contacts' => [], 'thirdparties' => []]);
+    exit;
+}
+
+// Check if user is logged in
+if (empty($user->id)) {
+    print json_encode(['error' => 'Not authenticated', 'success' => false, 'contacts' => [], 'thirdparties' => []]);
+    exit;
 }
 
 // Security check
 if (!$user->hasRight('docsig', 'envelope', 'write')) {
-    http_response_code(403);
-    die(json_encode(['error' => 'Access denied']));
+    print json_encode(['error' => 'Access denied', 'success' => false, 'contacts' => [], 'thirdparties' => []]);
+    exit;
 }
-
-header('Content-Type: application/json');
 
 $query = GETPOST('q', 'alpha');
 
-if (strlen($query) < 2) {
-    echo json_encode(['contacts' => [], 'thirdparties' => []]);
+if (strlen($query) < 1) {
+    print json_encode(['contacts' => [], 'thirdparties' => [], 'success' => true, 'query' => $query]);
     exit;
 }
 
 $response = [
     'contacts' => [],
-    'thirdparties' => []
+    'thirdparties' => [],
+    'success' => true,
+    'query' => $query
 ];
 
+$searchTerm = '%'.$db->escape($query).'%';
+
 // Search contacts
-$sql = "SELECT c.rowid, c.firstname, c.lastname, c.email, c.phone_mobile, c.phone_pro, c.civility";
+$sql = "SELECT c.rowid, c.firstname, c.lastname, c.email, c.phone_mobile, c.phone";
 $sql .= ", s.nom as socname, s.rowid as socid";
 $sql .= " FROM ".MAIN_DB_PREFIX."socpeople as c";
 $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON c.fk_soc = s.rowid";
 $sql .= " WHERE c.entity IN (".getEntity('socpeople').")";
 $sql .= " AND c.statut = 1";
 $sql .= " AND (";
-$sql .= "   c.lastname LIKE '%".$db->escape($query)."%'";
-$sql .= "   OR c.firstname LIKE '%".$db->escape($query)."%'";
-$sql .= "   OR c.email LIKE '%".$db->escape($query)."%'";
-$sql .= "   OR CONCAT(c.firstname, ' ', c.lastname) LIKE '%".$db->escape($query)."%'";
+$sql .= "   c.lastname LIKE '".$searchTerm."'";
+$sql .= "   OR c.firstname LIKE '".$searchTerm."'";
+$sql .= "   OR c.email LIKE '".$searchTerm."'";
 $sql .= " )";
 $sql .= " ORDER BY c.lastname, c.firstname";
 $sql .= " LIMIT 20";
-
+// echo $sql;
 $resql = $db->query($sql);
 if ($resql) {
     while ($obj = $db->fetch_object($resql)) {
@@ -67,13 +93,12 @@ if ($resql) {
         $response['contacts'][] = [
             'id' => (int)$obj->rowid,
             'name' => $name,
-            'firstname' => $obj->firstname,
-            'lastname' => $obj->lastname,
-            'email' => $obj->email,
-            'phone' => $obj->phone_mobile ?: $obj->phone_pro,
-            'company' => $obj->socname,
-            'socid' => (int)$obj->socid,
-            'dni' => '' // Could be loaded from extrafields if needed
+            'firstname' => $obj->firstname ?: '',
+            'lastname' => $obj->lastname ?: '',
+            'email' => $obj->email ?: '',
+            'phone' => $obj->phone_mobile ?: ($obj->phone_pro ?: ''),
+            'company' => $obj->socname ?: '',
+            'socid' => (int)($obj->socid ?: 0)
         ];
     }
     $db->free($resql);
@@ -85,8 +110,8 @@ $sql .= " FROM ".MAIN_DB_PREFIX."societe as s";
 $sql .= " WHERE s.entity IN (".getEntity('societe').")";
 $sql .= " AND s.status = 1";
 $sql .= " AND (";
-$sql .= "   s.nom LIKE '%".$db->escape($query)."%'";
-$sql .= "   OR s.email LIKE '%".$db->escape($query)."%'";
+$sql .= "   s.nom LIKE '".$searchTerm."'";
+$sql .= "   OR s.email LIKE '".$searchTerm."'";
 $sql .= " )";
 $sql .= " ORDER BY s.nom";
 $sql .= " LIMIT 20";
@@ -97,12 +122,13 @@ if ($resql) {
         $response['thirdparties'][] = [
             'id' => (int)$obj->rowid,
             'name' => $obj->nom,
-            'email' => $obj->email,
-            'phone' => $obj->phone,
+            'email' => $obj->email ?: '',
+            'phone' => $obj->phone ?: '',
             'company' => ''
         ];
     }
     $db->free($resql);
 }
 
-echo json_encode($response);
+print json_encode($response);
+exit;

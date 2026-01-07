@@ -172,7 +172,7 @@ if ($action == 'add' && $user->hasRight('docsig', 'envelope', 'write')) {
                 $object->label = $label ?: pathinfo($originalName, PATHINFO_FILENAME);
                 $object->element = 'standalone';
                 $object->element_id = 0;
-                $object->status = DocSigEnvelope::STATUS_PENDING;
+                $object->status = DocSigEnvelope::STATUS_SENT;
                 $object->expire_date = dol_time_plus_duree(dol_now(), $expire_days, 'd');
                 $object->fk_user_creat = $user->id;
                 
@@ -530,15 +530,37 @@ if ($action == 'create') {
         });
         
         function doSearch(query) {
-            var url = "'.dol_buildpath('/signDol/ajax/search_signers.php', 1).'?q=" + encodeURIComponent(query);
+            var url = "'.DOL_URL_ROOT.'/custom/signDol/ajax/search_signers.php?q=" + encodeURIComponent(query);
+            console.log("Searching with URL:", url);
             
-            fetch(url)
-                .then(function(response) { return response.json(); })
-                .then(function(data) {
-                    renderSearchResults(data);
+            fetch(url, {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json",
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                credentials: "same-origin"
+            })
+                .then(function(response) {
+                    console.log("Response status:", response.status);
+                    if (!response.ok) {
+                        throw new Error("HTTP error, status=" + response.status);
+                    }
+                    return response.text();
+                })
+                .then(function(text) {
+                    console.log("Response text:", text);
+                    try {
+                        var data = JSON.parse(text);
+                        console.log("Parsed data:", data);
+                        renderSearchResults(data);
+                    } catch(e) {
+                        console.error("JSON parse error:", e, "Text:", text);
+                    }
                 })
                 .catch(function(error) {
                     console.error("Search error:", error);
+                    console.error("Error stack:", error.stack);
                 });
         }
         
