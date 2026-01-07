@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4285f4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a73e8;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Background circle -->
+  <circle cx="50" cy="50" r="45" fill="url(#grad1)"/>
+  <!-- Document icon -->
+  <rect x="28" y="18" width="44" height="54" rx="4" fill="white"/>
+  <!-- Document lines -->
+  <rect x="35" y="28" width="30" height="4" rx="2" fill="#e0e0e0"/>
+  <rect x="35" y="38" width="25" height="4" rx="2" fill="#e0e0e0"/>
+  <rect x="35" y="48" width="20" height="4" rx="2" fill="#e0e0e0"/>
+  <!-- Signature line -->
+  <path d="M35 62 Q40 58, 45 62 T55 62 T65 62" stroke="#1a73e8" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <!-- Checkmark badge -->
+  <circle cx="72" cy="70" r="14" fill="#34a853"/>
+  <path d="M65 70 L70 75 L80 65" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

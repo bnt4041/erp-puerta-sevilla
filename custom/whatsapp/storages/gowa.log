@@ -54,3 +54,5 @@ time="2026-01-06T18:49:48Z" level=error msg="GetQRChannel can only be called whe
 time="2026-01-06T18:49:48Z" level=info msg="[DEBUG] Error is ErrQRStoreContainsID - attempting to connect"
 time="2026-01-06T18:49:48Z" level=error msg="Panic recovered in middleware: failed to get device list: failed to send usync query: websocket disconnected before info query returned response"
 time="2026-01-06T18:49:48Z" level=error msg="Panic recovered in middleware: you are already logged in."
+13:34:06.087[31m [Client ERROR] Failed to handle retry receipt for 34624230960@s.whatsapp.net/3EB00E55A6A06409585EE7 from 34624230960:14@s.whatsapp.net: couldn't find message 3EB00E55A6A06409585EE7[0m
+13:34:10.217[31m [Client ERROR] Failed to handle retry receipt for 34624230960@s.whatsapp.net/3EB0AAA43966816AE8A986 from 34624230960:14@s.whatsapp.net: couldn't find message 3EB0AAA43966816AE8A986[0m

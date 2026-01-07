@@ -1,0 +1,337 @@
+# ZonaJob - Módulo Pedidos para Zona Empleado
+# Spanish language file
+# Copyright (C) 2025
+
+# Module
+ModuleZonaJobName = ZonaJob - Pedidos
+ModuleZonaJobDesc = Gestión de pedidos para zona de empleados con firma, fotos y envío
+
+# Permisos
+Permission600001 = Ver pedidos en zona empleado
+Permission600002 = Añadir fotos a pedidos
+Permission600003 = Firmar pedidos
+Permission600004 = Enviar pedidos por WhatsApp/Email
+Permission600005 = Ver historial de envíos
+Permission600006 = Acceder a configuración de ZonaJob
+
+# Menú
+ZonaJobOrders = Pedidos
+ZonaJobOrderCard = Detalle de Pedido
+
+# Página de pedidos
+OrdersList = Lista de Pedidos
+MyOrders = Pedidos
+AllOrders = Todos los Pedidos
+ZonaJobOrdersSubtitle = Gestiona y consulta tus pedidos
+SearchOrders = Buscar pedidos...
+SearchRef = Buscar referencia...
+SearchThirdParty = Buscar cliente...
+PendingSignature = Pendiente de firma
+FilterByStatus = Filtrar por estado
+AllStatuses = Todos los estados
+Draft = Borrador
+Validated = Validado
+InProgress = En proceso
+ToInvoice = A facturar
+Invoiced = Facturado
+Cancelled = Cancelado
+NoOrdersFound = No se encontraron pedidos
+RefreshList = Actualizar lista
+Showing = Mostrando %d - %d de %d
+
+# Estadísticas
+TotalOrders = Total Pedidos
+PendingOrders = Pendientes
+ProcessingOrders = En Proceso
+CompletedOrders = Completados
+OrdersThisMonth = Este mes
+OrdersThisWeek = Esta semana
+OrdersToday = Hoy
+
+# Tarjeta de pedido
+OrderNumber = Nº Pedido
+OrderRef = Referencia
+OrderDate = Fecha
+ThirdParty = Cliente
+TotalTTC = Total TTC
+TotalHT = Total HT
+TotalVAT = Total IVA
+Status = Estado
+CreatedBy = Creado por
+ValidatedBy = Validado por
+DeliveryDate = Fecha entrega
+PaymentTerms = Condiciones pago
+PaymentMethod = Método pago
+Note = Observaciones
+
+# Vista detalle
+Totals = Totales
+ExtraFields = Campos extra
+Contacts = Contactos
+NoContactAssigned = No hay contacto asignado
+
+# Tabs
+TabInfo = Información
+TabLines = Líneas
+TabPhotos = Fotos
+TabSignature = Firma
+TabSend = Enviar
+TabDocuments = Documentos
+TabLinkedObjects = Objetos vinculados
+TabNotes = Notas
+TabEvents = Eventos
+Info = Información
+Lines = Líneas
+Photos = Fotos
+Signature = Firma
+Send = Enviar
+Documents = Documentos
+
+# Información del pedido
+GeneralInfo = Información General
+CustomerInfo = Datos del Cliente
+CustomerAddress = Dirección
+CustomerPhone = Teléfono
+CustomerEmail = Email
+ProjectInfo = Proyecto
+ShippingInfo = Información de Envío
+ShippingAddress = Dirección de Envío
+ShippingMethod = Método de Envío
+DeliveryAddress = Dirección de Entrega
+Warehouse = Almacén
+PaymentInfo = Información de Pago
+InternalNotes = Notas Internas
+PublicNotes = Notas Públicas
+
+# Líneas de pedido
+LinesTitle = Líneas del Pedido
+ProductRef = Referencia
+ProductLabel = Producto
+Description = Descripción
+Quantity = Cantidad
+UnitPrice = Precio Unit.
+Discount = Dto.
+TotalLine = Total
+VAT = IVA
+NoLines = Este pedido no tiene líneas
+AddLine = Añadir línea
+LineAdded = Línea añadida correctamente
+LineUpdated = Línea actualizada correctamente
+LineDeleted = Línea eliminada correctamente
+ConfirmDeleteLine = ¿Está seguro de eliminar esta línea?
+SelectProduct = Seleccionar producto
+FreeText = Texto libre
+InvalidQuantity = Cantidad inválida
+OrderLines = Líneas del Pedido
+UnitPriceHT = Precio unitario (HT)
+Qty = Cantidad
+Edit = Editar
+Delete = Eliminar
+Save = Guardar
+Cancel = Cancelar
+
+# Fotos
+PhotosTitle = Fotos del Pedido
+AddPhoto = Añadir Foto
+UploadPhoto = Subir Foto
+TakePhoto = Tomar Foto
+DropPhotos = Arrastra fotos aquí o haz clic para seleccionar
+SelectPhoto = Seleccionar foto
+PhotoDescription = Descripción (opcional)
+PhotoAdded = Foto añadida correctamente
+PhotoDeleted = Foto eliminada correctamente
+PhotoError = Error al subir la foto
+ConfirmDeletePhoto = ¿Está seguro de eliminar esta foto?
+NoPhotos = No hay fotos para este pedido
+PhotoDate = Fecha
+PhotoBy = Subida por
+PhotoLocation = Ubicación
+ViewPhoto = Ver foto
+DeletePhoto = Eliminar foto
+
+# Firma
+SignatureTitle = Firma del Cliente
+SignatureCanvas = Área de Firma
+SignHere = Firme aquí
+ClearSignature = Borrar Firma
+SaveSignature = Guardar Firma
+ConfirmSignature = Confirmar Firma
+SignerName = Nombre del firmante
+SignerEmail = Email del firmante
+SignerPhone = Teléfono del firmante
+SelectContact = Seleccionar contacto
+SignatureDate = Fecha de firma
+SignatureSaved = Firma guardada correctamente
+SignatureError = Error al guardar la firma
+NoSignature = Este pedido no tiene firma
+SignatureRequired = La firma es obligatoria
+ContactRequired = Seleccione un contacto o introduzca los datos
+Signed = Firmado
+NotSigned = Sin firmar
+
+# Cambio de estado
+ChangeStatus = Cambiar Estado
+ChangeStatusAfterSign = Cambiar estado después de firmar
+ValidateOrderAfterSign = Validar pedido después de firmar
+AfterSignature = Después de firmar
+NoChange = No cambiar
+NewStatus = Nuevo estado
+StatusChanged = Estado cambiado correctamente
+StatusChangeError = Error al cambiar el estado
+KeepCurrentStatus = Mantener estado actual
+SetToInProgress = Pasar a En Proceso
+SetToDelivered = Pasar a Enviado
+SetToValidated = Pasar a Validado
+StatusOrderValidated = Validado
+StatusOrderSent = En proceso
+StatusOrderDelivered = Entregado
+
+# Envío
+SendTitle = Enviar Pedido
+SendViaWhatsApp = Enviar por WhatsApp
+SendViaEmail = Enviar por Email
+RecipientPhone = Teléfono destinatario
+RecipientEmail = Email destinatario
+SelectRecipient = Seleccionar destinatario
+IncludePDF = Incluir PDF
+IncludePhotos = Incluir fotos
+IncludeSignature = Incluir firma
+CustomMessage = Mensaje personalizado
+DefaultMessage = Su pedido %s está listo.
+SendNow = Enviar Ahora
+MessageSent = Mensaje enviado correctamente
+SendError = Error al enviar el mensaje
+NoRecipientsAvailable = No hay destinatarios disponibles
+SendHistory = Historial de Envíos
+SentDate = Fecha envío
+SentTo = Enviado a
+SentBy = Enviado por
+SentVia = Método
+SendStatus = Estado
+MessageContent = Contenido
+
+# Contactos
+Contacts = Contactos
+ContactsList = Lista de Contactos
+AddContact = Añadir Contacto
+NewContact = Nuevo Contacto
+ContactName = Nombre
+ContactFirstname = Nombre
+ContactLastname = Apellidos
+ContactEmail = Email
+ContactPhone = Teléfono
+ContactRole = Rol
+ContactCreated = Contacto creado correctamente
+ContactError = Error al crear el contacto
+NoContacts = No hay contactos disponibles
+CreateContactInline = Crear contacto rápido
+
+# Documentos
+DocumentsTitle = Documentos
+DocumentName = Nombre
+DocumentDate = Fecha
+DocumentSize = Tamaño
+DocumentType = Tipo
+DownloadDocument = Descargar
+PreviewDocument = Ver
+GeneratePDF = Generar PDF
+PDFGenerated = PDF generado correctamente
+NoDocuments = No hay documentos
+
+# Errores y mensajes
+Error = Error
+Warning = Advertencia
+Success = Éxito
+ErrorLoadingOrder = Error al cargar el pedido
+OrderNotFound = Pedido no encontrado
+AccessDenied = Acceso denegado
+InvalidAction = Acción no válida
+ConfirmAction = ¿Está seguro?
+PleaseWait = Por favor espere...
+Loading = Cargando...
+Saving = Guardando...
+Sending = Enviando...
+
+# Configuración
+ZonaJobSetup = Configuración de ZonaJob
+ShowDraftOrders = Mostrar pedidos en borrador
+ShowValidatedOrders = Mostrar pedidos validados
+ShowAllOrders = Mostrar todos los pedidos
+RequireSignature = Requerir firma del cliente
+RequirePhoto = Requerir foto del pedido
+AutoSendOnSign = Enviar automáticamente al firmar
+WhatsAppEnabled = Habilitar WhatsApp
+EmailEnabled = Habilitar Email
+AllowStatusChange = Permitir cambio de estado
+MaxPhotosPerOrder = Máximo fotos por pedido
+MaxPhotoSize = Tamaño máximo de foto (MB)
+DefaultSendMethod = Método de envío por defecto
+SettingsSaved = Configuración guardada
+
+# Acciones rápidas
+QuickActions = Acciones Rápidas
+ViewOrder = Ver Pedido
+EditOrder = Editar Pedido
+SignOrder = Firmar Pedido
+SendOrder = Enviar Pedido
+PrintOrder = Imprimir Pedido
+
+# Zona Empleado integración
+ZonaJobMenu = Pedidos
+ZonaJobDescription = Gestiona los pedidos de tus clientes
+RecentOrders = Pedidos Recientes
+QuickLinkOrders = Ver Pedidos
+QuickLinkNewPhoto = Añadir Foto
+QuickLinkSign = Firmar Pedido
+
+# Footer
+BackToList = Volver a la lista
+BackToTop = Subir
+RefreshPage = Actualizar
+Help = Ayuda
+
+# Fecha y hora
+Today = Hoy
+Yesterday = Ayer
+DaysAgo = hace %d días
+HoursAgo = hace %d horas
+MinutesAgo = hace %d minutos
+JustNow = Ahora mismo
+
+# Estados envío
+Pending = Pendiente
+Sent = Enviado
+Delivered = Entregado
+Failed = Fallido
+Read = Leído
+
+# Filtros y búsqueda
+SearchProject = Buscar proyecto...
+Project = Proyecto
+
+# Creación de pedidos
+NewOrder = Nuevo Pedido
+CreateOrder = Crear Pedido
+RefCustomer = Ref. Cliente
+OrderDate = Fecha del pedido
+DeliveryDate = Fecha de entrega
+PaymentConditions = Condiciones de pago
+PaymentMode = Forma de pago
+OrderLines = Líneas del Pedido
+NotePublic = Nota pública
+NotePrivate = Nota privada
+OrderCreated = Pedido creado correctamente
+LineTotal = Total línea
+Customer = Cliente
+
+# Errores y mensajes
+ErrorAddLine = Error al añadir la línea
+ErrorUpdateLine = Error al actualizar la línea
+OrderClosed = Pedido cerrado
+OrderValidated = Pedido validado
+GeneratePDF = Generar PDF
+NoDocuments = No hay documentos
+All = Todos
+Product = Producto
+Service = Servicio
+VAT = IVA

@@ -1,0 +1,115 @@
+<?php
+/* Copyright (C) 2025 Zona Empleado Dev
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+//
+// File generated with Dolibarr tool makepack-dolibarrmodule
+//
+
+//
+// STOP - This is not a PHP file but a language file that is used by PHP
+//
+
+// Module
+$langs->trans['ZonaEmpleadoAreaDesc'] = 'Portal para empleados';
+$langs->trans['ZonaEmpleadoArea'] = 'Zona de Empleado';
+$langs->trans['ZonaEmpleado'] = 'Zona de Empleado';
+
+// Dashboard
+$langs->trans['ZonaEmpleadoDashboard'] = 'Mi Dashboard';
+$langs->trans['ZonaEmpleadoWelcome'] = 'Bienvenido a tu zona de trabajo';
+$langs->trans['ZonaEmpleadoProfile'] = 'Mi Perfil';
+$langs->trans['ZonaEmpleadoQuickAccess'] = 'Accesos Rápidos';
+$langs->trans['ZonaEmpleadoRecentActivity'] = 'Actividad Reciente';
+
+// Navigation
+$langs->trans['ZonaEmpleadoHome'] = 'Inicio';
+$langs->trans['ZonaEmpleadoProfile'] = 'Mi Perfil';
+$langs->trans['ZonaEmpleadoTools'] = 'Herramientas';
+$langs->trans['ZonaEmpleadoReports'] = 'Mis Informes';
+$langs->trans['ZonaEmpleadoHelp'] = 'Ayuda';
+
+// Permissions
+$langs->trans['Permission500001'] = 'Acceder a la Zona de Empleado';
+$langs->trans['Permission500002'] = 'Usar funcionalidades de la Zona de Empleado';
+$langs->trans['Permission500003'] = 'Configurar la Zona de Empleado';
+
+// Messages
+$langs->trans['ZonaEmpleadoAccessDenied'] = 'No tienes permisos para acceder a la Zona de Empleado';
+$langs->trans['ZonaEmpleadoNotAuthenticated'] = 'Debes iniciar sesión para acceder a esta área';
+$langs->trans['ZonaEmpleadoNoModules'] = 'No hay módulos adicionales configurados';
+
+// Configuration
+$langs->trans['ZonaEmpleadoSetup'] = 'Configuración de Zona de Empleado';
+$langs->trans['ZonaEmpleadoSetupPage'] = 'Configuración';
+$langs->trans['ZonaEmpleadoAbout'] = 'Acerca de Zona de Empleado';
+$langs->trans['ZonaEmpleadoAboutPage'] = 'Acerca de';
+
+// User info
+$langs->trans['ZonaEmpleadoUserInfo'] = 'Mi información';
+$langs->trans['ZonaEmpleadoLoginTime'] = 'Última conexión';
+$langs->trans['ZonaEmpleadoUserRole'] = 'Mi rol';
+
+// User Menu
+$langs->trans['ZonaEmpleadoNeedHelp'] = '¿Necesita ayuda?';
+$langs->trans['ZonaEmpleadoUserCard'] = 'Perfil';
+$langs->trans['ZonaEmpleadoShowCompanyInfo'] = 'Mostrar información de la empresa';
+$langs->trans['ZonaEmpleadoShowMoreInfo'] = 'Mostrar más información';
+$langs->trans['Administrator'] = 'Administrador';
+$langs->trans['Logout'] = 'Desconexión';
+
+// User Card Page
+$langs->trans['ZonaEmpleadoPersonalInfo'] = 'Información Personal';
+$langs->trans['ZonaEmpleadoContactInfo'] = 'Información de Contacto';
+$langs->trans['ZonaEmpleadoEmploymentInfo'] = 'Información Laboral';
+$langs->trans['ZonaEmpleadoNationalID'] = 'DNI/NIE';
+$langs->trans['ZonaEmpleadoAccountCreated'] = 'Cuenta creada';
+$langs->trans['ZonaEmpleadoAccountCreatedFull'] = 'Fecha y hora de creación';
+$langs->trans['ZonaEmpleadoNoContactInfo'] = 'No hay información de contacto disponible';
+$langs->trans['ZonaEmpleadoNoEmploymentInfo'] = 'No hay información laboral disponible';
+
+// Extensions
+$langs->trans['ZonaEmpleadoExtensions'] = 'Extensiones disponibles';
+$langs->trans['ZonaEmpleadoNoExtensions'] = 'No hay extensiones instaladas';
+$langs->trans['ZonaEmpleadoExtensionEnabled'] = 'Extensión habilitada';
+$langs->trans['ZonaEmpleadoExtensionDisabled'] = 'Extensión deshabilitada';
+
+// Mobile
+$langs->trans['ZonaEmpleadoMobileMenu'] = 'Menú';
+$langs->trans['ZonaEmpleadoMobileClose'] = 'Cerrar';
+
+// Errors
+$langs->trans['ZonaEmpleadoErrorLoadingModule'] = 'Error al cargar el módulo';
+$langs->trans['ZonaEmpleadoErrorPermissions'] = 'Error de permisos';
+$langs->trans['ZonaEmpleadoErrorGeneral'] = 'Ha ocurrido un error inesperado';
+
+// TPV (Point of Sale)
+$langs->trans['TPV'] = 'TPV';
+$langs->trans['BonosSale'] = 'Venta de Bonos';
+$langs->trans['Customer'] = 'Cliente';
+$langs->trans['BonoProduct'] = 'Producto Bono';
+$langs->trans['SearchProduct'] = 'Buscar producto';
+$langs->trans['NoBonoProductsAvailable'] = 'No hay productos de bonos disponibles';
+$langs->trans['CreateOrder'] = 'Crear Pedido';
+$langs->trans['OrderCreated'] = 'Pedido creado correctamente';
+$langs->trans['OrderCreatedWithBonos'] = 'Pedido creado con %s bono(s) generado(s)';
+$langs->trans['OrderCreatedButNoBonosGenerated'] = 'Pedido creado pero no se generaron bonos';
+$langs->trans['ErrorProductNotFound'] = 'Producto no encontrado';
+$langs->trans['ErrorProductIsNotBono'] = 'El producto seleccionado no es un bono';
+$langs->trans['SelectThirdParty'] = 'Seleccionar tercero';
+$langs->trans['Optional'] = 'Opcional';
+$langs->trans['Select'] = 'Seleccionar';
+$langs->trans['VATRate'] = 'IVA';
