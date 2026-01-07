@@ -71,7 +71,16 @@ header('Content-Type: application/json; charset=UTF-8');
 // Get parameters
 $element = GETPOST('element', 'aZ09');
 $objectId = GETPOSTINT('object_id');
+
+// Un solo archivo PDF por envelope
 $pdfFile = GETPOST('pdf_file', 'alpha');
+
+// Compatibilidad con formularios antiguos que envían array
+$pdfFiles = GETPOST('pdf_files', 'array');
+if (empty($pdfFile) && !empty($pdfFiles) && is_array($pdfFiles)) {
+    $pdfFile = $pdfFiles[0]; // Tomar el primero
+}
+
 $signatureMode = GETPOST('signature_mode', 'aZ09');
 $customMessage = GETPOST('custom_message', 'restricthtml');
 
@@ -87,7 +96,12 @@ try {
         throw new Exception($langs->trans('ErrorFieldRequired', 'element/object_id'));
     }
 
-    if (empty($pdfFile) || !file_exists($pdfFile)) {
+    if (empty($pdfFile)) {
+        throw new Exception($langs->trans('ErrorNoDocumentsSelected'));
+    }
+    
+    // Validar que el archivo existe
+    if (!file_exists($pdfFile)) {
         throw new Exception($langs->trans('ErrorFileNotFound'));
     }
 
@@ -163,7 +177,7 @@ try {
     }
     unset($signerInfo); // Romper referencia
 
-    // Crear envelope
+    // Crear envelope con el PDF seleccionado
     $envelope = new DocSigEnvelope($db);
     $envelope->element_type = $element;
     $envelope->fk_object = $objectId;
@@ -175,6 +189,8 @@ try {
     if ($envelopeId <= 0) {
         throw new Exception($langs->trans('ErrorCreatingEnvelope').': '.implode(', ', $envelope->errors));
     }
+
+    dol_syslog('DocSig: Created envelope #'.$envelopeId.' for document: '.$pdfFile, LOG_INFO);
 
     // Crear firmantes
     $signerTokens = array();

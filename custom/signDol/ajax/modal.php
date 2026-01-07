@@ -83,23 +83,30 @@ try {
                 throw new Exception($langs->trans('ErrorRecordNotFound'));
             }
 
-            // Verificar si ya existe un envelope activo
-            $existingEnvelope = docsig_get_existing_envelope($db, $element, $id);
-
-            // Obtener el PDF (único, el que viene en filepath o el más reciente)
-            $pdfInfo = docsig_get_pdf_info($element, $id, $filepath);
+            // Obtener TODOS los envelopes activos para este objeto
+            $existingEnvelopes = docsig_get_all_envelopes($db, $element, $id);
+            
+            // Obtener paths de PDFs ya en uso
+            $usedPdfPaths = docsig_get_used_pdf_paths($existingEnvelopes);
+            
+            // Obtener PDFs disponibles (excluyendo los que ya tienen envelope)
+            $availablePdfs = docsig_get_all_pdfs($element, $id, $usedPdfPaths);
+            
+            // Para compatibilidad con código antiguo
+            $existingEnvelope = !empty($existingEnvelopes) ? $existingEnvelopes[0] : null;
+            $pdfInfo = !empty($availablePdfs) ? $availablePdfs[0] : null;
 
             // Obtener tercero y contactos vinculados al objeto
             $thirdpartyContacts = docsig_get_object_contacts($db, $objectInfo, $element, $id);
 
             // Generar HTML del modal
-            $html = docsig_generate_modal_html($objectInfo, $existingEnvelope, $pdfInfo, $thirdpartyContacts, $element, $id);
+            $html = docsig_generate_modal_html($objectInfo, $existingEnvelopes, $availablePdfs, $thirdpartyContacts, $element, $id);
 
             $response = array(
                 'success' => true,
                 'html' => $html,
-                'hasExisting' => !empty($existingEnvelope),
-                'envelopeId' => $existingEnvelope ? $existingEnvelope->id : null,
+                'hasExisting' => !empty($existingEnvelopes),
+                'envelopeCount' => count($existingEnvelopes),
             );
             break;
 
@@ -176,6 +183,110 @@ function docsig_get_existing_envelope($db, $element, $objectId)
     }
 
     return null;
+}
+
+/**
+ * Obtiene TODOS los envelopes activos para un objeto
+ * @param DoliDB $db Database handler
+ * @param string $element Tipo de elemento
+ * @param int $objectId ID del objeto
+ * @return DocSigEnvelope[] Array de envelopes activos
+ */
+function docsig_get_all_envelopes($db, $element, $objectId)
+{
+    global $conf;
+
+    $envelopes = array();
+
+    $sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."docsig_envelope";
+    $sql .= " WHERE element = '".$db->escape($element)."'";
+    $sql .= " AND fk_object = ".(int)$objectId;
+    $sql .= " AND entity = ".(int)$conf->entity;
+    $sql .= " AND status NOT IN (4, 5)"; // No cancelados ni expirados
+    $sql .= " ORDER BY date_creation DESC";
+
+    $resql = $db->query($sql);
+    if ($resql) {
+        while ($obj = $db->fetch_object($resql)) {
+            $envelope = new DocSigEnvelope($db);
+            $envelope->fetch($obj->rowid);
+            $envelopes[] = $envelope;
+        }
+    }
+
+    return $envelopes;
+}
+
+/**
+ * Obtiene los paths de PDFs que ya tienen envelope activo
+ * @param DocSigEnvelope[] $envelopes Array de envelopes
+ * @return array Array de paths de archivos ya en uso
+ */
+function docsig_get_used_pdf_paths($envelopes)
+{
+    $usedPaths = array();
+    foreach ($envelopes as $envelope) {
+        if (!empty($envelope->file_path)) {
+            $usedPaths[] = $envelope->file_path;
+        }
+    }
+    return $usedPaths;
+}
+
+/**
+ * Obtiene TODOS los PDFs disponibles para un objeto (excluyendo los que ya tienen envelope)
+ * @param string $element Tipo de elemento
+ * @param int $id ID del objeto
+ * @param array $excludePaths Paths a excluir (ya tienen envelope)
+ * @return array Array de PDFs con info de cada uno
+ */
+function docsig_get_all_pdfs($element, $id, $excludePaths = array())
+{
+    global $conf;
+
+    $pdfs = array();
+
+    // Obtener referencia del objeto para el subdirectorio
+    $objectInfo = docsig_get_object_info($element, $id);
+    if (!$objectInfo) {
+        return $pdfs;
+    }
+
+    $ref = dol_sanitizeFileName($objectInfo['ref']);
+    $dir = $conf->$element->dir_output.'/'.$ref;
+
+    if (!is_dir($dir)) {
+        return $pdfs;
+    }
+
+    // Buscar todos los PDFs en el directorio
+    $files = dol_dir_list($dir, 'files', 0, '\.pdf$', '', 'date', SORT_DESC);
+    
+    foreach ($files as $file) {
+        // Excluir PDFs firmados y certificados
+        if (preg_match('/_signed\.pdf$/i', $file['name']) || 
+            preg_match('/^compliance_certificate/i', $file['name']) ||
+            preg_match('/^signature_addendum/i', $file['name'])) {
+            continue;
+        }
+        
+        // Excluir PDFs que ya tienen un envelope activo
+        if (in_array($file['fullname'], $excludePaths)) {
+            continue;
+        }
+        
+        $pdfs[] = array(
+            'name' => $file['name'],
+            'path' => $file['fullname'],
+            'relativepath' => $file['relativename'] ?? $file['name'],
+            'size' => dol_print_size($file['size']),
+            'size_raw' => $file['size'],
+            'date' => dol_print_date($file['date'], 'dayhour'),
+            'date_raw' => $file['date'],
+        );
+    }
+
+    return $pdfs;
 }
 
 /**
@@ -382,100 +493,146 @@ function docsig_get_object_contacts($db, $objectInfo, $element, $objectId)
 
 /**
  * Genera HTML del modal
+ * @param array $objectInfo Información del objeto
+ * @param DocSigEnvelope|null $existingEnvelope Envelope existente
+ * @param array|null $pdfInfo PDF principal (compatibilidad)
+ * @param array $thirdpartyContacts Contactos
+ * @param string $element Tipo de elemento
+ * @param int $id ID del objeto
+ * @param array $allPdfs Todos los PDFs disponibles
  */
-function docsig_generate_modal_html($objectInfo, $existingEnvelope, $pdfInfo, $thirdpartyContacts, $element, $id)
+function docsig_generate_modal_html($objectInfo, $existingEnvelopes, $availablePdfs, $thirdpartyContacts, $element, $id)
 {
     global $langs, $conf, $user;
 
     $html = '';
 
-    // Si hay envelope existente, mostrar estado
-    if ($existingEnvelope) {
-        $html .= '<div class="docsig-envelope-status">';
-        $html .= '<h3>'.$langs->trans('DocSigExistingEnvelope').'</h3>';
+    // ============================================================
+    // SECCIÓN 1: Mostrar envelopes existentes (si los hay)
+    // ============================================================
+    if (!empty($existingEnvelopes)) {
+        $html .= '<div class="docsig-existing-envelopes-section">';
+        $html .= '<h3><span class="fa fa-folder-open"></span> '.$langs->trans('DocSigExistingEnvelopes').' ('.count($existingEnvelopes).')</h3>';
         $html .= '<table class="border centpercent">';
-        $html .= '<tr><td class="titlefield">'.$langs->trans('Ref').'</td>';
-        $html .= '<td>'.$existingEnvelope->getNomUrl(1).'</td></tr>';
-        $html .= '<tr><td>'.$langs->trans('Status').'</td>';
-        $html .= '<td>'.$existingEnvelope->getLibStatut(4).'</td></tr>';
-        $html .= '<tr><td>'.$langs->trans('DateCreation').'</td>';
-        $html .= '<td>'.dol_print_date($existingEnvelope->date_creation, 'dayhour').'</td></tr>';
-        $html .= '<tr><td>'.$langs->trans('ExpireDate').'</td>';
-        $html .= '<td>'.dol_print_date($existingEnvelope->expire_date, 'dayhour').'</td></tr>';
-        $html .= '</table>';
+        $html .= '<tr class="liste_titre">';
+        $html .= '<th>'.$langs->trans('Ref').'</th>';
+        $html .= '<th>'.$langs->trans('Document').'</th>';
+        $html .= '<th>'.$langs->trans('Status').'</th>';
+        $html .= '<th>'.$langs->trans('DateCreation').'</th>';
+        $html .= '<th class="right">'.$langs->trans('Actions').'</th>';
+        $html .= '</tr>';
 
-        // Lista de firmantes
-        if (!empty($existingEnvelope->signers)) {
-            $html .= '<h4>'.$langs->trans('Signers').'</h4>';
-            $html .= '<table class="border centpercent">';
-            $html .= '<tr class="liste_titre">';
-            $html .= '<th>'.$langs->trans('Name').'</th>';
-            $html .= '<th>'.$langs->trans('Email').'</th>';
-            $html .= '<th>'.$langs->trans('Status').'</th>';
-            $html .= '<th>'.$langs->trans('DateSigned').'</th>';
-            $html .= '<th></th>';
+        foreach ($existingEnvelopes as $envelope) {
+            // Obtener nombre del documento
+            $pdfName = basename($envelope->pdf_path);
+            
+            $html .= '<tr class="oddeven">';
+            $html .= '<td>'.$envelope->getNomUrl(1).'</td>';
+            $html .= '<td><span class="fa fa-file-pdf-o" style="color:#dc3545;"></span> '.dol_escape_htmltag($pdfName).'</td>';
+            $html .= '<td>'.$envelope->getLibStatut(4).'</td>';
+            $html .= '<td>'.dol_print_date($envelope->date_creation, 'dayhour').'</td>';
+            $html .= '<td class="right nowraponall">';
+            $html .= '<a href="'.dol_buildpath('/signDol/card.php', 1).'?id='.$envelope->id.'" class="button small">';
+            $html .= '<span class="fa fa-eye"></span>';
+            $html .= '</a>';
+            if ($envelope->status < 3 && $user->hasRight('docsig', 'envelope', 'delete')) {
+                $html .= ' <button type="button" class="button button-cancel small docsig-cancel-envelope-btn" data-id="'.$envelope->id.'" title="'.$langs->trans('CancelEnvelope').'">';
+                $html .= '<span class="fa fa-times"></span>';
+                $html .= '</button>';
+            }
+            $html .= '</td>';
             $html .= '</tr>';
-
-            foreach ($existingEnvelope->signers as $signer) {
-                $html .= '<tr>';
-                $html .= '<td>'.$signer->getFullName().'</td>';
-                $html .= '<td>'.$signer->email.'</td>';
-                $html .= '<td>'.$signer->getLibStatut(2).'</td>';
-                $html .= '<td>'.($signer->date_signed ? dol_print_date($signer->date_signed, 'dayhour') : '-').'</td>';
-                $html .= '<td class="right nowraponall">';
-                if ($signer->status == 0 && $user->hasRight('docsig', 'envelope', 'write')) {
-                    $html .= '<a href="#" class="docsig-resend-btn paddingright" data-signer-id="'.$signer->id.'" title="'.$langs->trans('ResendNotification').'">';
-                    $html .= '<span class="fa fa-paper-plane"></span>';
-                    $html .= '</a>';
-                    $html .= '<a href="#" class="docsig-copy-url-btn" data-signer-id="'.$signer->id.'" title="'.$langs->trans('CopySignUrl').'">';
-                    $html .= '<span class="fa fa-copy"></span>';
-                    $html .= '</a>';
+            
+            // Fila de firmantes (colapsable)
+            if (!empty($envelope->signers)) {
+                $html .= '<tr class="docsig-signers-row">';
+                $html .= '<td colspan="5" style="padding-left:30px; background:#f9f9f9;">';
+                $html .= '<small><strong>'.$langs->trans('Signers').':</strong> ';
+                $signerNames = array();
+                foreach ($envelope->signers as $signer) {
+                    $statusIcon = $signer->status == 1 ? '<span class="fa fa-check" style="color:green;"></span>' : '<span class="fa fa-clock-o" style="color:orange;"></span>';
+                    $signerNames[] = $statusIcon.' '.dol_escape_htmltag($signer->getFullName());
                 }
-                $html .= '</td>';
+                $html .= implode(' | ', $signerNames);
+                $html .= '</small></td>';
                 $html .= '</tr>';
             }
-            $html .= '</table>';
         }
-
-        // Botones de acción
-        $html .= '<div class="docsig-modal-actions">';
-        if ($existingEnvelope->status < 3 && $user->hasRight('docsig', 'envelope', 'delete')) {
-            $html .= '<button type="button" class="button button-cancel" id="docsig-cancel-envelope" data-id="'.$existingEnvelope->id.'">';
-            $html .= $langs->trans('CancelEnvelope');
-            $html .= '</button>';
+        $html .= '</table>';
+        $html .= '</div>';
+        
+        // Separador si hay PDFs disponibles para nuevo envelope
+        if (!empty($availablePdfs)) {
+            $html .= '<hr style="margin: 20px 0; border-top: 1px dashed #ccc;">';
         }
-        $html .= '<a href="'.dol_buildpath('/signDol/card.php', 1).'?id='.$existingEnvelope->id.'" class="button">';
-        $html .= $langs->trans('ViewDetails');
-        $html .= '</a>';
-        $html .= '</div>';
-        $html .= '</div>';
-
-        return $html;
     }
 
     // ============================================================
-    // Formulario para crear nuevo envelope
+    // SECCIÓN 2: Formulario para crear nuevo envelope (si hay PDFs disponibles)
     // ============================================================
+    if (empty($availablePdfs)) {
+        if (empty($existingEnvelopes)) {
+            $html .= '<div class="warning">';
+            $html .= '<span class="fa fa-exclamation-triangle"></span> '.$langs->trans('NoPDFAvailable');
+            $html .= '</div>';
+        } else {
+            $html .= '<div class="info">';
+            $html .= '<span class="fa fa-info-circle"></span> '.$langs->trans('DocSigAllPDFsHaveEnvelope');
+            $html .= '</div>';
+        }
+        return $html;
+    }
+
+    // Título del formulario
+    $html .= '<div class="docsig-new-envelope-section">';
+    if (!empty($existingEnvelopes)) {
+        $html .= '<h3><span class="fa fa-plus-circle"></span> '.$langs->trans('DocSigCreateNewEnvelope').'</h3>';
+    }
+
     $html .= '<form id="docsig-create-form" class="docsig-create-form">';
     $html .= '<input type="hidden" name="element" value="'.dol_escape_htmltag($element).'">';
     $html .= '<input type="hidden" name="object_id" value="'.dol_escape_htmltag($id).'">';
     $html .= '<input type="hidden" name="token" value="'.newToken().'">';
 
     // ============================================================
-    // 1) Documento PDF (único, no seleccionable)
+    // 1) Selección de documento PDF (UN solo PDF)
     // ============================================================
     $html .= '<div class="docsig-section docsig-document-section">';
-    $html .= '<h4><span class="fa fa-file-pdf-o"></span> '.$langs->trans('Document').'</h4>';
-    if (empty($pdfInfo)) {
-        $html .= '<div class="warning">'.$langs->trans('NoPDFAvailable').'</div>';
-    } else {
-        $html .= '<input type="hidden" name="pdf_file" value="'.dol_escape_htmltag($pdfInfo['path']).'">';
+    $html .= '<h4><span class="fa fa-file-pdf-o"></span> '.$langs->trans('SelectDocument').'</h4>';
+    
+    if (count($availablePdfs) == 1) {
+        // Un solo PDF disponible - mostrar como info
+        $pdf = $availablePdfs[0];
+        $html .= '<input type="hidden" name="pdf_file" value="'.dol_escape_htmltag($pdf['path']).'">';
         $html .= '<div class="docsig-pdf-info">';
         $html .= '<span class="fa fa-file-pdf-o fa-2x" style="color:#dc3545; margin-right:10px;"></span>';
         $html .= '<div class="docsig-pdf-details">';
-        $html .= '<strong>'.dol_escape_htmltag($pdfInfo['name']).'</strong><br>';
-        $html .= '<small class="opacitymedium">'.$pdfInfo['size'].' - '.$pdfInfo['date'].'</small>';
+        $html .= '<strong>'.dol_escape_htmltag($pdf['name']).'</strong><br>';
+        $html .= '<small class="opacitymedium">'.$pdf['size'].' - '.$pdf['date'].'</small>';
         $html .= '</div>';
+        $html .= '</div>';
+    } else {
+        // Múltiples PDFs disponibles - mostrar lista con radio buttons
+        $html .= '<div class="docsig-help-text opacitymedium small" style="margin-bottom:8px;">';
+        $html .= '<span class="fa fa-info-circle"></span> '.$langs->trans('DocSigSelectOnePDF');
+        $html .= '</div>';
+        $html .= '<div class="docsig-pdf-list" style="max-height:180px; overflow-y:auto; border:1px solid #ddd; border-radius:4px; padding:8px;">';
+        
+        foreach ($availablePdfs as $index => $pdf) {
+            $checked = ($index == 0) ? ' checked' : ''; // El primero seleccionado por defecto
+            $uniqueId = 'pdf_'.md5($pdf['path']);
+            
+            $html .= '<div class="docsig-pdf-item" style="display:flex; align-items:center; padding:6px; margin-bottom:4px; background:#f9f9f9; border-radius:3px;">';
+            $html .= '<input type="radio" name="pdf_file" value="'.dol_escape_htmltag($pdf['path']).'" id="'.$uniqueId.'"'.$checked.' class="docsig-pdf-radio">';
+            $html .= '<label for="'.$uniqueId.'" style="flex:1; display:flex; align-items:center; margin-left:8px; cursor:pointer;">';
+            $html .= '<span class="fa fa-file-pdf-o" style="color:#dc3545; margin-right:8px;"></span>';
+            $html .= '<div style="flex:1;">';
+            $html .= '<strong style="display:block;">'.dol_escape_htmltag($pdf['name']).'</strong>';
+            $html .= '<small class="opacitymedium">'.$pdf['size'].' - '.$pdf['date'].'</small>';
+            $html .= '</div>';
+            $html .= '</label>';
+            $html .= '</div>';
+        }
         $html .= '</div>';
     }
     $html .= '</div>';
@@ -649,12 +806,13 @@ function docsig_generate_modal_html($objectInfo, $existingEnvelope, $pdfInfo, $t
     // ============================================================
     $html .= '<div class="docsig-modal-actions">';
     $html .= '<button type="button" class="button button-cancel" onclick="DocSig.closeModal();">'.$langs->trans('Cancel').'</button>';
-    $html .= '<button type="submit" class="button button-primary" id="docsig-submit-btn"'.(!empty($pdfInfo) ? '' : ' disabled').'>';
+    $html .= '<button type="submit" class="button button-primary" id="docsig-submit-btn">';
     $html .= '<span class="fa fa-paper-plane"></span> '.$langs->trans('SendSignatureRequest');
     $html .= '</button>';
     $html .= '</div>';
 
     $html .= '</form>';
+    $html .= '</div>'; // end docsig-new-envelope-section
 
     return $html;
 }

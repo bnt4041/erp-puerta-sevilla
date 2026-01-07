@@ -56,6 +56,31 @@ DocSigPositionBottomLeft = Bottom left
 DocSigPositionTopRight = Top right
 DocSigPositionTopLeft = Top left
 
+# Setup - Signature Stamp Visual
+StampSection = Visual Signature Stamp Configuration
+DocSigStampPages = Pages with stamp
+DocSigStampPagesHelp = On which pages of the document the signature stamp will be displayed
+DocSigStampAllPages = All pages
+DocSigStampFirstPage = First page only
+DocSigStampLastPage = Last page only
+DocSigStampFirstLastPage = First and last page
+DocSigStampX = X Position (mm)
+DocSigStampXHelp = Distance in millimeters from the left edge of the page
+DocSigStampY = Y Position (mm)
+DocSigStampYHelp = Distance in millimeters from the top edge of the page
+DocSigStampWidth = Stamp width (mm)
+DocSigStampWidthHelp = Width of the signature stamp in millimeters
+DocSigStampHeight = Stamp height (mm)
+DocSigStampHeightHelp = Height of the signature stamp in millimeters
+DocSigStampOrientation = Stamp layout
+DocSigStampOrientationHelp = How stamps are distributed when there are multiple signers
+DocSigStampHorizontal = Horizontal (in row)
+DocSigStampVertical = Vertical (in column)
+DocSigStampOpacity = Opacity (%%)
+DocSigStampOpacityHelp = Opacity of the signature stamp (10-100%%)
+DocSigStampHeaderColor = Header color
+DocSigStampHeaderColorHelp = Color of the signature stamp header (HEX format)
+
 # Setup - Notifications
 DocSigNotifyFacture = Invoices
 DocSigNotifyCommande = Orders
@@ -214,6 +239,12 @@ OTPNotification = Verification code
 ReminderNotification = Reminder
 CompletedNotification = Signature completed
 CanceledNotification = Signature canceled
+
+# Regenerate signed PDF
+RegenerateSignedPDF = Regenerate signed PDF
+SignedPDFRegeneratedSuccessfully = Signed PDF regenerated successfully
+ErrorRegeneratingSignedPDF = Error regenerating signed PDF
+ErrorNoSignedSigners = No signers have signed yet
 
 # Audit events
 AuditTrail = Audit trail
@@ -386,3 +417,31 @@ HideDocument = Hide document
 
 # DNI field
 DNIWillBeVerified = (Will be verified)
+
+# Standalone envelopes (direct upload)
+CreateEnvelope = Create signature envelope
+NewEnvelope = New envelope
+PDFFileToSign = PDF file to sign
+ExpirationDays = Expiration days
+Days = days
+SignerType = Signer type
+SelectSigners = Select signers
+SelectMultipleSignersHelp = Hold Ctrl (or Cmd on Mac) key to select multiple signers
+Standalone = Standalone document
+StandaloneDocument = Unlinked document
+CreateAndSend = Create and send
+Contacts = Contacts
+ThirdParties = Third parties
+Note = Note
+ErrorNoSignersSelected = You must select at least one signer
+ErrorInvalidPDFFile = File must be a valid PDF
+EnvelopeCreatedAndSent = Envelope created and notifications sent to signers
+ErrorCreatingEnvelope = Error creating envelope
+# Enhanced signer selector
+SearchContactOrThirdParty = Search contact or third party...
+SelectedSigners = Selected signers
+NewSigner = New signer
+Remove = Remove
+AlreadyAdded = Already added
+NoResultsFound = No results found
+ErrorSignerNeedsEmail = Signer %s needs an email address

@@ -96,6 +96,31 @@ DocSigCertCNHelp = Common Name del certificado interno
 DocSigCertOrg = Organización
 DocSigCertOrgHelp = Nombre de la organización en el certificado
 
+# Setup - Sello de Firma Visual
+StampSection = Configuración del Sello de Firma Visual
+DocSigStampPages = Páginas con sello
+DocSigStampPagesHelp = En qué páginas del documento se mostrará el sello de firma
+DocSigStampAllPages = Todas las páginas
+DocSigStampFirstPage = Solo primera página
+DocSigStampLastPage = Solo última página
+DocSigStampFirstLastPage = Primera y última página
+DocSigStampX = Posición X (mm)
+DocSigStampXHelp = Distancia en milímetros desde el borde izquierdo de la página
+DocSigStampY = Posición Y (mm)
+DocSigStampYHelp = Distancia en milímetros desde el borde superior de la página
+DocSigStampWidth = Ancho del sello (mm)
+DocSigStampWidthHelp = Ancho del sello de firma en milímetros
+DocSigStampHeight = Alto del sello (mm)
+DocSigStampHeightHelp = Alto del sello de firma en milímetros
+DocSigStampOrientation = Disposición de sellos
+DocSigStampOrientationHelp = Cómo se distribuyen los sellos cuando hay múltiples firmantes
+DocSigStampHorizontal = Horizontal (en fila)
+DocSigStampVertical = Vertical (en columna)
+DocSigStampOpacity = Opacidad (%%)
+DocSigStampOpacityHelp = Opacidad del sello de firma (10-100%%)
+DocSigStampHeaderColor = Color del encabezado
+DocSigStampHeaderColorHelp = Color del encabezado del sello de firma (formato HEX)
+
 # Setup - Info Certificado
 DocSigCertificateInfo = Información del Certificado Interno
 DocSigCertStatus = Estado
@@ -221,6 +246,12 @@ OTPNotification = Código de verificación
 ReminderNotification = Recordatorio
 CompletedNotification = Firma completada
 CanceledNotification = Firma cancelada
+
+# Regenerar PDF firmado
+RegenerateSignedPDF = Regenerar PDF firmado
+SignedPDFRegeneratedSuccessfully = PDF firmado regenerado correctamente
+ErrorRegeneratingSignedPDF = Error al regenerar el PDF firmado
+ErrorNoSignedSigners = No hay firmantes que hayan firmado aún
 
 # Eventos de auditoría
 AuditTrail = Registro de auditoría
@@ -353,6 +384,11 @@ ParallelModeDesc = Todos firman a la vez
 SequentialModeDesc = Firman en orden
 NoPDFAvailable = No hay PDF disponible para firmar
 DocSigExistingEnvelope = Solicitud de firma existente
+DocSigExistingEnvelopes = Solicitudes de firma existentes
+DocSigCreateNewEnvelope = Crear nueva solicitud de firma
+DocSigAllPDFsHaveEnvelope = Todos los PDFs de este objeto ya tienen una solicitud de firma activa
+DocSigSelectOnePDF = Seleccione el documento PDF que desea enviar a firma
+SelectDocument = Seleccionar documento
 ViewDetails = Ver detalles
 DNI = DNI/NIE
 Phone = Teléfono
@@ -471,3 +507,46 @@ HideDocument = Ocultar documento
 
 # DNI field
 DNIWillBeVerified = (Se verificará que coincida)
+# Multiple documents support
+Documents = Documentos
+DocSigSelectMultiplePDFs = Seleccione uno o mas documentos PDF para solicitar firma
+ErrorNoDocumentsSelected = Debe seleccionar al menos un documento
+SelectAll = Seleccionar todos
+DeselectAll = Deseleccionar todos
+DocumentsInEnvelope = Documentos en el sobre
+DocumentCount = Número de documentos
+DocSigDocumentStatusPending = Pendiente
+DocSigDocumentStatusPartial = Firmado parcialmente
+DocSigDocumentStatusCompleted = Firmado
+DownloadOriginal = Descargar original
+DownloadSigned = Descargar firmado
+GeneratedOn = Generado el
+
+# Standalone envelopes (direct upload)
+CreateEnvelope = Crear sobre de firma
+NewEnvelope = Nuevo sobre
+PDFFileToSign = Archivo PDF a firmar
+ExpirationDays = Días de expiración
+Days = días
+SignerType = Tipo de firmante
+SelectSigners = Seleccionar firmantes
+SelectMultipleSignersHelp = Mantenga pulsada la tecla Ctrl (o Cmd en Mac) para seleccionar varios firmantes
+Standalone = Documento independiente
+StandaloneDocument = Documento sin vincular
+CreateAndSend = Crear y enviar
+Contacts = Contactos
+ThirdParties = Terceros
+Note = Nota
+ErrorNoSignersSelected = Debe seleccionar al menos un firmante
+ErrorInvalidPDFFile = El archivo debe ser un PDF válido
+EnvelopeCreatedAndSent = Sobre creado y notificaciones enviadas a los firmantes
+ErrorCreatingEnvelope = Error al crear el sobre
+
+# Nuevo selector de firmantes mejorado
+SearchContactOrThirdParty = Buscar contacto o tercero...
+SelectedSigners = Firmantes seleccionados
+NewSigner = Nuevo firmante
+Remove = Eliminar
+AlreadyAdded = Ya añadido
+NoResultsFound = No se encontraron resultados
+ErrorSignerNeedsEmail = El firmante %s necesita una dirección de email

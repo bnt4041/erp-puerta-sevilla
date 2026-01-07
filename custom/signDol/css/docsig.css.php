@@ -1214,3 +1214,386 @@ header('Cache-Control: max-age=3600');
     padding: 8px 16px;
     border-radius: 6px;
 }
+/* ============================================================
+   CREATE ENVELOPE - Enhanced Signer Selection Styles
+   ============================================================ */
+
+.docsig-create-signers-section {
+    max-width: 700px;
+}
+
+/* Search box */
+.docsig-search-box {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.docsig-search-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.docsig-search-input-wrapper .fa-search {
+    position: absolute;
+    left: 12px;
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.docsig-search-input-wrapper input {
+    width: 100%;
+    padding: 10px 15px 10px 38px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.docsig-search-input-wrapper input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+    outline: none;
+}
+
+.docsig-search-input-wrapper input::placeholder {
+    color: #adb5bd;
+}
+
+/* Search dropdown */
+.docsig-search-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    max-height: 350px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.docsig-search-group {
+    padding: 0;
+}
+
+.docsig-search-group-header {
+    padding: 10px 15px;
+    background: #f8f9fa;
+    font-size: 12px;
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.docsig-search-group-header .fa {
+    margin-right: 8px;
+}
+
+.docsig-search-item {
+    padding: 12px 15px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.15s;
+}
+
+.docsig-search-item:last-child {
+    border-bottom: none;
+}
+
+.docsig-search-item:hover {
+    background: #f8f9fa;
+}
+
+.docsig-search-item-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.docsig-search-item-main {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.docsig-search-item-main .fa {
+    color: #6c757d;
+}
+
+.docsig-search-item-name {
+    font-weight: 500;
+    color: #333;
+}
+
+.docsig-search-item-company {
+    color: #6c757d;
+    font-size: 13px;
+}
+
+.docsig-search-item-details {
+    display: flex;
+    gap: 15px;
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.docsig-search-item-details .fa {
+    margin-right: 5px;
+    font-size: 11px;
+}
+
+.docsig-search-item-no-email {
+    color: #dc3545;
+}
+
+.docsig-search-item-added {
+    display: inline-block;
+    margin-top: 5px;
+    font-size: 11px;
+    color: #28a745;
+}
+
+.docsig-search-no-results {
+    padding: 20px 15px;
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+}
+
+.docsig-search-no-results .fa {
+    margin-right: 8px;
+}
+
+/* Create contact toggle */
+.docsig-create-contact-toggle {
+    margin-bottom: 15px;
+}
+
+.docsig-create-contact-toggle a {
+    color: #667eea;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.docsig-create-contact-toggle a:hover {
+    text-decoration: underline;
+}
+
+.docsig-create-contact-toggle a .fa {
+    margin-right: 5px;
+}
+
+/* Create contact form */
+.docsig-create-contact-form {
+    background: linear-gradient(135deg, #f8f9ff, #fff);
+    border: 1px solid #e0e5ff;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    animation: slideDown 0.2s ease;
+    overflow: hidden;
+}
+
+.docsig-create-contact-form .docsig-form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: #667eea;
+    color: #fff;
+    font-weight: 500;
+}
+
+.docsig-create-contact-form .docsig-form-header .fa {
+    margin-right: 8px;
+}
+
+.docsig-create-contact-form .docsig-close-form {
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+}
+
+.docsig-create-contact-form .docsig-close-form:hover {
+    color: #fff;
+}
+
+.docsig-create-contact-form .docsig-form-body {
+    padding: 15px;
+}
+
+.docsig-create-contact-form .docsig-form-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.docsig-create-contact-form .docsig-form-row:last-child {
+    margin-bottom: 0;
+}
+
+.docsig-create-contact-form .docsig-form-row input,
+.docsig-create-contact-form .docsig-form-row select {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.docsig-create-contact-form .docsig-form-row input:focus,
+.docsig-create-contact-form .docsig-form-row select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    outline: none;
+}
+
+.docsig-create-contact-form .docsig-form-actions {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #e9ecef;
+}
+
+.docsig-create-contact-form .docsig-form-actions .button {
+    padding: 8px 20px;
+    border-radius: 6px;
+}
+
+/* Selected signers header */
+.docsig-selected-signers-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 0;
+    font-weight: 600;
+    color: #495057;
+    border-bottom: 1px solid #e9ecef;
+    margin-bottom: 15px;
+}
+
+.docsig-selected-signers-header .fa {
+    color: #667eea;
+}
+
+/* Selected signers list */
+.docsig-selected-signers {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.docsig-signer-card {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    transition: box-shadow 0.2s;
+}
+
+.docsig-signer-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.docsig-signer-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.docsig-signer-card-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.docsig-signer-card-title .fa {
+    color: #6c757d;
+}
+
+.docsig-signer-card-title .docsig-signer-name {
+    font-weight: 500;
+    color: #333;
+}
+
+.docsig-signer-card-title .badge {
+    padding: 3px 8px;
+    font-size: 10px;
+    border-radius: 12px;
+}
+
+.docsig-signer-remove {
+    color: #dc3545;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    text-decoration: none;
+}
+
+.docsig-signer-remove:hover {
+    opacity: 1;
+}
+
+.docsig-signer-card-body {
+    display: flex;
+    gap: 15px;
+    padding: 15px;
+}
+
+.docsig-signer-field {
+    flex: 1;
+}
+
+.docsig-signer-field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    color: #6c757d;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.docsig-signer-field label .fa {
+    margin-right: 5px;
+}
+
+.docsig-signer-field input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.docsig-signer-field input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    outline: none;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .docsig-create-contact-form .docsig-form-row {
+        flex-direction: column;
+    }
+    
+    .docsig-signer-card-body {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .docsig-search-item-details {
+        flex-direction: column;
+        gap: 5px;
+    }
+}

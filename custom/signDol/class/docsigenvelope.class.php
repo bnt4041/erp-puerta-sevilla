@@ -99,6 +99,9 @@ class DocSigEnvelope extends CommonObject
     // Signers array
     public $signers = array();
 
+    // Documents array (for multi-document support)
+    public $documents = array();
+
     /**
      * Constructor
      *
@@ -280,6 +283,194 @@ class DocSigEnvelope extends CommonObject
             return count($this->signers);
         }
         return 0;
+    }
+
+    /**
+     * Load documents for this envelope
+     *
+     * @return int Number of documents loaded or -1 if error
+     */
+    public function fetchDocuments()
+    {
+        $this->documents = array();
+
+        require_once __DIR__.'/docsigdocument.class.php';
+        $documentObj = new DocSigDocument($this->db);
+        $result = $documentObj->fetchByEnvelope($this->id);
+        
+        if (is_array($result)) {
+            $this->documents = $result;
+            return count($this->documents);
+        }
+        
+        return $result; // Error code
+    }
+
+    /**
+     * Add a document to this envelope
+     *
+     * @param string $file_path Path to the PDF file
+     * @param User $user User adding the document
+     * @param string $label Optional label for the document
+     * @param int $sign_order Order for signing (default auto)
+     * @return int >0 if OK (document id), <0 if KO
+     */
+    public function addDocument($file_path, $user, $label = '', $sign_order = 0)
+    {
+        require_once __DIR__.'/docsigdocument.class.php';
+        
+        // Check file exists
+        if (!file_exists($file_path)) {
+            $this->error = 'FileNotFound: '.$file_path;
+            return -1;
+        }
+
+        // Check file is not in another active envelope
+        $docCheck = new DocSigDocument($this->db);
+        $existingEnvelope = $docCheck->fileExistsInEnvelope($file_path, $this->id);
+        if ($existingEnvelope > 0) {
+            $this->error = 'FileAlreadyInEnvelope';
+            return -2;
+        }
+        if ($existingEnvelope < 0) {
+            $this->error = $docCheck->error;
+            return -3;
+        }
+
+        // Determine sign order
+        if ($sign_order <= 0) {
+            $sign_order = count($this->documents) + 1;
+        }
+
+        $document = new DocSigDocument($this->db);
+        $document->fk_envelope = $this->id;
+        $document->file_path = $file_path;
+        $document->original_filename = basename($file_path);
+        $document->label = $label ?: basename($file_path);
+        $document->sign_order = $sign_order;
+        $document->status = DocSigDocument::STATUS_PENDING;
+
+        $result = $document->create($user);
+        
+        if ($result > 0) {
+            $this->documents[] = $document;
+            
+            // If this is the first document and envelope has no file_path, set it for backwards compatibility
+            if (empty($this->file_path)) {
+                $this->file_path = $file_path;
+                $this->file_hash = hash_file('sha256', $file_path);
+                $this->update($user, true);
+            }
+            
+            $this->logEvent('DOCUMENT_ADDED', 'Document added: '.$document->original_filename);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Remove a document from this envelope
+     *
+     * @param int $document_id Document ID
+     * @param User $user User removing the document
+     * @return int >0 if OK, <0 if KO
+     */
+    public function removeDocument($document_id, $user)
+    {
+        require_once __DIR__.'/docsigdocument.class.php';
+        
+        // Find document
+        $document = null;
+        foreach ($this->documents as $key => $doc) {
+            if ($doc->id == $document_id) {
+                $document = $doc;
+                unset($this->documents[$key]);
+                break;
+            }
+        }
+        
+        if (!$document) {
+            $document = new DocSigDocument($this->db);
+            if ($document->fetch($document_id) <= 0) {
+                $this->error = 'DocumentNotFound';
+                return -1;
+            }
+            
+            // Verify document belongs to this envelope
+            if ($document->fk_envelope != $this->id) {
+                $this->error = 'DocumentNotInEnvelope';
+                return -2;
+            }
+        }
+
+        $filename = $document->original_filename;
+        $result = $document->delete($user);
+        
+        if ($result > 0) {
+            $this->logEvent('DOCUMENT_REMOVED', 'Document removed: '.$filename);
+            // Re-index documents array
+            $this->documents = array_values($this->documents);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get document count for this envelope
+     *
+     * @return int Number of documents
+     */
+    public function getDocumentCount()
+    {
+        if (!empty($this->documents)) {
+            return count($this->documents);
+        }
+        
+        // Count from DB
+        $sql = "SELECT COUNT(*) as cnt FROM ".MAIN_DB_PREFIX."docsig_document";
+        $sql .= " WHERE fk_envelope = ".(int)$this->id;
+        
+        $resql = $this->db->query($sql);
+        if ($resql) {
+            $obj = $this->db->fetch_object($resql);
+            return (int) $obj->cnt;
+        }
+        
+        return 0;
+    }
+
+    /**
+     * Check if envelope has multiple documents
+     *
+     * @return bool True if envelope has more than one document
+     */
+    public function hasMultipleDocuments()
+    {
+        return $this->getDocumentCount() > 1;
+    }
+
+    /**
+     * Get all file paths from documents (for PDF generation)
+     *
+     * @return array Array of file paths ordered by sign_order
+     */
+    public function getDocumentFilePaths()
+    {
+        if (empty($this->documents)) {
+            $this->fetchDocuments();
+        }
+        
+        $paths = array();
+        foreach ($this->documents as $doc) {
+            $paths[] = $doc->file_path;
+        }
+        
+        // Fallback for envelopes without documents table
+        if (empty($paths) && !empty($this->file_path)) {
+            $paths[] = $this->file_path;
+        }
+        
+        return $paths;
     }
 
     /**
@@ -766,49 +957,163 @@ class DocSigEnvelope extends CommonObject
 
         dol_syslog('DocSigEnvelope::generateSignedPdf - Starting for envelope '.$this->ref);
 
+        // Load documents if not loaded
+        if (empty($this->documents)) {
+            $this->fetchDocuments();
+        }
+
+        // If we have documents in the documents table, generate PDFs for all of them
+        if (!empty($this->documents)) {
+            return $this->generateAllSignedPdfs();
+        }
+
+        // Fallback: Single document mode (backwards compatibility)
+        return $this->generateSignedPdfForFile($this->file_path);
+    }
+
+    /**
+     * Generate signed PDFs for all documents in this envelope
+     *
+     * @return int >0 if OK, <0 if KO
+     */
+    public function generateAllSignedPdfs()
+    {
+        global $conf;
+
+        dol_syslog('DocSigEnvelope::generateAllSignedPdfs - Generating for '.count($this->documents).' documents');
+
+        $successCount = 0;
+        $errorCount = 0;
+
+        foreach ($this->documents as $document) {
+            $result = $this->generateSignedPdfForDocument($document);
+            if ($result > 0) {
+                $successCount++;
+            } else {
+                $errorCount++;
+                dol_syslog('DocSigEnvelope::generateAllSignedPdfs - Error generating PDF for document '.$document->id.': '.$this->error, LOG_ERR);
+            }
+        }
+
+        // Update envelope's signed_file_path to the first document's signed path (for backwards compatibility)
+        if (!empty($this->documents[0]) && !empty($this->documents[0]->signed_file_path)) {
+            $this->signed_file_path = $this->documents[0]->signed_file_path;
+        }
+
+        if ($errorCount > 0) {
+            $this->error = sprintf('Generated %d/%d PDFs. %d errors.', $successCount, count($this->documents), $errorCount);
+            return -1;
+        }
+
+        $this->logEvent('ALL_PDFS_SIGNED', 'Generated signed PDFs for all '.count($this->documents).' documents');
+        return $successCount;
+    }
+
+    /**
+     * Generate signed PDF for a specific document
+     *
+     * @param DocSigDocument $document Document object
+     * @return int >0 if OK, <0 if KO
+     */
+    public function generateSignedPdfForDocument($document)
+    {
+        require_once __DIR__.'/docsigdocument.class.php';
+
+        // Generate the signed PDF
+        $result = $this->generateSignedPdfForFile($document->file_path, $document);
+        
+        if ($result > 0 && !empty($this->signed_file_path)) {
+            // Update document with signed file info
+            $document->signed_file_path = $this->signed_file_path;
+            $document->signed_hash = hash_file('sha256', $this->signed_file_path);
+            $document->markAsSigned();
+        }
+
+        return $result;
+    }
+
+    /**
+     * Generate signed PDF for a specific file
+     *
+     * @param string $file_path Path to the original PDF
+     * @param DocSigDocument $document Optional document object for context
+     * @return int >0 if OK, <0 if KO
+     */
+    public function generateSignedPdfForFile($file_path, $document = null)
+    {
+        global $conf;
+
+        dol_syslog('DocSigEnvelope::generateSignedPdfForFile - Starting for file '.$file_path);
+
         // Check original file exists
-        if (!file_exists($this->file_path)) {
-            $this->error = 'Original file not found: '.$this->file_path;
+        if (!file_exists($file_path)) {
+            $this->error = 'Original file not found: '.$file_path;
             return -1;
         }
 
         // Prepare output path
-        $signedFilename = pathinfo($this->file_path, PATHINFO_FILENAME).'_signed.pdf';
-        $signedDir = dirname($this->file_path);
+        $signedFilename = pathinfo($file_path, PATHINFO_FILENAME).'_signed.pdf';
+        $signedDir = dirname($file_path);
         $this->signed_file_path = $signedDir.'/'.$signedFilename;
 
-        // Include TCPDF/FPDI
+        // Include TCPDF
         require_once TCPDF_PATH.'tcpdf.php';
 
-        // Check if FPDI is available, otherwise use simple approach
+        // Check if FPDI is available (new setasign version)
         $fpdiAvailable = false;
-        $fpdiPath = DOL_DOCUMENT_ROOT.'/includes/tecnickcom/tcpdf/include/fpdi_bridge.php';
-        if (file_exists($fpdiPath)) {
-            $fpdiAvailable = true;
-            require_once $fpdiPath;
+        $fpdiAutoloadPath = DOL_DOCUMENT_ROOT.'/includes/setasign/fpdi/src/autoload.php';
+        if (file_exists($fpdiAutoloadPath)) {
+            require_once $fpdiAutoloadPath;
+            $fpdiAvailable = class_exists('setasign\Fpdi\Tcpdf\Fpdi');
+            dol_syslog('DocSigEnvelope::generateSignedPdfForFile - FPDI autoload found, class exists: '.($fpdiAvailable ? 'YES' : 'NO'));
+        } else {
+            // Try old path
+            $fpdiOldPath = DOL_DOCUMENT_ROOT.'/includes/tecnickcom/tcpdf/include/fpdi_bridge.php';
+            if (file_exists($fpdiOldPath)) {
+                require_once $fpdiOldPath;
+                $fpdiAvailable = class_exists('FPDI');
+            }
         }
 
+        // Get stamp configuration
+        $stampConfig = $this->getStampConfiguration();
+
         try {
-            if ($fpdiAvailable && class_exists('FPDI')) {
+            if ($fpdiAvailable) {
                 // Use FPDI to import and modify existing PDF
-                $pdf = new FPDI();
-                $pageCount = $pdf->setSourceFile($this->file_path);
+                if (class_exists('setasign\Fpdi\Tcpdf\Fpdi')) {
+                    $pdf = new \setasign\Fpdi\Tcpdf\Fpdi();
+                } else {
+                    $pdf = new FPDI();
+                }
                 
-                // Import all pages
+                dol_syslog('DocSigEnvelope::generateSignedPdfForFile - FPDI created, loading source file');
+                $pageCount = $pdf->setSourceFile($file_path);
+                dol_syslog('DocSigEnvelope::generateSignedPdfForFile - Source has '.$pageCount.' pages');
+                
+                // Import all pages and add stamps according to configuration
                 for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
                     $templateId = $pdf->importPage($pageNo);
                     $size = $pdf->getTemplateSize($templateId);
                     $pdf->AddPage($size['orientation'], array($size['width'], $size['height']));
                     $pdf->useTemplate($templateId);
                     
-                    // Add signatures on last page
-                    if ($pageNo == $pageCount) {
-                        $this->addSignaturesToPage($pdf, $size);
+                    // Determine if stamp should be added to this page
+                    $addStamp = $this->shouldAddStampToPage($pageNo, $pageCount, $stampConfig['pages']);
+                    dol_syslog('DocSigEnvelope::generateSignedPdfForFile - Page '.$pageNo.': addStamp='.($addStamp ? 'YES' : 'NO'));
+                    
+                    if ($addStamp) {
+                        $this->addSignatureStampsToPage($pdf, $size, $stampConfig);
                     }
                 }
+                
+                // Save the signed PDF
+                $pdf->Output($this->signed_file_path, 'F');
+                dol_syslog('DocSigEnvelope::generateSignedPdfForFile - PDF saved to '.$this->signed_file_path);
+                
             } else {
                 // Copy original and append signature page
-                copy($this->file_path, $this->signed_file_path);
+                copy($file_path, $this->signed_file_path);
                 
                 // Create new PDF with signatures
                 $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
@@ -825,74 +1130,543 @@ class DocSigEnvelope extends CommonObject
                 
                 // For now, just keep the original as signed (signatures are recorded in DB)
                 // In a full implementation, we would merge PDFs properly
-                copy($this->file_path, $this->signed_file_path);
+                copy($file_path, $this->signed_file_path);
             }
 
             // Calculate hash of signed file
             $signedHash = hash_file('sha256', $this->signed_file_path);
             
             // Log event
-            $this->logEvent('PDF_SIGNED', 'Signed PDF generated: '.$signedFilename.' (SHA256: '.$signedHash.')');
+            $docRef = $document ? $document->ref : basename($file_path);
+            $this->logEvent('PDF_SIGNED', 'Signed PDF generated: '.$signedFilename.' (SHA256: '.$signedHash.') Doc: '.$docRef);
             
-            dol_syslog('DocSigEnvelope::generateSignedPdf - Signed PDF generated: '.$this->signed_file_path);
+            dol_syslog('DocSigEnvelope::generateSignedPdfForFile - Signed PDF generated: '.$this->signed_file_path);
             
             return 1;
 
         } catch (Exception $e) {
             $this->error = 'Error generating signed PDF: '.$e->getMessage();
-            dol_syslog('DocSigEnvelope::generateSignedPdf - Error: '.$this->error, LOG_ERR);
+            dol_syslog('DocSigEnvelope::generateSignedPdfForFile - Error: '.$this->error, LOG_ERR);
             return -1;
         }
     }
 
     /**
-     * Add signatures to a PDF page using TCPDF
+     * Get stamp configuration from module settings
+     *
+     * @return array Configuration array
+     */
+    private function getStampConfiguration()
+    {
+        global $conf;
+
+        // Parse header color from hex to RGB
+        $headerColorHex = getDolGlobalString('DOCSIG_STAMP_HEADER_COLOR', '#4682B4');
+        $headerColorHex = ltrim($headerColorHex, '#');
+        $headerColorR = hexdec(substr($headerColorHex, 0, 2));
+        $headerColorG = hexdec(substr($headerColorHex, 2, 2));
+        $headerColorB = hexdec(substr($headerColorHex, 4, 2));
+
+        return array(
+            'pages' => getDolGlobalString('DOCSIG_STAMP_PAGES', 'all'),
+            'x' => (float) getDolGlobalString('DOCSIG_STAMP_X', 10),
+            'y' => (float) getDolGlobalString('DOCSIG_STAMP_Y', 10),
+            'width' => (float) getDolGlobalString('DOCSIG_STAMP_WIDTH', 55),
+            'height' => (float) getDolGlobalString('DOCSIG_STAMP_HEIGHT', 35),
+            'orientation' => getDolGlobalString('DOCSIG_STAMP_ORIENTATION', 'horizontal'),
+            'opacity' => (int) getDolGlobalString('DOCSIG_STAMP_OPACITY', 100),
+            'header_color' => array($headerColorR, $headerColorG, $headerColorB),
+        );
+    }
+
+    /**
+     * Determine if stamp should be added to a specific page
+     *
+     * @param int $pageNo Current page number (1-based)
+     * @param int $pageCount Total number of pages
+     * @param string $pagesConfig Configuration: 'all', 'first', 'last', 'first_last'
+     * @return bool True if stamp should be added
+     */
+    private function shouldAddStampToPage($pageNo, $pageCount, $pagesConfig)
+    {
+        switch ($pagesConfig) {
+            case 'first':
+                return $pageNo == 1;
+            case 'last':
+                return $pageNo == $pageCount;
+            case 'first_last':
+                return $pageNo == 1 || $pageNo == $pageCount;
+            case 'all':
+            default:
+                return true;
+        }
+    }
+
+    /**
+     * Add signature stamps to a PDF page using configuration
+     *
+     * @param TCPDF|FPDI $pdf PDF object
+     * @param array $size Page size array with 'width', 'height', 'orientation'
+     * @param array $config Stamp configuration
+     */
+    private function addSignatureStampsToPage(&$pdf, $size, $config)
+    {
+        global $langs;
+        $langs->load('docsig@signDol');
+
+        // Get stamp dimensions from config
+        $stampWidth = $config['width'];
+        $stampHeight = $config['height'];
+        $startX = $config['x'];
+        $startY = $config['y'];
+        $orientation = $config['orientation'];
+        $opacity = $config['opacity'] / 100;
+        $headerColor = $config['header_color'];
+
+        dol_syslog('DocSigEnvelope::addSignatureStampsToPage - Config: X='.$startX.', Y='.$startY.', W='.$stampWidth.', H='.$stampHeight.', O='.$orientation.', Opacity='.$opacity);
+
+        // Collect signed signers
+        $signedSigners = array();
+        foreach ($this->signers as $signer) {
+            if ($signer->status == DocSigSigner::STATUS_SIGNED) {
+                $signedSigners[] = $signer;
+            }
+        }
+
+        if (empty($signedSigners)) {
+            dol_syslog('DocSigEnvelope::addSignatureStampsToPage - No signed signers found');
+            return;
+        }
+
+        // Set transparency if opacity < 100
+        if ($opacity < 1) {
+            $pdf->SetAlpha($opacity);
+        }
+
+        // Calculate spacing between stamps
+        $spacing = 5;
+        $signerIndex = 0;
+
+        foreach ($signedSigners as $signer) {
+            // Calculate position based on orientation
+            if ($orientation == 'horizontal') {
+                $x = $startX + ($signerIndex * ($stampWidth + $spacing));
+                $y = $startY;
+                
+                // Check if we exceed page width, wrap to next row
+                if ($x + $stampWidth > $size['width'] - 10) {
+                    $signerIndex = 0;
+                    $x = $startX;
+                    $startY += $stampHeight + $spacing;
+                    $y = $startY;
+                }
+            } else {
+                // Vertical orientation
+                $x = $startX;
+                $y = $startY + ($signerIndex * ($stampHeight + $spacing));
+                
+                // Check if we exceed page height, wrap to next column
+                if ($y + $stampHeight > $size['height'] - 10) {
+                    $signerIndex = 0;
+                    $startX += $stampWidth + $spacing;
+                    $x = $startX;
+                    $y = $startY;
+                }
+            }
+
+            $this->drawSignatureStampOnPage($pdf, $signer, $x, $y, $stampWidth, $stampHeight, $headerColor);
+            $signerIndex++;
+        }
+
+        // Reset transparency
+        if ($opacity < 1) {
+            $pdf->SetAlpha(1);
+        }
+    }
+
+    /**
+     * Draw a single signature stamp on a page
+     *
+     * @param TCPDF|FPDI $pdf PDF object
+     * @param DocSigSigner $signer Signer object
+     * @param float $x X position
+     * @param float $y Y position
+     * @param float $w Width
+     * @param float $h Height
+     * @param array $headerColor RGB array for header color
+     */
+    private function drawSignatureStampOnPage(&$pdf, $signer, $x, $y, $w, $h, $headerColor)
+    {
+        global $langs;
+
+        // Draw stamp border with rounded corners and fill
+        $pdf->SetDrawColor(150, 150, 150);
+        $pdf->SetLineWidth(0.3);
+        $pdf->SetFillColor(255, 255, 255);
+        $pdf->RoundedRect($x, $y, $w, $h, 1.5, '1111', 'DF');
+
+        // Header bar with configurable color
+        $headerHeight = 5;
+        $pdf->SetFillColor($headerColor[0], $headerColor[1], $headerColor[2]);
+        $pdf->Rect($x, $y, $w, $headerHeight, 'F');
+
+        // Header text
+        $pdf->SetFont('helvetica', 'B', 5);
+        $pdf->SetTextColor(255, 255, 255);
+        $pdf->SetXY($x, $y + 0.8);
+        $pdf->Cell($w, 3.5, 'FIRMA DIGITAL VERIFICADA', 0, 0, 'C');
+
+        // Calculate areas: signature on left, details on right
+        $sigAreaX = $x + 2;
+        $sigAreaY = $y + $headerHeight + 1;
+        $sigAreaW = min(22, ($w - 6) * 0.4);
+        $sigAreaH = min(14, $h - $headerHeight - 10);
+
+        // Signature image area background
+        $pdf->SetFillColor(250, 250, 250);
+        $pdf->SetDrawColor(200, 200, 200);
+        $pdf->Rect($sigAreaX, $sigAreaY, $sigAreaW, $sigAreaH, 'DF');
+
+        // Add signature image if available
+        $signatureData = $signer->signature_image ?: $signer->signature_data;
+        if (!empty($signatureData) && strpos($signatureData, 'data:image') === 0) {
+            $imgData = explode(',', $signatureData);
+            if (count($imgData) > 1) {
+                try {
+                    $pdf->Image('@'.base64_decode($imgData[1]), $sigAreaX + 0.5, $sigAreaY + 0.5, $sigAreaW - 1, $sigAreaH - 1, '', '', '', true, 300, '', false, false, 0, 'CM');
+                } catch (Exception $e) {
+                    // Ignore image errors
+                }
+            }
+        }
+
+        // Details area (right side of signature)
+        $detailX = $sigAreaX + $sigAreaW + 2;
+        $detailY = $sigAreaY;
+        $detailW = $w - $sigAreaW - 6;
+        $lineHeight = 2.5;
+
+        // Signer name
+        $pdf->SetFont('helvetica', 'B', 5);
+        $pdf->SetTextColor(40, 40, 40);
+        $pdf->SetXY($detailX, $detailY);
+        $signerName = $signer->getFullName();
+        if (strlen($signerName) > 18) {
+            $signerName = substr($signerName, 0, 16).'...';
+        }
+        $pdf->Cell($detailW, $lineHeight, $signerName, 0, 1, 'L');
+
+        // Email
+        $pdf->SetFont('helvetica', '', 4);
+        $pdf->SetTextColor(80, 80, 80);
+        $pdf->SetXY($detailX, $detailY + $lineHeight);
+        $email = $signer->email;
+        if (strlen($email) > 20) {
+            $email = substr($email, 0, 18).'...';
+        }
+        $pdf->Cell($detailW, $lineHeight, $email, 0, 1, 'L');
+
+        // Date - simplified format to fit
+        $pdf->SetXY($detailX, $detailY + ($lineHeight * 2));
+        $dateStr = dol_print_date($signer->date_signed, '%d/%m/%Y %H:%M');
+        $pdf->Cell($detailW, $lineHeight, $dateStr, 0, 1, 'L');
+
+        // IP Address
+        $pdf->SetXY($detailX, $detailY + ($lineHeight * 3));
+        $pdf->Cell($detailW, $lineHeight, 'IP: '.($signer->ip_address ?: 'N/A'), 0, 1, 'L');
+
+        // DNI if available
+        if (!empty($signer->dni)) {
+            $pdf->SetXY($detailX, $detailY + ($lineHeight * 4));
+            $pdf->Cell($detailW, $lineHeight, 'DNI: '.$signer->dni, 0, 1, 'L');
+        }
+
+        // Hash footer
+        $hashY = $y + $h - 6;
+        $pdf->SetFont('helvetica', '', 3.5);
+        $pdf->SetTextColor(120, 120, 120);
+        $pdf->SetXY($x + 2, $hashY);
+        $signatureHash = $signer->signature_hash ?: hash('sha256', $signer->email.$signer->date_signed);
+        $pdf->Cell($w - 4, 2.5, 'Hash: '.substr($signatureHash, 0, 28).'...', 0, 1, 'L');
+
+        // Reference
+        $pdf->SetXY($x + 2, $hashY + 2.5);
+        $pdf->Cell($w - 4, 2.5, 'Ref: '.$this->ref, 0, 1, 'L');
+    }
+
+    /**
+     * Add professional signature stamps to a PDF page (legacy method - kept for compatibility)
+     * Each signer gets a visual stamp with: name, date, IP, signature hash, and handwritten signature
      *
      * @param TCPDF $pdf PDF object
      * @param array $size Page size
      */
     private function addSignaturesToPage(&$pdf, $size)
     {
-        // Signature box dimensions
-        $boxWidth = 60;
-        $boxHeight = 25;
+        global $langs;
+        $langs->load('docsig@signDol');
+
+        // Stamp dimensions - larger to accommodate all data
+        $stampWidth = 75;
+        $stampHeight = 45;
         $margin = 10;
-        $startY = $size['height'] - $margin - $boxHeight;
-        $startX = $size['width'] - $margin - $boxWidth;
+        
+        // Calculate positions - stamps go at bottom of page
+        $startY = $size['height'] - $margin - $stampHeight;
+        $startX = $margin;
         
         $signerIndex = 0;
-        $maxPerRow = 3;
+        $maxPerRow = 2; // 2 stamps per row for better readability
+        $signedSigners = array();
         
+        // Collect signed signers
         foreach ($this->signers as $signer) {
-            if ($signer->status == DocSigSigner::STATUS_SIGNED && !empty($signer->signature_data)) {
-                $col = $signerIndex % $maxPerRow;
-                $row = floor($signerIndex / $maxPerRow);
-                
-                $x = $startX - ($col * ($boxWidth + 5));
-                $y = $startY - ($row * ($boxHeight + 5));
-                
-                // Draw signature box
-                $pdf->SetDrawColor(200, 200, 200);
-                $pdf->Rect($x, $y, $boxWidth, $boxHeight, 'D');
-                
-                // Add signature image if it's base64
-                if (strpos($signer->signature_data, 'data:image') === 0) {
-                    $imgData = explode(',', $signer->signature_data);
-                    if (count($imgData) > 1) {
-                        $pdf->Image('@'.base64_decode($imgData[1]), $x + 2, $y + 2, $boxWidth - 4, $boxHeight - 10, '', '', '', true);
-                    }
-                }
-                
-                // Add signer name and date
-                $pdf->SetFont('helvetica', '', 6);
-                $pdf->SetXY($x, $y + $boxHeight - 8);
-                $pdf->Cell($boxWidth, 4, $signer->getFullName(), 0, 1, 'C');
-                $pdf->SetXY($x, $y + $boxHeight - 4);
-                $pdf->Cell($boxWidth, 4, dol_print_date($signer->signed_at, 'dayhour'), 0, 1, 'C');
-                
-                $signerIndex++;
+            if ($signer->status == DocSigSigner::STATUS_SIGNED) {
+                $signedSigners[] = $signer;
             }
         }
+        
+        // If there are signatures, add a separator line
+        if (!empty($signedSigners)) {
+            $lineY = $startY - 5;
+            $pdf->SetDrawColor(180, 180, 180);
+            $pdf->Line($margin, $lineY, $size['width'] - $margin, $lineY);
+            
+            // Title above signatures
+            $pdf->SetFont('helvetica', 'B', 8);
+            $pdf->SetTextColor(80, 80, 80);
+            $pdf->SetXY($margin, $lineY - 6);
+            $pdf->Cell(0, 5, $langs->trans('DigitalSignaturesRecord'), 0, 0, 'L');
+        }
+        
+        foreach ($signedSigners as $signer) {
+            $col = $signerIndex % $maxPerRow;
+            $row = floor($signerIndex / $maxPerRow);
+            
+            $x = $startX + ($col * ($stampWidth + 10));
+            $y = $startY - ($row * ($stampHeight + 5));
+            
+            // Draw stamp border with slight shadow effect
+            $pdf->SetDrawColor(100, 100, 100);
+            $pdf->SetLineWidth(0.3);
+            $pdf->SetFillColor(252, 252, 252);
+            $pdf->RoundedRect($x, $y, $stampWidth, $stampHeight, 2, '1111', 'DF');
+            
+            // Header bar
+            $pdf->SetFillColor(70, 130, 180); // Steel blue
+            $pdf->Rect($x, $y, $stampWidth, 6, 'F');
+            
+            $pdf->SetFont('helvetica', 'B', 6);
+            $pdf->SetTextColor(255, 255, 255);
+            $pdf->SetXY($x, $y + 1);
+            $pdf->Cell($stampWidth, 4, 'FIRMA DIGITAL VERIFICADA', 0, 0, 'C');
+            
+            // Signature image area (left side)
+            $sigAreaX = $x + 2;
+            $sigAreaY = $y + 8;
+            $sigAreaW = 28;
+            $sigAreaH = 18;
+            
+            $pdf->SetDrawColor(200, 200, 200);
+            $pdf->SetFillColor(255, 255, 255);
+            $pdf->Rect($sigAreaX, $sigAreaY, $sigAreaW, $sigAreaH, 'DF');
+            
+            // Add signature image
+            $signatureData = $signer->signature_image ?: $signer->signature_data;
+            if (!empty($signatureData) && strpos($signatureData, 'data:image') === 0) {
+                $imgData = explode(',', $signatureData);
+                if (count($imgData) > 1) {
+                    $pdf->Image('@'.base64_decode($imgData[1]), $sigAreaX + 1, $sigAreaY + 1, $sigAreaW - 2, $sigAreaH - 2, '', '', '', true, 300, '', false, false, 0, 'CM');
+                }
+            }
+            
+            // Signer details (right side)
+            $detailX = $x + 32;
+            $detailY = $y + 8;
+            $detailW = $stampWidth - 34;
+            
+            $pdf->SetTextColor(50, 50, 50);
+            $pdf->SetFont('helvetica', 'B', 6);
+            $pdf->SetXY($detailX, $detailY);
+            $signerName = $signer->getFullName();
+            if (strlen($signerName) > 20) {
+                $signerName = substr($signerName, 0, 18) . '...';
+            }
+            $pdf->Cell($detailW, 3, $signerName, 0, 1, 'L');
+            
+            $pdf->SetFont('helvetica', '', 5);
+            $pdf->SetTextColor(80, 80, 80);
+            
+            // Email (truncated if too long)
+            $pdf->SetXY($detailX, $detailY + 3);
+            $email = $signer->email;
+            if (strlen($email) > 22) {
+                $email = substr($email, 0, 20) . '...';
+            }
+            $pdf->Cell($detailW, 3, $email, 0, 1, 'L');
+            
+            // Date signed
+            $pdf->SetXY($detailX, $detailY + 6);
+            $pdf->Cell($detailW, 3, dol_print_date($signer->date_signed, 'dayhour'), 0, 1, 'L');
+            
+            // IP Address
+            $pdf->SetXY($detailX, $detailY + 9);
+            $pdf->Cell($detailW, 3, 'IP: '.($signer->ip_address ?: 'N/A'), 0, 1, 'L');
+            
+            // DNI if available
+            if (!empty($signer->dni)) {
+                $pdf->SetXY($detailX, $detailY + 12);
+                $pdf->Cell($detailW, 3, 'DNI: '.$signer->dni, 0, 1, 'L');
+            }
+            
+            // Hash verification footer
+            $hashY = $y + $stampHeight - 8;
+            $pdf->SetFont('helvetica', '', 4);
+            $pdf->SetTextColor(120, 120, 120);
+            $pdf->SetXY($x + 2, $hashY);
+            $signatureHash = $signer->signature_hash ?: hash('sha256', $signer->email.$signer->date_signed);
+            $pdf->Cell($stampWidth - 4, 3, 'Hash: '.substr($signatureHash, 0, 32).'...', 0, 1, 'L');
+            
+            // Document ref
+            $pdf->SetXY($x + 2, $hashY + 3);
+            $pdf->Cell($stampWidth - 4, 3, 'Ref: '.$this->ref, 0, 1, 'L');
+            
+            $signerIndex++;
+        }
+    }
+
+    /**
+     * Add a new page with all signature stamps (fallback when FPDI not available)
+     *
+     * @param TCPDF $pdf PDF object
+     */
+    private function addSignatureStampsPage(&$pdf)
+    {
+        global $langs;
+        $langs->load('docsig@signDol');
+        
+        $pdf->AddPage();
+        
+        // Header
+        $pdf->SetFont('helvetica', 'B', 16);
+        $pdf->SetTextColor(51, 51, 51);
+        $pdf->Cell(0, 12, $langs->trans('DigitalSignaturesRecord'), 0, 1, 'C');
+        
+        $pdf->SetFont('helvetica', '', 9);
+        $pdf->SetTextColor(100, 100, 100);
+        $pdf->Cell(0, 6, $langs->trans('Document').': '.$this->ref.' - '.basename($this->file_path), 0, 1, 'C');
+        $pdf->Ln(8);
+        
+        // Draw stamps in a grid
+        $stampWidth = 85;
+        $stampHeight = 50;
+        $margin = 15;
+        $spacing = 10;
+        $maxPerRow = 2;
+        
+        $signerIndex = 0;
+        foreach ($this->signers as $signer) {
+            if ($signer->status != DocSigSigner::STATUS_SIGNED) {
+                continue;
+            }
+            
+            $col = $signerIndex % $maxPerRow;
+            $row = floor($signerIndex / $maxPerRow);
+            
+            $x = $margin + ($col * ($stampWidth + $spacing));
+            $y = 45 + ($row * ($stampHeight + $spacing));
+            
+            // Check if we need a new page
+            if ($y + $stampHeight > $pdf->getPageHeight() - 20) {
+                $pdf->AddPage();
+                $y = 20;
+            }
+            
+            $this->drawSignatureStamp($pdf, $signer, $x, $y, $stampWidth, $stampHeight);
+            $signerIndex++;
+        }
+    }
+
+    /**
+     * Draw a single signature stamp
+     *
+     * @param TCPDF $pdf PDF object
+     * @param DocSigSigner $signer Signer object
+     * @param float $x X position
+     * @param float $y Y position
+     * @param float $w Width
+     * @param float $h Height
+     */
+    private function drawSignatureStamp(&$pdf, $signer, $x, $y, $w, $h)
+    {
+        // Border
+        $pdf->SetDrawColor(70, 130, 180);
+        $pdf->SetLineWidth(0.5);
+        $pdf->SetFillColor(250, 250, 255);
+        $pdf->RoundedRect($x, $y, $w, $h, 3, '1111', 'DF');
+        
+        // Header
+        $pdf->SetFillColor(70, 130, 180);
+        $pdf->Rect($x, $y, $w, 7, 'F');
+        $pdf->SetFont('helvetica', 'B', 7);
+        $pdf->SetTextColor(255, 255, 255);
+        $pdf->SetXY($x, $y + 1.5);
+        $pdf->Cell($w, 4, 'FIRMA DIGITAL VERIFICADA', 0, 0, 'C');
+        
+        // Signature area
+        $sigX = $x + 3;
+        $sigY = $y + 10;
+        $sigW = 35;
+        $sigH = 22;
+        
+        $pdf->SetDrawColor(180, 180, 180);
+        $pdf->SetFillColor(255, 255, 255);
+        $pdf->Rect($sigX, $sigY, $sigW, $sigH, 'DF');
+        
+        // Signature image
+        $signatureData = $signer->signature_image ?: $signer->signature_data;
+        if (!empty($signatureData) && strpos($signatureData, 'data:image') === 0) {
+            $imgData = explode(',', $signatureData);
+            if (count($imgData) > 1) {
+                $pdf->Image('@'.base64_decode($imgData[1]), $sigX + 1, $sigY + 1, $sigW - 2, $sigH - 2, '', '', '', true, 300, '', false, false, 0, 'CM');
+            }
+        }
+        
+        // Details
+        $detX = $x + 42;
+        $detY = $y + 10;
+        $detW = $w - 45;
+        
+        $pdf->SetTextColor(50, 50, 50);
+        $pdf->SetFont('helvetica', 'B', 8);
+        $pdf->SetXY($detX, $detY);
+        $pdf->Cell($detW, 4, $signer->getFullName(), 0, 1, 'L');
+        
+        $pdf->SetFont('helvetica', '', 6);
+        $pdf->SetTextColor(80, 80, 80);
+        
+        $pdf->SetXY($detX, $detY + 5);
+        $pdf->Cell($detW, 3, $signer->email, 0, 1, 'L');
+        
+        if (!empty($signer->dni)) {
+            $pdf->SetXY($detX, $detY + 9);
+            $pdf->Cell($detW, 3, 'DNI: '.$signer->dni, 0, 1, 'L');
+        }
+        
+        $pdf->SetXY($detX, $detY + 13);
+        $pdf->Cell($detW, 3, 'Fecha: '.dol_print_date($signer->date_signed, 'dayhour'), 0, 1, 'L');
+        
+        $pdf->SetXY($detX, $detY + 17);
+        $pdf->Cell($detW, 3, 'IP: '.($signer->ip_address ?: 'N/A'), 0, 1, 'L');
+        
+        // Footer with hash
+        $pdf->SetFont('helvetica', '', 5);
+        $pdf->SetTextColor(120, 120, 120);
+        $signatureHash = $signer->signature_hash ?: hash('sha256', $signer->email.($signer->date_signed ?: ''));
+        $pdf->SetXY($x + 3, $y + $h - 8);
+        $pdf->Cell($w - 6, 3, 'Hash verificacion: '.substr($signatureHash, 0, 40).'...', 0, 1, 'L');
+        $pdf->SetXY($x + 3, $y + $h - 5);
+        $pdf->Cell($w - 6, 3, 'Documento: '.$this->ref.' | Integridad: '.substr($this->file_hash, 0, 16).'...', 0, 1, 'L');
     }
 
     /**
@@ -903,46 +1677,160 @@ class DocSigEnvelope extends CommonObject
     private function addSignatureAddendumPage(&$pdf)
     {
         global $langs;
+        $langs->load('docsig@signDol');
         
-        $pdf->SetFont('helvetica', 'B', 14);
-        $pdf->Cell(0, 10, $langs->trans('DigitalSignaturesRecord'), 0, 1, 'C');
-        $pdf->Ln(5);
+        // Page header
+        $pdf->SetFont('helvetica', 'B', 16);
+        $pdf->SetTextColor(70, 130, 180);
+        $pdf->Cell(0, 12, $langs->trans('DigitalSignaturesRecord'), 0, 1, 'C');
         
-        $pdf->SetFont('helvetica', '', 9);
-        $pdf->Cell(0, 5, $langs->trans('Document').': '.$this->ref, 0, 1);
-        $pdf->Cell(0, 5, $langs->trans('Date').': '.dol_print_date(dol_now(), 'dayhour'), 0, 1);
-        $pdf->Ln(5);
+        // Document info
+        $pdf->SetFont('helvetica', '', 10);
+        $pdf->SetTextColor(80, 80, 80);
+        $pdf->Cell(0, 6, $langs->trans('Document').': '.$this->ref, 0, 1, 'C');
+        $pdf->Cell(0, 6, $langs->trans('GeneratedOn').': '.dol_print_date(dol_now(), 'dayhour'), 0, 1, 'C');
         
-        // Signatures table
-        $pdf->SetFont('helvetica', 'B', 10);
-        $pdf->Cell(50, 7, $langs->trans('Signer'), 1);
-        $pdf->Cell(50, 7, $langs->trans('Email'), 1);
-        $pdf->Cell(40, 7, $langs->trans('SignedAt'), 1);
-        $pdf->Cell(40, 7, $langs->trans('Signature'), 1);
-        $pdf->Ln();
+        $pdf->Ln(8);
         
-        $pdf->SetFont('helvetica', '', 9);
+        // Draw separator line
+        $pdf->SetDrawColor(200, 200, 200);
+        $pdf->Line(20, $pdf->GetY(), 190, $pdf->GetY());
+        $pdf->Ln(8);
+        
+        // Stamp dimensions for addendum page
+        $stampWidth = 80;
+        $stampHeight = 50;
+        $margin = 15;
+        $maxPerRow = 2;
+        
+        // Collect signed signers
+        $signedSigners = array();
         foreach ($this->signers as $signer) {
             if ($signer->status == DocSigSigner::STATUS_SIGNED) {
-                $pdf->Cell(50, 15, $signer->getFullName(), 1);
-                $pdf->Cell(50, 15, $signer->email, 1);
-                $pdf->Cell(40, 15, dol_print_date($signer->signed_at, 'dayhour'), 1);
-                
-                // Signature image cell
-                $x = $pdf->GetX();
-                $y = $pdf->GetY();
-                $pdf->Cell(40, 15, '', 1);
-                
-                if (!empty($signer->signature_data) && strpos($signer->signature_data, 'data:image') === 0) {
-                    $imgData = explode(',', $signer->signature_data);
-                    if (count($imgData) > 1) {
-                        $pdf->Image('@'.base64_decode($imgData[1]), $x + 2, $y + 2, 36, 11, '', '', '', true);
-                    }
-                }
-                
-                $pdf->Ln();
+                $signedSigners[] = $signer;
             }
         }
+        
+        $startY = $pdf->GetY();
+        $startX = $margin;
+        
+        foreach ($signedSigners as $index => $signer) {
+            $col = $index % $maxPerRow;
+            $row = floor($index / $maxPerRow);
+            
+            $x = $startX + ($col * ($stampWidth + 10));
+            $y = $startY + ($row * ($stampHeight + 10));
+            
+            // Check if we need a new page
+            if ($y + $stampHeight > 270) {
+                $pdf->AddPage();
+                $startY = 20;
+                $y = $startY;
+            }
+            
+            $this->drawSignatureStampAddendum($pdf, $signer, $x, $y, $stampWidth, $stampHeight);
+        }
+    }
+    
+    /**
+     * Draw individual signature stamp for addendum page
+     *
+     * @param TCPDF $pdf PDF object
+     * @param DocSigSigner $signer Signer object
+     * @param float $x X position
+     * @param float $y Y position
+     * @param float $w Width
+     * @param float $h Height
+     */
+    private function drawSignatureStampAddendum(&$pdf, $signer, $x, $y, $w, $h)
+    {
+        global $langs;
+        
+        // Draw stamp border with slight shadow effect
+        $pdf->SetDrawColor(100, 100, 100);
+        $pdf->SetLineWidth(0.4);
+        $pdf->SetFillColor(252, 252, 252);
+        $pdf->RoundedRect($x, $y, $w, $h, 3, '1111', 'DF');
+        
+        // Header bar
+        $pdf->SetFillColor(70, 130, 180); // Steel blue
+        $pdf->Rect($x, $y, $w, 8, 'F');
+        
+        $pdf->SetFont('helvetica', 'B', 8);
+        $pdf->SetTextColor(255, 255, 255);
+        $pdf->SetXY($x, $y + 2);
+        $pdf->Cell($w, 5, 'FIRMA DIGITAL VERIFICADA', 0, 0, 'C');
+        
+        // Signature image area (left side)
+        $sigAreaX = $x + 3;
+        $sigAreaY = $y + 11;
+        $sigAreaW = 32;
+        $sigAreaH = 22;
+        
+        $pdf->SetDrawColor(200, 200, 200);
+        $pdf->SetFillColor(255, 255, 255);
+        $pdf->Rect($sigAreaX, $sigAreaY, $sigAreaW, $sigAreaH, 'DF');
+        
+        // Add signature image
+        $signatureData = $signer->signature_image ?: $signer->signature_data;
+        if (!empty($signatureData) && strpos($signatureData, 'data:image') === 0) {
+            $imgData = explode(',', $signatureData);
+            if (count($imgData) > 1) {
+                $pdf->Image('@'.base64_decode($imgData[1]), $sigAreaX + 2, $sigAreaY + 2, $sigAreaW - 4, $sigAreaH - 4, '', '', '', true, 300, '', false, false, 0, 'CM');
+            }
+        }
+        
+        // Signer details (right side)
+        $detailX = $x + 38;
+        $detailY = $y + 11;
+        $detailW = $w - 42;
+        
+        $pdf->SetTextColor(50, 50, 50);
+        $pdf->SetFont('helvetica', 'B', 8);
+        $pdf->SetXY($detailX, $detailY);
+        $signerName = $signer->getFullName();
+        if (strlen($signerName) > 22) {
+            $signerName = substr($signerName, 0, 20) . '...';
+        }
+        $pdf->Cell($detailW, 4, $signerName, 0, 1, 'L');
+        
+        $pdf->SetFont('helvetica', '', 7);
+        $pdf->SetTextColor(80, 80, 80);
+        
+        // Email
+        $pdf->SetXY($detailX, $detailY + 5);
+        $email = $signer->email;
+        if (strlen($email) > 25) {
+            $email = substr($email, 0, 23) . '...';
+        }
+        $pdf->Cell($detailW, 4, $email, 0, 1, 'L');
+        
+        // Date signed
+        $pdf->SetXY($detailX, $detailY + 10);
+        $signedDate = $signer->date_signed ?: $signer->signed_at;
+        $pdf->Cell($detailW, 4, $langs->trans('SignedAt').': '.dol_print_date($signedDate, 'dayhour'), 0, 1, 'L');
+        
+        // IP Address
+        $pdf->SetXY($detailX, $detailY + 15);
+        $pdf->Cell($detailW, 4, 'IP: '.($signer->ip_address ?: 'N/A'), 0, 1, 'L');
+        
+        // DNI if available
+        if (!empty($signer->dni)) {
+            $pdf->SetXY($detailX, $detailY + 20);
+            $pdf->Cell($detailW, 4, 'DNI: '.$signer->dni, 0, 1, 'L');
+        }
+        
+        // Hash verification footer
+        $hashY = $y + $h - 10;
+        $pdf->SetFont('helvetica', '', 5);
+        $pdf->SetTextColor(120, 120, 120);
+        $pdf->SetXY($x + 3, $hashY);
+        $signatureHash = $signer->signature_hash ?: hash('sha256', $signer->email.($signer->date_signed ?: $signer->signed_at));
+        $pdf->Cell($w - 6, 4, 'Hash: '.substr($signatureHash, 0, 40).'...', 0, 1, 'L');
+        
+        // Document ref
+        $pdf->SetXY($x + 3, $hashY + 4);
+        $pdf->Cell($w - 6, 4, 'Ref: '.$this->ref, 0, 1, 'L');
     }
 
     /**
@@ -952,8 +1840,9 @@ class DocSigEnvelope extends CommonObject
      */
     public function generateComplianceCertificate()
     {
-        global $conf, $langs;
+        global $conf, $langs, $mysoc;
 
+        $langs->load('docsig@signDol');
         dol_syslog('DocSigEnvelope::generateComplianceCertificate - Starting for envelope '.$this->ref);
 
         // Prepare output path
@@ -964,154 +1853,308 @@ class DocSigEnvelope extends CommonObject
         require_once TCPDF_PATH.'tcpdf.php';
 
         try {
-            $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+            $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
             
             // Document info
             $pdf->SetCreator('DocSig');
-            $pdf->SetAuthor('DocSig Digital Signature Module');
-            $pdf->SetTitle('Compliance Certificate - '.$this->ref);
-            $pdf->SetSubject('Digital Signature Compliance Certificate');
+            $pdf->SetAuthor(getDolGlobalString('MAIN_INFO_SOCIETE_NOM', 'DocSig'));
+            $pdf->SetTitle('Certificado - '.$this->ref);
+            $pdf->SetSubject('Certificado de Contratación Electrónica');
             
-            $pdf->SetMargins(15, 15, 15);
-            $pdf->SetAutoPageBreak(true, 15);
+            // Remove default header/footer
+            $pdf->setPrintHeader(false);
+            $pdf->setPrintFooter(false);
+            
+            $pdf->SetMargins(15, 10, 15);
+            $pdf->SetAutoPageBreak(true, 25);
             $pdf->AddPage();
 
-            // Header
-            $pdf->SetFont('helvetica', 'B', 18);
-            $pdf->SetTextColor(51, 51, 51);
-            $pdf->Cell(0, 15, $langs->trans('ComplianceCertificate'), 0, 1, 'C');
-            
-            $pdf->SetFont('helvetica', '', 10);
-            $pdf->SetTextColor(102, 102, 102);
-            $pdf->Cell(0, 8, $langs->trans('DigitalSignatureRecord'), 0, 1, 'C');
-            $pdf->Ln(10);
+            // Colors
+            $primaryColor = array(0, 102, 153); // Blue
+            $headerBg = array(0, 102, 153);
+            $lightBg = array(245, 248, 250);
+            $borderColor = array(200, 210, 220);
+            $textDark = array(51, 51, 51);
+            $textLight = array(102, 102, 102);
+            $successColor = array(40, 167, 69);
 
-            // Document Info Box
-            $pdf->SetFillColor(245, 245, 245);
-            $pdf->SetFont('helvetica', 'B', 11);
-            $pdf->Cell(0, 8, $langs->trans('DocumentInformation'), 0, 1, 'L', true);
+            $pageWidth = 180; // mm (210 - 15*2)
+            $colWidth = $pageWidth / 2;
+
+            // ==================== HEADER ====================
+            // Company logo area (left)
+            $pdf->SetXY(15, 10);
+            $companyName = getDolGlobalString('MAIN_INFO_SOCIETE_NOM', 'DocSig');
+            $pdf->SetFont('helvetica', 'B', 14);
+            $pdf->SetTextColor($primaryColor[0], $primaryColor[1], $primaryColor[2]);
+            $pdf->Cell(60, 10, $companyName, 0, 0, 'L');
+
+            // Title and date (right aligned)
+            $pdf->SetXY(100, 10);
+            $pdf->SetFont('helvetica', 'B', 20);
+            $pdf->SetTextColor($primaryColor[0], $primaryColor[1], $primaryColor[2]);
+            $pdf->Cell(95, 10, 'CERTIFICADO', 0, 1, 'R');
             
+            $pdf->SetXY(100, 18);
+            $pdf->SetFont('helvetica', '', 10);
+            $pdf->SetTextColor($textLight[0], $textLight[1], $textLight[2]);
+            $pdf->Cell(95, 6, 'Contratación electrónica certificada', 0, 1, 'R');
+            
+            $pdf->SetXY(100, 24);
             $pdf->SetFont('helvetica', '', 9);
-            $infoY = $pdf->GetY();
+            $pdf->Cell(95, 5, dol_print_date(dol_now(), 'dayhour'), 0, 1, 'R');
+
+            $pdf->Ln(8);
+
+            // ==================== CERTIFICATION TEXT ====================
+            $pdf->SetFont('helvetica', '', 9);
+            $pdf->SetTextColor($textDark[0], $textDark[1], $textDark[2]);
             
-            $labels = array(
-                'Reference' => $this->ref,
-                'OriginalFile' => basename($this->file_path),
-                'FileHash' => $this->file_hash,
-                'CreationDate' => dol_print_date($this->date_creation, 'dayhour'),
-                'CompletionDate' => dol_print_date(dol_now(), 'dayhour'),
-                'TotalSigners' => count($this->signers)
+            $adminName = getDolGlobalString('MAIN_INFO_SOCIETE_MANAGERS', 'El Administrador');
+            $companyCIF = getDolGlobalString('MAIN_INFO_SIREN', '');
+            
+            $certText = sprintf(
+                'D. %s en representación de %s%s, en su condición de Prestador de Servicios de Confianza generando una prueba por interposición CERTIFICA que todos los datos recogidos en el presente documento corresponden con la contratación electrónica certificada entre las partes abajo indicadas, con fecha de creación %s cuyo identificador único es %s, habiéndose procedido a depositar notarialmente la función resumen de su contenido.',
+                $adminName,
+                $companyName,
+                $companyCIF ? ' con NIF '.$companyCIF : '',
+                dol_print_date($this->date_creation, 'dayhour'),
+                $this->ref
             );
             
-            foreach ($labels as $label => $value) {
-                $pdf->SetFont('helvetica', 'B', 9);
-                $pdf->Cell(50, 6, $langs->trans($label).':', 0);
-                $pdf->SetFont('helvetica', '', 9);
-                $pdf->Cell(0, 6, $value, 0, 1);
-            }
+            $pdf->MultiCell(0, 5, $certText, 0, 'J');
             $pdf->Ln(5);
 
-            // Signers Section
-            $pdf->SetFont('helvetica', 'B', 11);
-            $pdf->Cell(0, 8, $langs->trans('SignersInformation'), 0, 1, 'L', true);
-            $pdf->Ln(3);
-
-            foreach ($this->signers as $index => $signer) {
-                $pdf->SetFont('helvetica', 'B', 10);
-                $pdf->SetTextColor(51, 51, 51);
-                $pdf->Cell(0, 7, ($index + 1).'. '.$signer->getFullName(), 0, 1);
+            // ==================== INTERVINIENTES ====================
+            $this->_drawCertSectionHeader($pdf, 'INTERVINIENTES', $headerBg);
+            
+            // Emisor del contrato
+            $pdf->SetFont('helvetica', 'B', 8);
+            $pdf->SetTextColor($textLight[0], $textLight[1], $textLight[2]);
+            $pdf->Cell(40, 5, 'EMISOR DEL CONTRATO', 0, 0, 'L');
+            $pdf->SetFont('helvetica', '', 9);
+            $pdf->SetTextColor($textDark[0], $textDark[1], $textDark[2]);
+            $pdf->Cell(0, 5, $companyName, 0, 1, 'L');
+            
+            // Otros intervinientes (firmantes)
+            $pdf->SetFont('helvetica', 'B', 8);
+            $pdf->SetTextColor($textLight[0], $textLight[1], $textLight[2]);
+            $pdf->Cell(40, 5, 'OTROS INTERVINIENTES', 0, 1, 'L');
+            
+            foreach ($this->signers as $signer) {
+                $pdf->SetFont('helvetica', 'B', 9);
+                $pdf->SetTextColor($primaryColor[0], $primaryColor[1], $primaryColor[2]);
+                $pdf->Cell(5, 4, '', 0);
+                $pdf->Cell(0, 4, $signer->getFullName(), 0, 1, 'L');
                 
                 $pdf->SetFont('helvetica', '', 8);
-                $pdf->SetTextColor(102, 102, 102);
-                
-                $signerInfo = array(
-                    'Email' => $signer->email,
-                    'Phone' => $signer->phone ?: '-',
-                    'DNI' => $signer->dni ?: '-',
-                    'Status' => $signer->status == DocSigSigner::STATUS_SIGNED ? $langs->trans('Signed') : $langs->trans('Pending'),
-                );
+                $pdf->SetTextColor($textLight[0], $textLight[1], $textLight[2]);
+                $pdf->Cell(10, 4, '', 0);
+                $signerInfo = 'Identificación: '.$signer->email;
+                if ($signer->dni) $signerInfo .= ' - DNI: '.$signer->dni;
+                if ($signer->phone) $signerInfo .= ' - Móvil: '.$signer->phone;
+                $pdf->Cell(0, 4, $signerInfo, 0, 1, 'L');
+            }
+            $pdf->Ln(3);
+
+            // ==================== ESTADO ====================
+            $this->_drawCertSectionHeader($pdf, 'ESTADO', $headerBg);
+            
+            $pdf->SetFillColor($lightBg[0], $lightBg[1], $lightBg[2]);
+            $pdf->Rect(15, $pdf->GetY(), $pageWidth, 8, 'F');
+            
+            // Check icon
+            $pdf->SetFont('zapfdingbats', '', 12);
+            $pdf->SetTextColor($successColor[0], $successColor[1], $successColor[2]);
+            $pdf->Cell(8, 8, '4', 0, 0, 'C'); // Checkmark in Zapf Dingbats
+            
+            $pdf->SetFont('helvetica', 'B', 9);
+            $pdf->SetTextColor($successColor[0], $successColor[1], $successColor[2]);
+            $pdf->Cell(20, 8, 'FIRMADO', 0, 0, 'L');
+            
+            $pdf->SetFont('helvetica', '', 9);
+            $pdf->SetTextColor($textDark[0], $textDark[1], $textDark[2]);
+            $completionDate = dol_now();
+            foreach ($this->signers as $s) {
+                if ($s->signed_at && $s->signed_at > $completionDate) {
+                    $completionDate = $s->signed_at;
+                }
+            }
+            $pdf->Cell(0, 8, 'Fecha último estado: '.dol_print_date($completionDate, 'dayhour'), 0, 1, 'L');
+            $pdf->Ln(3);
+
+            // ==================== VERIFICACIÓN ELECTRÓNICA ====================
+            $this->_drawCertSectionHeader($pdf, 'VERIFICACIÓN ELECTRÓNICA', $headerBg);
+            
+            $pdf->SetFont('helvetica', 'B', 8);
+            $pdf->SetTextColor($textLight[0], $textLight[1], $textLight[2]);
+            $pdf->Cell(50, 5, 'GUID DE LA TRANSACCIÓN:', 0, 0, 'L');
+            $pdf->SetFont('helvetica', '', 8);
+            $pdf->SetTextColor($textDark[0], $textDark[1], $textDark[2]);
+            $pdf->Cell(0, 5, $this->ref.'-'.strtoupper(substr(md5($this->ref.$this->date_creation), 0, 16)), 0, 1, 'L');
+            
+            $pdf->SetFont('helvetica', 'I', 7);
+            $pdf->SetTextColor($textLight[0], $textLight[1], $textLight[2]);
+            $pdf->Cell(50, 4, '', 0);
+            $pdf->Cell(0, 4, 'CONTROL DE INTEGRIDAD BASADO EN LA FUNCIÓN RESUMEN DEL DOCUMENTO TRAMITADO', 0, 1, 'L');
+            
+            // Document hash
+            $pdf->SetFont('helvetica', 'B', 8);
+            $pdf->SetTextColor($textLight[0], $textLight[1], $textLight[2]);
+            $pdf->Cell(50, 5, 'DOCUMENTO:', 0, 0, 'L');
+            $pdf->SetFont('helvetica', '', 8);
+            $pdf->SetTextColor($textDark[0], $textDark[1], $textDark[2]);
+            $pdf->Cell(0, 5, basename($this->file_path), 0, 1, 'L');
+            
+            $pdf->SetFont('helvetica', 'B', 8);
+            $pdf->SetTextColor($textLight[0], $textLight[1], $textLight[2]);
+            $pdf->Cell(50, 5, 'HASH SHA-256:', 0, 0, 'L');
+            $pdf->SetFont('helvetica', '', 7);
+            $pdf->SetTextColor($textDark[0], $textDark[1], $textDark[2]);
+            $pdf->Cell(0, 5, $this->file_hash, 0, 1, 'L');
+            $pdf->Ln(3);
+
+            // ==================== REMISIONES ====================
+            $this->_drawCertSectionHeader($pdf, 'REMISIONES', $headerBg);
+            
+            // Table header
+            $pdf->SetFont('helvetica', 'B', 8);
+            $pdf->SetFillColor($lightBg[0], $lightBg[1], $lightBg[2]);
+            $pdf->Cell(55, 6, 'INTERVINIENTE', 1, 0, 'C', true);
+            $pdf->Cell(25, 6, 'MÉTODO', 1, 0, 'C', true);
+            $pdf->Cell(60, 6, 'DIRECCIÓN/TELÉFONO', 1, 0, 'C', true);
+            $pdf->Cell(40, 6, 'FECHA', 1, 1, 'C', true);
+            
+            // Remisiones data - fetch from events
+            $pdf->SetFont('helvetica', '', 8);
+            $sql = "SELECT DISTINCT payload_json, created_at FROM ".MAIN_DB_PREFIX."docsig_event 
+                    WHERE fk_envelope = ".(int)$this->id." AND event_type IN ('OTP_SENT', 'OTP_EMAIL_SENT', 'OTP_WHATSAPP_SENT')
+                    ORDER BY created_at ASC";
+            $resql = $this->db->query($sql);
+            if ($resql && $this->db->num_rows($resql) > 0) {
+                while ($obj = $this->db->fetch_object($resql)) {
+                    $payload = json_decode($obj->payload_json, true);
+                    $channel = isset($payload['channel']) ? strtoupper($payload['channel']) : 'EMAIL';
+                    $dest = isset($payload['destination']) ? $payload['destination'] : '';
+                    
+                    // Find signer
+                    $signerName = '';
+                    foreach ($this->signers as $s) {
+                        if ($s->email == $dest || $s->phone == $dest) {
+                            $signerName = $s->getFullName();
+                            break;
+                        }
+                    }
+                    if (!$signerName) $signerName = $dest;
+                    
+                    $pdf->Cell(55, 5, $signerName, 1, 0, 'L');
+                    $pdf->Cell(25, 5, $channel, 1, 0, 'C');
+                    $pdf->Cell(60, 5, $dest, 1, 0, 'L');
+                    $pdf->Cell(40, 5, dol_print_date($this->db->jdate($obj->created_at), 'dayhour'), 1, 1, 'C');
+                }
+            } else {
+                // If no OTP events, show signers
+                foreach ($this->signers as $signer) {
+                    $pdf->Cell(55, 5, $signer->getFullName(), 1, 0, 'L');
+                    $pdf->Cell(25, 5, 'EMAIL', 1, 0, 'C');
+                    $pdf->Cell(60, 5, $signer->email, 1, 0, 'L');
+                    $pdf->Cell(40, 5, dol_print_date($this->date_creation, 'dayhour'), 1, 1, 'C');
+                }
+            }
+            $pdf->Ln(3);
+
+            // ==================== FIRMAS ====================
+            $this->_drawCertSectionHeader($pdf, 'FIRMAS', $headerBg);
+            
+            // Table header
+            $pdf->SetFont('helvetica', 'B', 8);
+            $pdf->SetFillColor($lightBg[0], $lightBg[1], $lightBg[2]);
+            $pdf->Cell(50, 6, 'INTERVINIENTE', 1, 0, 'C', true);
+            $pdf->Cell(50, 6, 'DOCUMENTO', 1, 0, 'C', true);
+            $pdf->Cell(40, 6, 'FECHA', 1, 0, 'C', true);
+            $pdf->Cell(40, 6, 'RESULTADO', 1, 1, 'C', true);
+            
+            // Firmas data
+            $pdf->SetFont('helvetica', '', 8);
+            foreach ($this->signers as $signer) {
+                $pdf->Cell(50, 5, $signer->getFullName(), 1, 0, 'L');
+                $pdf->Cell(50, 5, basename($this->file_path), 1, 0, 'L');
+                $pdf->Cell(40, 5, $signer->signed_at ? dol_print_date($signer->signed_at, 'dayhour') : '-', 1, 0, 'C');
                 
                 if ($signer->status == DocSigSigner::STATUS_SIGNED) {
-                    $signerInfo['SignedAt'] = dol_print_date($signer->signed_at, 'dayhour');
-                    $signerInfo['IPAddress'] = $signer->ip_address ?: '-';
+                    $pdf->SetTextColor($successColor[0], $successColor[1], $successColor[2]);
+                    $pdf->Cell(40, 5, 'FIRMADO', 1, 1, 'C');
+                } else {
+                    $pdf->SetTextColor(200, 100, 0);
+                    $pdf->Cell(40, 5, 'PENDIENTE', 1, 1, 'C');
                 }
-                
-                foreach ($signerInfo as $label => $value) {
-                    $pdf->Cell(5, 5, '', 0);
-                    $pdf->SetFont('helvetica', 'B', 8);
-                    $pdf->Cell(30, 5, $langs->trans($label).':', 0);
-                    $pdf->SetFont('helvetica', '', 8);
-                    $pdf->Cell(0, 5, $value, 0, 1);
-                }
-                
-                // Add signature image if available
-                if ($signer->status == DocSigSigner::STATUS_SIGNED && !empty($signer->signature_data)) {
-                    if (strpos($signer->signature_data, 'data:image') === 0) {
-                        $imgData = explode(',', $signer->signature_data);
+                $pdf->SetTextColor($textDark[0], $textDark[1], $textDark[2]);
+            }
+            
+            // Add signature images
+            $pdf->Ln(3);
+            foreach ($this->signers as $signer) {
+                if ($signer->status == DocSigSigner::STATUS_SIGNED) {
+                    $signatureData = $signer->signature_image ?: $signer->signature_data;
+                    if (!empty($signatureData) && strpos($signatureData, 'data:image') === 0) {
+                        $imgData = explode(',', $signatureData);
                         if (count($imgData) > 1) {
-                            $pdf->Cell(5, 5, '', 0);
-                            $pdf->Cell(30, 5, $langs->trans('Signature').':', 0);
+                            $pdf->SetFont('helvetica', '', 7);
+                            $pdf->SetTextColor($textLight[0], $textLight[1], $textLight[2]);
+                            $pdf->Cell(30, 4, 'Firma de '.$signer->getFullName().':', 0, 0, 'L');
                             $x = $pdf->GetX();
                             $y = $pdf->GetY();
-                            $pdf->Image('@'.base64_decode($imgData[1]), $x, $y - 2, 40, 12, '', '', '', true);
-                            $pdf->Ln(15);
+                            try {
+                                $pdf->Image('@'.base64_decode($imgData[1]), $x, $y - 2, 35, 12, '', '', '', true, 300, '', false, false, 0, 'CM');
+                            } catch (Exception $e) {}
+                            $pdf->Ln(14);
                         }
                     }
                 }
-                
-                $pdf->Ln(3);
             }
+
+            // ==================== FOOTER ====================
+            $pdf->Ln(5);
+            
+            // Legal text boxes
+            $pdf->SetFont('helvetica', '', 6);
+            $pdf->SetTextColor($textLight[0], $textLight[1], $textLight[2]);
+            
+            $legalText1 = $companyName.' custodiará los registros informáticos generados en las transacciones realizadas, que son acreditativos de todo lo antedicho, de acuerdo con contrato suscrito entre '.$companyName.' y el emisor.';
+            $legalText2 = 'El soporte que incorpora las firmas electrónicas de las transacciones tiene la consideración de prueba documental, de acuerdo con la normativa aplicable en el Espacio Económico Europeo.';
+            
+            $pdf->MultiCell(85, 3, $legalText1, 0, 'J');
+            $pdf->SetXY(105, $pdf->GetY() - 12);
+            $pdf->MultiCell(85, 3, $legalText2, 0, 'J');
             
             $pdf->Ln(5);
-
-            // Audit Trail Section
-            $pdf->SetFont('helvetica', 'B', 11);
-            $pdf->Cell(0, 8, $langs->trans('AuditTrail'), 0, 1, 'L', true);
-            $pdf->Ln(3);
-
-            // Fetch audit events
-            $sql = "SELECT event_type, description, event_date, ip_address, user_agent 
-                    FROM ".MAIN_DB_PREFIX."docsig_event 
-                    WHERE fk_envelope = ".(int)$this->id." 
-                    ORDER BY event_date ASC";
-            $resql = $this->db->query($sql);
             
-            if ($resql) {
-                $pdf->SetFont('helvetica', '', 7);
-                
-                // Table header
-                $pdf->SetFillColor(230, 230, 230);
-                $pdf->Cell(30, 5, $langs->trans('DateTime'), 1, 0, 'C', true);
-                $pdf->Cell(35, 5, $langs->trans('Event'), 1, 0, 'C', true);
-                $pdf->Cell(65, 5, $langs->trans('Description'), 1, 0, 'C', true);
-                $pdf->Cell(30, 5, $langs->trans('IPAddress'), 1, 1, 'C', true);
-                
-                $pdf->SetFillColor(255, 255, 255);
-                while ($obj = $this->db->fetch_object($resql)) {
-                    $pdf->Cell(30, 4, dol_print_date($this->db->jdate($obj->event_date), 'dayhour'), 1, 0, 'L');
-                    $pdf->Cell(35, 4, $obj->event_type, 1, 0, 'L');
-                    
-                    // Truncate description if too long
-                    $desc = strlen($obj->description) > 40 ? substr($obj->description, 0, 37).'...' : $obj->description;
-                    $pdf->Cell(65, 4, $desc, 1, 0, 'L');
-                    $pdf->Cell(30, 4, $obj->ip_address ?: '-', 1, 1, 'L');
-                }
-            }
-
-            $pdf->Ln(10);
-
-            // Footer with hash and timestamp
-            $pdf->SetFont('helvetica', 'I', 8);
-            $pdf->SetTextColor(128, 128, 128);
+            // Verification code
+            $verificationCode = strtoupper(substr(hash('sha256', $this->ref.$this->file_hash.implode('', array_column($this->signers, 'id'))), 0, 20));
             
-            $certHash = hash('sha256', $this->ref.'-'.dol_now().'-'.implode('-', array_column($this->signers, 'id')));
-            $pdf->Cell(0, 5, $langs->trans('CertificateHash').': '.$certHash, 0, 1, 'C');
-            $pdf->Cell(0, 5, $langs->trans('GeneratedAt').': '.dol_print_date(dol_now(), 'dayhoursec').' UTC', 0, 1, 'C');
+            $pdf->SetY(-30);
+            $pdf->SetDrawColor($borderColor[0], $borderColor[1], $borderColor[2]);
+            $pdf->Line(15, $pdf->GetY(), 195, $pdf->GetY());
+            
+            $pdf->SetFont('helvetica', 'B', 8);
+            $pdf->SetTextColor($primaryColor[0], $primaryColor[1], $primaryColor[2]);
+            $pdf->Cell(60, 5, 'Código de verificación del certificado:', 0, 0, 'L');
+            $pdf->SetFont('helvetica', '', 8);
+            $pdf->Cell(70, 5, $verificationCode, 0, 0, 'L');
+            
+            // Verification URL
+            $verifyUrl = getDolGlobalString('DOCSIG_VERIFY_URL', dol_buildpath('/signDol/public/verify.php', 2));
+            $pdf->SetTextColor($primaryColor[0], $primaryColor[1], $primaryColor[2]);
+            $pdf->Cell(0, 5, $verifyUrl, 0, 1, 'R');
+            
+            $pdf->SetFont('helvetica', '', 7);
+            $pdf->SetTextColor($textLight[0], $textLight[1], $textLight[2]);
+            $pdf->Cell(0, 4, $companyName.' - Documento generado electrónicamente', 0, 1, 'L');
 
             // Save PDF
             $pdf->Output($this->compliance_cert_path, 'F');
             
-            $this->logEvent('CERTIFICATE_GENERATED', 'Compliance certificate generated: '.$certFilename);
+            $this->logEvent('CERTIFICATE_GENERATED', 'Compliance certificate generated: '.$certFilename.' (Code: '.$verificationCode.')');
             
             dol_syslog('DocSigEnvelope::generateComplianceCertificate - Certificate generated: '.$this->compliance_cert_path);
             
@@ -1122,6 +2165,19 @@ class DocSigEnvelope extends CommonObject
             dol_syslog('DocSigEnvelope::generateComplianceCertificate - Error: '.$this->error, LOG_ERR);
             return -1;
         }
+    }
+
+    /**
+     * Draw a section header for the certificate
+     */
+    private function _drawCertSectionHeader(&$pdf, $title, $bgColor)
+    {
+        $pdf->SetFont('helvetica', 'B', 9);
+        $pdf->SetFillColor($bgColor[0], $bgColor[1], $bgColor[2]);
+        $pdf->SetTextColor(255, 255, 255);
+        $pdf->Cell(0, 6, $title, 0, 1, 'L', true);
+        $pdf->SetTextColor(51, 51, 51);
+        $pdf->Ln(2);
     }
 
     /**

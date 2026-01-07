@@ -171,7 +171,13 @@ print '<input type="hidden" name="sortfield" value="'.$sortfield.'">';
 print '<input type="hidden" name="sortorder" value="'.$sortorder.'">';
 print '<input type="hidden" name="contextpage" value="'.$contextpage.'">';
 
-print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, '', $num, $nbtotalofrecords, 'fa-file-signature', 0, '', '', $limit, 0, 0, 1);
+// Button to create new standalone envelope
+$newcardbutton = '';
+if ($user->hasRight('docsig', 'envelope', 'write')) {
+    $newcardbutton .= dolGetButtonTitle($langs->trans('NewEnvelope'), '', 'fa fa-plus-circle', dol_buildpath('/signDol/card.php', 1).'?action=create');
+}
+
+print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, '', $num, $nbtotalofrecords, 'fa-file-signature', 0, $newcardbutton, '', $limit, 0, 0, 1);
 
 // Search filters
 print '<div class="div-table-responsive">';
@@ -188,6 +194,7 @@ $elementTypes = array(
     'propal' => $langs->trans('Proposal'),
     'contrat' => $langs->trans('Contract'),
     'fichinter' => $langs->trans('Intervention'),
+    'standalone' => $langs->trans('Standalone'),
 );
 print $form->selectarray('search_element', $elementTypes, $search_element, 0, 0, 0, '', 0, 0, 0, '', 'maxwidth150');
 print '</td>';
@@ -258,13 +265,18 @@ while ($i < min($num, $limit)) {
         'propal' => $langs->trans('Proposal'),
         'contrat' => $langs->trans('Contract'),
         'fichinter' => $langs->trans('Intervention'),
+        'standalone' => $langs->trans('Standalone'),
     );
     print $elementLabels[$obj->element] ?? $obj->element;
     print '</td>';
 
     // Object
     print '<td class="tdoverflowmax200">';
-    print $objectLink;
+    if ($obj->element == 'standalone') {
+        print '<span class="opacitymedium">'.$langs->trans('StandaloneDocument').'</span>';
+    } else {
+        print $objectLink;
+    }
     print '</td>';
 
     // Status

@@ -176,6 +176,93 @@ $item->helpText = $langs->trans('DocSigSignaturePositionHelp');
 $item->setAsSelect($signaturePositions);
 
 /*
+ * Configuración del Sello de Firma Visual
+ */
+$formSetup->newItem('StampSection')->setAsTitle();
+
+// En qué páginas mostrar el sello
+$stampPagesOptions = array(
+    'all' => $langs->trans('DocSigStampAllPages'),
+    'first' => $langs->trans('DocSigStampFirstPage'),
+    'last' => $langs->trans('DocSigStampLastPage'),
+    'first_last' => $langs->trans('DocSigStampFirstLastPage'),
+);
+$item = $formSetup->newItem('DOCSIG_STAMP_PAGES');
+$item->nameText = $langs->trans('DocSigStampPages');
+$item->helpText = $langs->trans('DocSigStampPagesHelp');
+$item->setAsSelect($stampPagesOptions);
+$item->defaultFieldValue = 'all';
+
+// Posición X del sello (mm desde el borde izquierdo)
+$item = $formSetup->newItem('DOCSIG_STAMP_X');
+$item->nameText = $langs->trans('DocSigStampX');
+$item->helpText = $langs->trans('DocSigStampXHelp');
+$item->defaultFieldValue = '10';
+$item->cssClass = 'minwidth100';
+$item->fieldAttr['type'] = 'number';
+$item->fieldAttr['min'] = '0';
+$item->fieldAttr['max'] = '200';
+
+// Posición Y del sello (mm desde el borde superior)
+$item = $formSetup->newItem('DOCSIG_STAMP_Y');
+$item->nameText = $langs->trans('DocSigStampY');
+$item->helpText = $langs->trans('DocSigStampYHelp');
+$item->defaultFieldValue = '10';
+$item->cssClass = 'minwidth100';
+$item->fieldAttr['type'] = 'number';
+$item->fieldAttr['min'] = '0';
+$item->fieldAttr['max'] = '280';
+
+// Ancho del sello (mm)
+$item = $formSetup->newItem('DOCSIG_STAMP_WIDTH');
+$item->nameText = $langs->trans('DocSigStampWidth');
+$item->helpText = $langs->trans('DocSigStampWidthHelp');
+$item->defaultFieldValue = '55';
+$item->cssClass = 'minwidth100';
+$item->fieldAttr['type'] = 'number';
+$item->fieldAttr['min'] = '30';
+$item->fieldAttr['max'] = '100';
+
+// Alto del sello (mm)
+$item = $formSetup->newItem('DOCSIG_STAMP_HEIGHT');
+$item->nameText = $langs->trans('DocSigStampHeight');
+$item->helpText = $langs->trans('DocSigStampHeightHelp');
+$item->defaultFieldValue = '35';
+$item->cssClass = 'minwidth100';
+$item->fieldAttr['type'] = 'number';
+$item->fieldAttr['min'] = '25';
+$item->fieldAttr['max'] = '60';
+
+// Orientación/Alineación del sello
+$stampAlignOptions = array(
+    'horizontal' => $langs->trans('DocSigStampHorizontal'),
+    'vertical' => $langs->trans('DocSigStampVertical'),
+);
+$item = $formSetup->newItem('DOCSIG_STAMP_ORIENTATION');
+$item->nameText = $langs->trans('DocSigStampOrientation');
+$item->helpText = $langs->trans('DocSigStampOrientationHelp');
+$item->setAsSelect($stampAlignOptions);
+$item->defaultFieldValue = 'horizontal';
+
+// Opacidad del sello (0-100)
+$item = $formSetup->newItem('DOCSIG_STAMP_OPACITY');
+$item->nameText = $langs->trans('DocSigStampOpacity');
+$item->helpText = $langs->trans('DocSigStampOpacityHelp');
+$item->defaultFieldValue = '100';
+$item->cssClass = 'minwidth100';
+$item->fieldAttr['type'] = 'number';
+$item->fieldAttr['min'] = '10';
+$item->fieldAttr['max'] = '100';
+
+// Color del encabezado del sello
+$item = $formSetup->newItem('DOCSIG_STAMP_HEADER_COLOR');
+$item->nameText = $langs->trans('DocSigStampHeaderColor');
+$item->helpText = $langs->trans('DocSigStampHeaderColorHelp');
+$item->defaultFieldValue = '#4682B4';
+$item->cssClass = 'minwidth100';
+$item->fieldAttr['type'] = 'color';
+
+/*
  * Notificaciones por tipo de objeto
  */
 $formSetup->newItem('NotificationSection')->setAsTitle();
