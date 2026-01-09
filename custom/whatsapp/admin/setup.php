@@ -8,8 +8,10 @@ if (!$res && file_exists("../../../main.inc.php")) $res = @include "../../../mai
 if (!$res && file_exists("../../../../main.inc.php")) $res = @include "../../../../main.inc.php";
 if (!$res) die("Include of main fails");
 
-require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
-require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
+$core_path = dirname(dirname(dirname(dirname(__FILE__))));
+
+require_once $core_path.'/core/lib/admin.lib.php';
+require_once $core_path.'/core/lib/functions2.lib.php';
 require_once '../lib/whatsapp.lib.php';
 require_once '../class/gowaclient.class.php';
 require_once '../class/gowainstaller.class.php';

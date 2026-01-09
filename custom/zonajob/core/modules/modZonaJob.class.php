@@ -80,7 +80,8 @@ class modZonaJob extends DolibarrModules
             'menus' => 0,
             'tpl' => 0,
             'barcode' => 0,
-            'models' => 0,
+            // Habilitar carga de modelos de documentos desde el módulo
+            'models' => array('/custom/zonajob/'),
             'printing' => 0,
             'theme' => 0,
             'css' => array(
@@ -243,11 +244,14 @@ class modZonaJob extends DolibarrModules
         // Create directories
         $this->_createDirectories();
 
+        // Registrar plantilla de pedidos con firma de conformidad
+        $this->registerOrderDocModel($this->db);
+
         return $this->_init(array(), $options);
     }
 
     /**
-     * Create required directories
+     * Create required directories and copy PDF template
      *
      * @return void
      */
@@ -267,6 +271,73 @@ class modZonaJob extends DolibarrModules
                 dol_mkdir($dir);
             }
         }
+
+        // Copy PDF template to core/modules/commande/doc/
+        $this->_copyPDFTemplate();
+    }
+
+    /**
+     * Copy PDF template from custom zonajob to core/modules/commande/doc/
+     * This ensures Dolibarr can find the template for PDF generation
+     *
+     * @return bool True on success, false on error
+     */
+    private function _copyPDFTemplate()
+    {
+        global $conf;
+
+        // Use DOL_DOCUMENT_ROOT for portable paths
+        $source = DOL_DOCUMENT_ROOT.'/custom/zonajob/core/modules/commande/doc/pdf_zonajob.modules.php';
+        $destination = DOL_DOCUMENT_ROOT.'/core/modules/commande/doc/pdf_zonajob.modules.php';
+
+        // Check if source exists
+        if (!file_exists($source)) {
+            dol_syslog('ZonaJob: Source PDF template not found at '.$source, LOG_WARNING);
+            return false;
+        }
+
+        // Always copy/update the file to ensure latest version
+        $destDir = dirname($destination);
+        if (!is_dir($destDir)) {
+            dol_mkdir($destDir);
+        }
+
+        // Check if destination is writable
+        if (file_exists($destination) && !is_writable($destination)) {
+            @chmod($destination, 0644);
+        }
+
+        // Copy the file (overwrite if exists to update)
+        if (@copy($source, $destination)) {
+            @chmod($destination, 0644);
+            dol_syslog('ZonaJob: PDF template copied/updated to '.$destination, LOG_INFO);
+            return true;
+        } else {
+            dol_syslog('ZonaJob: Failed to copy PDF template to '.$destination.' - Check permissions', LOG_ERR);
+            return false;
+        }
+    }
+
+    /**
+     * Register custom PDF model for orders so it can be selected in builddoc.
+     *
+     * @param DoliDB $db
+     * @return void
+     */
+    private function registerOrderDocModel($db)
+    {
+        dol_include_once('/core/lib/admin.lib.php');
+
+        // Avoid duplicates
+        global $conf;
+
+        $sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."document_model WHERE nom='zonajob' AND type='order' AND entity=".(int) $conf->entity." LIMIT 1";
+        $resql = $db->query($sql);
+        if ($resql && $db->num_rows($resql) > 0) {
+            return;
+        }
+
+        addDocumentModel('zonajob', 'order', 'ZonaJob PDF', '');
     }
 
     /**
@@ -277,6 +348,31 @@ class modZonaJob extends DolibarrModules
      */
     public function remove($options = '')
     {
+        // Clean up copied PDF template
+        $this->_removePDFTemplate();
+
         return $this->_remove(array(), $options);
     }
+
+    /**
+     * Remove PDF template from core/modules/commande/doc/ when module is disabled
+     *
+     * @return bool True on success, false on error
+     */
+    private function _removePDFTemplate()
+    {
+        $destination = DOL_DOCUMENT_ROOT.'/core/modules/commande/doc/pdf_zonajob.modules.php';
+
+        if (file_exists($destination)) {
+            if (@unlink($destination)) {
+                dol_syslog('ZonaJob: PDF template removed from '.$destination, LOG_INFO);
+                return true;
+            } else {
+                dol_syslog('ZonaJob: Failed to remove PDF template from '.$destination, LOG_WARNING);
+                return false;
+            }
+        }
+        return true;
+    }
+
 }

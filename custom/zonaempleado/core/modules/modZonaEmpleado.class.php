@@ -292,38 +292,38 @@ class modZonaEmpleado extends DolibarrModules
 		// Add here entries to declare new menus
 		
 		// Top menu for employee zone (separate entry point)
-		$this->menu[$r++] = array(
-			'fk_menu'=>'', // '' if this is a top menu
-			'type'=>'top', // This is a Top menu entry
-			'titre'=>'Zona de Empleado',
-			'prefix' => img_picto('', $this->picto, 'class="paddingright pictofixedwidth valignmiddle"'),
-			'mainmenu'=>'zonaempleado',
-			'leftmenu'=>'',
-			'url'=>'/zonaempleado/index.php',
-			'langs'=>'zonaempleado@zonaempleado',
-			'position'=>1000 + $r,
-			'enabled'=>'$conf->zonaempleado->enabled',
-			'perms'=>'1', // All authenticated users can access
-			'target'=>'',
-			'user'=>2, // 0=Menu for internal users, 1=external users, 2=both
-		);
+		// $this->menu[$r++] = array(
+		// 	'fk_menu'=>'', // '' if this is a top menu
+		// 	'type'=>'top', // This is a Top menu entry
+		// 	'titre'=>'Zona de Empleado',
+		// 	'prefix' => img_picto('', $this->picto, 'class="paddingright pictofixedwidth valignmiddle"'),
+		// 	'mainmenu'=>'zonaempleado',
+		// 	'leftmenu'=>'',
+		// 	'url'=>'/zonaempleado/index.php',
+		// 	'langs'=>'zonaempleado@zonaempleado',
+		// 	'position'=>1000 + $r,
+		// 	'enabled'=>'$conf->zonaempleado->enabled',
+		// 	'perms'=>'1', // All authenticated users can access
+		// 	'target'=>'',
+		// 	'user'=>2, // 0=Menu for internal users, 1=external users, 2=both
+		// );
 		
-		// Left menu: TPV
-		$this->menu[$r++] = array(
-			'fk_menu'=>'fk_mainmenu=zonaempleado',
-			'type'=>'left',
-			'titre'=>'TPV',
-			'prefix' => img_picto('', 'cash-register', 'class="paddingright pictofixedwidth valignmiddle"'),
-			'mainmenu'=>'zonaempleado',
-			'leftmenu'=>'zonaempleado_tpv',
-			'url'=>'/clinicas/tpv.php?context=zonaempleado',
-			'langs'=>'zonaempleado@zonaempleado',
-			'position'=>1000 + $r,
-			'enabled'=>'$conf->zonaempleado->enabled && $conf->clinicas->enabled',
-			'perms'=>'$user->rights->zonaempleado->access->read',
-			'target'=>'',
-			'user'=>2,
-		);
+		// // Left menu: TPV
+		// $this->menu[$r++] = array(
+		// 	'fk_menu'=>'fk_mainmenu=zonaempleado',
+		// 	'type'=>'left',
+		// 	'titre'=>'TPV',
+		// 	'prefix' => img_picto('', 'cash-register', 'class="paddingright pictofixedwidth valignmiddle"'),
+		// 	'mainmenu'=>'zonaempleado',
+		// 	'leftmenu'=>'zonaempleado_tpv',
+		// 	'url'=>'/clinicas/tpv.php?context=zonaempleado',
+		// 	'langs'=>'zonaempleado@zonaempleado',
+		// 	'position'=>1000 + $r,
+		// 	'enabled'=>'$conf->zonaempleado->enabled && $conf->clinicas->enabled',
+		// 	'perms'=>'$user->rights->zonaempleado->access->read',
+		// 	'target'=>'',
+		// 	'user'=>2,
+		// );
 		/* BEGIN MODULEBUILDER LEFTMENU MYOBJECT
 		$this->menu[$r++]=array(
 			'fk_menu'=>'fk_mainmenu=zonaempleado',      // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
@@ -438,6 +438,9 @@ class modZonaEmpleado extends DolibarrModules
 			return -1; // Do not activate module if error 'not allowed' returned when loading module SQL queries (the _load_table run sql with run_sql with the error allowed parameter set to 'default')
 		}
 
+		// Register ZonaEmpleado notification events
+		$this->registerNotificationEvents();
+
 		// Create extrafields during init
 		//include_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
 		//$extrafields = new ExtraFields($this->db);
@@ -486,6 +489,9 @@ class modZonaEmpleado extends DolibarrModules
 			}
 		}
 
+		// Register notification events
+		$this->registerNotificationEvents();
+
 		return $this->_init($sql, $options);
 	}
 
@@ -501,5 +507,144 @@ class modZonaEmpleado extends DolibarrModules
 	{
 		$sql = array();
 		return $this->_remove($sql, $options);
+	}
+
+	/**
+	 * Register ZonaEmpleado notification events in the database
+	 *
+	 * @return int 1 if OK, 0 if KO
+	 */
+	private function registerNotificationEvents()
+	{
+		global $db;
+
+		// Array of notification events to register
+		$events = array(
+			array(
+				'elementtype' => 'user',
+				'code' => 'ZONAEMPLEADO_USER_LOGIN',
+				'label' => 'Employee zone: User login',
+				'description' => 'Triggered when a user logs into the employee zone portal',
+				'rang' => 1
+			),
+			array(
+				'elementtype' => 'user',
+				'code' => 'ZONAEMPLEADO_USER_LOGOUT',
+				'label' => 'Employee zone: User logout',
+				'description' => 'Triggered when a user logs out from the employee zone portal',
+				'rang' => 2
+			),
+			array(
+				'elementtype' => 'user',
+				'code' => 'ZONAEMPLEADO_USER_REGISTRATION',
+				'label' => 'Employee zone: User registration',
+				'description' => 'Triggered when a new user is registered in the system',
+				'rang' => 3
+			),
+			array(
+				'elementtype' => 'user',
+				'code' => 'ZONAEMPLEADO_PROFILE_UPDATED',
+				'label' => 'Employee zone: Profile updated',
+				'description' => 'Triggered when a user profile is updated',
+				'rang' => 4
+			),
+			array(
+				'elementtype' => 'document',
+				'code' => 'ZONAEMPLEADO_DOCUMENT_SHARED',
+				'label' => 'Employee zone: Document shared',
+				'description' => 'Triggered when a document is shared with employees',
+				'rang' => 5
+			),
+			array(
+				'elementtype' => 'announcement',
+				'code' => 'ZONAEMPLEADO_ANNOUNCEMENT_CREATED',
+				'label' => 'Employee zone: Announcement created',
+				'description' => 'Triggered when a new announcement is created',
+				'rang' => 6
+			),
+			array(
+				'elementtype' => 'announcement',
+				'code' => 'ZONAEMPLEADO_ANNOUNCEMENT_UPDATED',
+				'label' => 'Employee zone: Announcement updated',
+				'description' => 'Triggered when an announcement is updated',
+				'rang' => 7
+			),
+			array(
+				'elementtype' => 'holiday',
+				'code' => 'ZONAEMPLEADO_HOLIDAY_REQUEST_SUBMITTED',
+				'label' => 'Employee zone: Holiday request submitted',
+				'description' => 'Triggered when an employee submits a holiday request',
+				'rang' => 8
+			),
+			array(
+				'elementtype' => 'holiday',
+				'code' => 'ZONAEMPLEADO_HOLIDAY_REQUEST_APPROVED',
+				'label' => 'Employee zone: Holiday request approved',
+				'description' => 'Triggered when a holiday request is approved',
+				'rang' => 9
+			),
+			array(
+				'elementtype' => 'holiday',
+				'code' => 'ZONAEMPLEADO_HOLIDAY_REQUEST_REJECTED',
+				'label' => 'Employee zone: Holiday request rejected',
+				'description' => 'Triggered when a holiday request is rejected',
+				'rang' => 10
+			),
+			array(
+				'elementtype' => 'payslip',
+				'code' => 'ZONAEMPLEADO_PAYSLIP_PUBLISHED',
+				'label' => 'Employee zone: Payslip published',
+				'description' => 'Triggered when a payslip is published for employees',
+				'rang' => 11
+			),
+			array(
+				'elementtype' => 'message',
+				'code' => 'ZONAEMPLEADO_MESSAGE_RECEIVED',
+				'label' => 'Employee zone: Message received',
+				'description' => 'Triggered when an employee receives a message',
+				'rang' => 12
+			),
+			array(
+				'elementtype' => 'schedule',
+				'code' => 'ZONAEMPLEADO_SCHEDULE_MODIFIED',
+				'label' => 'Employee zone: Schedule modified',
+				'description' => 'Triggered when an employee schedule is modified',
+				'rang' => 13
+			),
+		);
+
+		// Register each event in the c_action_trigger table
+		foreach ($events as $event) {
+			$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."c_action_trigger";
+			$sql .= " WHERE code = '".$db->escape($event['code'])."'";
+
+			$result = $db->query($sql);
+			if (!$result) {
+				dol_syslog("Error checking ZonaEmpleado notification event", LOG_ERR);
+				return 0;
+			}
+
+			$num = $db->num_rows($result);
+
+			// Only insert if event doesn't exist
+			if ($num == 0) {
+				$sql = "INSERT INTO ".MAIN_DB_PREFIX."c_action_trigger";
+				$sql .= " (elementtype, code, label, description, rang)";
+				$sql .= " VALUES (";
+				$sql .= "'".$db->escape($event['elementtype'])."',";
+				$sql .= "'".$db->escape($event['code'])."',";
+				$sql .= "'".$db->escape($event['label'])."',";
+				$sql .= "'".$db->escape($event['description'])."',";
+				$sql .= $event['rang'];
+				$sql .= ")";
+
+				if (!$db->query($sql)) {
+					dol_syslog("Error registering ZonaEmpleado notification event: ".$event['code'], LOG_ERR);
+					return 0;
+				}
+			}
+		}
+
+		return 1;
 	}
 }

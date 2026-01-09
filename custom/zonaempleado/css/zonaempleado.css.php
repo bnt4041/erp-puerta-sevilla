@@ -809,7 +809,7 @@ $colorbackhmenu1 = trim(str_replace(' ', '', $colorbackhmenu1));
 .opacitymedium {
     opacity: 0.6;
     text-align: center;
-    padding: 2rem;
+    <!-- padding: 2rem; -->
     color: var(--ze-text-light);
 }
 

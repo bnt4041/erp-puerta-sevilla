@@ -1,0 +1,94 @@
+
+========== WEBHOOK TEST - 2026-01-08 17:43:23 ==========
+Method: GET
+URL: /custom/whatsapp/public/webhook_test.php
+Remote IP: 192.168.160.2
+
+Headers:
+Array
+(
+    [Host] => doli.puertasevillainmobiliaria.online
+    [User-Agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+    [Accept] => text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+    [Accept-Encoding] => gzip, deflate, br, zstd
+    [Accept-Language] => es-ES,es;q=0.9
+    [Cookie] => _ga=GA1.1.98777282.1765460733; _ga_MZ6PPB00H5=GS2.1.s1765975986$o7$g0$t1765975986$j60$l0$h0; _ga_T169Y9V5R1=GS2.1.s1765975986$o6$g0$t1765975986$j60$l0$h0; DOLSESSID_5e81c2cefcf25962f66313bb6e1b3a7b735e8769=261d6187cc7a6607fef8da9c525096ba; DOLUSERCOOKIE_boxfilter_task=all
+    [Priority] => u=0, i
+    [Sec-Ch-Ua] => "Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"
+    [Sec-Ch-Ua-Mobile] => ?0
+    [Sec-Ch-Ua-Platform] => "Windows"
+    [Sec-Fetch-Dest] => document
+    [Sec-Fetch-Mode] => navigate
+    [Sec-Fetch-Site] => none
+    [Sec-Fetch-User] => ?1
+    [Upgrade-Insecure-Requests] => 1
+    [X-Forwarded-For] => 188.227.152.247
+    [X-Forwarded-Host] => doli.puertasevillainmobiliaria.online
+    [X-Forwarded-Port] => 443
+    [X-Forwarded-Proto] => https
+    [X-Forwarded-Server] => a08b523d4c3f
+    [X-Real-Ip] => 188.227.152.247
+)
+
+GET params:
+Array
+(
+)
+
+POST params:
+Array
+(
+)
+
+Body:
+
+========== END TEST ==========
+
+
+========== WEBHOOK TEST - 2026-01-08 17:43:38 ==========
+Method: GET
+URL: /custom/whatsapp/public/webhook_test.php?view_test_log=1
+Remote IP: 192.168.160.2
+
+Headers:
+Array
+(
+    [Host] => doli.puertasevillainmobiliaria.online
+    [User-Agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36
+    [Accept] => text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+    [Accept-Encoding] => gzip, deflate, br, zstd
+    [Accept-Language] => es-ES,es;q=0.9
+    [Cookie] => _ga=GA1.1.98777282.1765460733; _ga_MZ6PPB00H5=GS2.1.s1765975986$o7$g0$t1765975986$j60$l0$h0; _ga_T169Y9V5R1=GS2.1.s1765975986$o6$g0$t1765975986$j60$l0$h0; DOLSESSID_5e81c2cefcf25962f66313bb6e1b3a7b735e8769=261d6187cc7a6607fef8da9c525096ba; DOLUSERCOOKIE_boxfilter_task=all
+    [Priority] => u=0, i
+    [Referer] => https://doli.puertasevillainmobiliaria.online/custom/whatsapp/public/webhook_test.php
+    [Sec-Ch-Ua] => "Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"
+    [Sec-Ch-Ua-Mobile] => ?0
+    [Sec-Ch-Ua-Platform] => "Windows"
+    [Sec-Fetch-Dest] => document
+    [Sec-Fetch-Mode] => navigate
+    [Sec-Fetch-Site] => same-origin
+    [Sec-Fetch-User] => ?1
+    [Upgrade-Insecure-Requests] => 1
+    [X-Forwarded-For] => 188.227.152.247
+    [X-Forwarded-Host] => doli.puertasevillainmobiliaria.online
+    [X-Forwarded-Port] => 443
+    [X-Forwarded-Proto] => https
+    [X-Forwarded-Server] => a08b523d4c3f
+    [X-Real-Ip] => 188.227.152.247
+)
+
+GET params:
+Array
+(
+    [view_test_log] => 1
+)
+
+POST params:
+Array
+(
+)
+
+Body:
+
+========== END TEST ==========
+

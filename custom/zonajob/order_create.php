@@ -19,6 +19,10 @@ if (!$res) {
     die("Include of main fails");
 }
 
+/** @var DoliDB $db */
+/** @var Translate $langs */
+/** @var User $user */
+
 // Security check
 if (empty($user) || !$user->id) {
     header("Location: ".DOL_URL_ROOT."/");
@@ -48,6 +52,63 @@ $projectid = GETPOSTINT('projectid');
 // Initialize order object
 $order = new Commande($db);
 $form = new Form($db);
+
+/**
+ * Lookup VAT info (rate/code) from Dolibarr dictionary c_tva
+ *
+ * @param DoliDB $db
+ * @param float $rate
+ * @return array|null
+ */
+function zonajob_getVatInfoFromDictionary($db, $rate)
+{
+    global $mysoc;
+
+    $rate = (float) price2num($rate, 'MU');
+
+    $companyCountryId = 0;
+    if (is_object($mysoc) && !empty($mysoc->country_id)) {
+        $companyCountryId = (int) $mysoc->country_id;
+    } else {
+        $tmp = explode(':', getDolGlobalString('MAIN_INFO_SOCIETE_COUNTRY'));
+        if (!empty($tmp[0]) && is_numeric($tmp[0])) {
+            $companyCountryId = (int) $tmp[0];
+        }
+    }
+
+    $sql = "SELECT taux, code";
+    $sql .= " FROM ".MAIN_DB_PREFIX."c_tva";
+    $sql .= " WHERE active = 1";
+    $sql .= " AND taux = ".$rate;
+    if ($companyCountryId > 0) {
+        $sql .= " AND (fk_pays IS NULL OR fk_pays = 0 OR fk_pays = ".$companyCountryId.")";
+    }
+    $sql .= " ORDER BY rowid ASC";
+    $sql .= " LIMIT 1";
+
+    $resql = $db->query($sql);
+    if (!$resql && $companyCountryId > 0) {
+        // Fallback if column fk_pays does not exist
+        $sql = "SELECT taux, code";
+        $sql .= " FROM ".MAIN_DB_PREFIX."c_tva";
+        $sql .= " WHERE active = 1";
+        $sql .= " AND taux = ".$rate;
+        $sql .= " ORDER BY rowid ASC";
+        $sql .= " LIMIT 1";
+        $resql = $db->query($sql);
+    }
+    if ($resql) {
+        $obj = $db->fetch_object($resql);
+        if ($obj) {
+            return array(
+                'taux' => (float) $obj->taux,
+                'code' => $obj->code,
+            );
+        }
+    }
+
+    return null;
+}
 
 /*
  * Actions
@@ -104,6 +165,8 @@ if ($action == 'create') {
                     $price = isset($line_prices[$i]) ? price2num($line_prices[$i]) : 0;
                     $vat = isset($line_vats[$i]) ? price2num($line_vats[$i]) : 0;
                     $discount = isset($line_discounts[$i]) ? price2num($line_discounts[$i]) : 0;
+
+                    $vatInfo = null;
                     
                     if ($qty > 0) {
                         // Get product info if selected
@@ -120,8 +183,19 @@ if ($action == 'create') {
                                 $vat = $product->tva_tx;
                             }
                         }
+
+                        // Validate VAT against Dolibarr dictionary
+                        if ($vat === '' || $vat === null) {
+                            $vat = 0;
+                        }
+                        $vatInfo = zonajob_getVatInfoFromDictionary($db, $vat);
+                        if ($vatInfo) {
+                            $vat = $vatInfo['taux'];
+                        } else {
+                            $vat = (float) $vat;
+                        }
                         
-                        $order->addline(
+                        $lineid = $order->addline(
                             $description,
                             $price,
                             $qty,
@@ -134,6 +208,12 @@ if ($action == 'create') {
                             0, 0, 0, 0,
                             '', null, 0, '', 0, 0, ''
                         );
+
+                        if ($lineid > 0 && !empty($vatInfo) && !empty($vatInfo['code'])) {
+                            $sql = "UPDATE ".MAIN_DB_PREFIX."commandedet SET vat_src_code='".$db->escape($vatInfo['code'])."'";
+                            $sql .= " WHERE rowid = ".((int) $lineid);
+                            $db->query($sql);
+                        }
                     }
                 }
             }
@@ -357,10 +437,43 @@ zonaempleado_print_header($title);
                 <div class="form-group">
                     <label><?php echo $langs->trans('VAT'); ?> (%)</label>
                     <select name="line_vat[]" class="line-vat" onchange="calculateLineTotals()">
-                        <option value="0">0%</option>
-                        <option value="4">4%</option>
-                        <option value="10">10%</option>
-                        <option value="21" selected>21%</option>
+                        <?php
+                        $companyCountryId = 0;
+                        if (is_object($mysoc) && !empty($mysoc->country_id)) {
+                            $companyCountryId = (int) $mysoc->country_id;
+                        } else {
+                            $tmp = explode(':', getDolGlobalString('MAIN_INFO_SOCIETE_COUNTRY'));
+                            if (!empty($tmp[0]) && is_numeric($tmp[0])) {
+                                $companyCountryId = (int) $tmp[0];
+                            }
+                        }
+
+                        $defaultVat = 21;
+                        $vatRates = array();
+                        $sqlVat = "SELECT DISTINCT taux as rate FROM ".MAIN_DB_PREFIX."c_tva WHERE active = 1";
+                        if ($companyCountryId > 0) {
+                            $sqlVat .= " AND (fk_pays IS NULL OR fk_pays = 0 OR fk_pays = ".$companyCountryId.")";
+                        }
+                        $sqlVat .= " ORDER BY taux ASC";
+                        $resVat = $db->query($sqlVat);
+                        if (!$resVat && $companyCountryId > 0) {
+                            // Fallback if column fk_pays does not exist
+                            $sqlVat = "SELECT DISTINCT taux as rate FROM ".MAIN_DB_PREFIX."c_tva WHERE active = 1 ORDER BY taux ASC";
+                            $resVat = $db->query($sqlVat);
+                        }
+                        if ($resVat) {
+                            while ($objVat = $db->fetch_object($resVat)) {
+                                $vatRates[] = (float) $objVat->rate;
+                            }
+                        }
+                        if (empty($vatRates)) {
+                            $vatRates = array(0, 4, 10, 21);
+                        }
+                        foreach ($vatRates as $rate) {
+                            $selected = (abs((float) $rate - (float) $defaultVat) < 0.01) ? ' selected' : '';
+                            print '<option value="'.((float) $rate).'"'.$selected.'>'.number_format((float) $rate, 2, ',', '').'%</option>';
+                        }
+                        ?>
                     </select>
                 </div>
                 <div class="form-group">

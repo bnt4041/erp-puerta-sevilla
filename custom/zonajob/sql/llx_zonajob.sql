@@ -87,3 +87,22 @@ CREATE TABLE IF NOT EXISTS llx_zonajob_send_history (
 -- Index for send history table
 ALTER TABLE llx_zonajob_send_history ADD INDEX idx_zonajob_send_history_fk_commande (fk_commande);
 ALTER TABLE llx_zonajob_send_history ADD INDEX idx_zonajob_send_history_send_type (send_type);
+
+-- Table for public download tokens of order documents
+CREATE TABLE IF NOT EXISTS llx_zonajob_doc_tokens (
+    rowid           INTEGER AUTO_INCREMENT PRIMARY KEY,
+    token           VARCHAR(64) NOT NULL,
+    fk_commande     INTEGER NOT NULL,
+    filename        VARCHAR(255) NOT NULL,
+    filepath        VARCHAR(512) NOT NULL,
+    date_creation   DATETIME NOT NULL,
+    date_expiration DATETIME DEFAULT NULL,
+    downloads       INTEGER DEFAULT 0,
+    active          TINYINT DEFAULT 1,
+    entity          INTEGER DEFAULT 1
+) ENGINE=InnoDB;
+
+-- Indexes for doc tokens
+ALTER TABLE llx_zonajob_doc_tokens ADD UNIQUE INDEX uk_zonajob_doc_tokens_token (token, entity);
+ALTER TABLE llx_zonajob_doc_tokens ADD INDEX idx_zonajob_doc_tokens_fk_commande (fk_commande);
+ALTER TABLE llx_zonajob_doc_tokens ADD INDEX idx_zonajob_doc_tokens_date_exp (date_expiration);

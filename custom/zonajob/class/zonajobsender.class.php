@@ -200,10 +200,10 @@ class ZonaJobSender extends CommonObject
      * @param string $message Message
      * @param User $user User object
      * @param int $fk_socpeople Contact ID (optional)
-     * @param string $pdfFile PDF file path (optional)
+     * @param array $attachments Array of file paths to attach (optional)
      * @return int <0 if KO, >0 if OK
      */
-    public function sendWhatsApp($order, $phone, $message, $user, $fk_socpeople = 0, $pdfFile = '')
+    public function sendWhatsApp($order, $phone, $message, $user, $fk_socpeople = 0, $attachments = array())
     {
         global $conf;
 
@@ -213,12 +213,19 @@ class ZonaJobSender extends CommonObject
             return -1;
         }
 
+        // Normalize phone number for GoWA (E.164 format)
+        $normalizedPhone = $this->normalizePhoneForGoWA($phone);
+        if (empty($normalizedPhone)) {
+            $this->error = 'Invalid phone number format';
+            return -1;
+        }
+
         // Initialize record
         $this->fk_commande = $order->id;
         $this->fk_soc = $order->socid;
         $this->fk_socpeople = $fk_socpeople;
         $this->send_type = self::TYPE_WHATSAPP;
-        $this->recipient = $phone;
+        $this->recipient = $normalizedPhone;
         $this->message = $message;
 
         $record_id = $this->create($user);
@@ -230,8 +237,12 @@ class ZonaJobSender extends CommonObject
         require_once DOL_DOCUMENT_ROOT.'/custom/whatsapp/class/gowaclient.class.php';
         $client = new GoWAClient($this->db);
 
-        // Send message
-        $result = $client->sendMessage($phone, $message);
+        // Send message (with attachments if supported)
+        if (!empty($attachments) && method_exists($client, 'sendMessageWithAttachments')) {
+            $result = $client->sendMessageWithAttachments($normalizedPhone, $message, $attachments);
+        } else {
+            $result = $client->sendMessage($normalizedPhone, $message);
+        }
 
         if ($result['error'] == 0) {
             $this->status = self::STATUS_SENT;
@@ -248,6 +259,78 @@ class ZonaJobSender extends CommonObject
     }
 
     /**
+     * Normalize phone number to E.164 format for GoWA
+     * Supports Spanish numbers and international format
+     *
+     * @param string $phone Raw phone number
+     * @param string $defaultCountry Default country code (default: 34 for Spain)
+     * @return string Normalized phone number (digits only, with country code) or empty on error
+     */
+    public function normalizePhoneForGoWA($phone, $defaultCountry = '34')
+    {
+        if (empty($phone)) {
+            return '';
+        }
+
+        // Remove all non-digit characters except leading +
+        $phone = trim($phone);
+        $hasPlus = (substr($phone, 0, 1) === '+');
+        $phone = preg_replace('/[^0-9]/', '', $phone);
+
+        if (empty($phone)) {
+            return '';
+        }
+
+        // If phone had + prefix, it's already international
+        if ($hasPlus) {
+            // Already has country code, just return digits
+            return $phone;
+        }
+
+        // Handle Spanish numbers
+        if ($defaultCountry === '34') {
+            // Spanish mobile numbers start with 6 or 7, landlines with 9
+            // If starts with 00, remove it and assume international
+            if (substr($phone, 0, 2) === '00') {
+                return substr($phone, 2);
+            }
+
+            // If starts with 34, assume it already has country code
+            if (substr($phone, 0, 2) === '34' && strlen($phone) >= 11) {
+                return $phone;
+            }
+
+            // Spanish numbers are 9 digits (without country code)
+            if (strlen($phone) === 9) {
+                // Valid Spanish mobile: starts with 6, 7, or 9
+                $firstDigit = substr($phone, 0, 1);
+                if (in_array($firstDigit, array('6', '7', '9'))) {
+                    return '34' . $phone;
+                }
+            }
+
+            // If 11 digits starting with 34, probably has country code
+            if (strlen($phone) === 11 && substr($phone, 0, 2) === '34') {
+                return $phone;
+            }
+        }
+
+        // Generic handling: if number is long enough, assume it has country code
+        if (strlen($phone) >= 10) {
+            // Check common country codes
+            $commonCodes = array('34', '33', '44', '49', '39', '351', '1', '52', '54', '57', '55');
+            foreach ($commonCodes as $code) {
+                if (substr($phone, 0, strlen($code)) === $code) {
+                    return $phone;
+                }
+            }
+        }
+
+        // Fallback: prepend default country code
+        return $defaultCountry . $phone;
+    }
+
+    /**
      * Send order via Email
      *
      * @param Commande $order Order object
@@ -256,10 +339,10 @@ class ZonaJobSender extends CommonObject
      * @param string $message Message
      * @param User $user User object
      * @param int $fk_socpeople Contact ID (optional)
-     * @param string $pdfFile PDF file path (optional)
+     * @param array $attachments Array of file paths to attach (optional)
      * @return int <0 if KO, >0 if OK
      */
-    public function sendEmail($order, $email, $subject, $message, $user, $fk_socpeople = 0, $pdfFile = '')
+    public function sendEmail($order, $email, $subject, $message, $user, $fk_socpeople = 0, $attachments = array())
     {
         global $conf, $langs, $mysoc;
 
@@ -285,10 +368,18 @@ class ZonaJobSender extends CommonObject
             $from = $mysoc->email;
         }
 
-        // Attachments
-        $attachments = array();
-        if (!empty($pdfFile) && file_exists($pdfFile)) {
-            $attachments[] = $pdfFile;
+        // Process attachments - ensure array format
+        $filesToAttach = array();
+        if (!empty($attachments)) {
+            if (is_array($attachments)) {
+                foreach ($attachments as $file) {
+                    if (!empty($file) && file_exists($file)) {
+                        $filesToAttach[] = $file;
+                    }
+                }
+            } elseif (is_string($attachments) && file_exists($attachments)) {
+                $filesToAttach[] = $attachments;
+            }
         }
 
         // Send email
@@ -297,7 +388,7 @@ class ZonaJobSender extends CommonObject
             $email,
             $from,
             $message,
-            $attachments,
+            $filesToAttach,
             array(),
             array(),
             '',

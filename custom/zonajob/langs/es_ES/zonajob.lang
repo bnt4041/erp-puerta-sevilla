@@ -148,6 +148,9 @@ PhotoBy = Subida por
 PhotoLocation = Ubicación
 ViewPhoto = Ver foto
 DeletePhoto = Eliminar foto
+ClientSignature = Firma del cliente
+NewSignature = Nueva Firma
+SignAndSave = Firmar y guardar
 
 # Firma
 SignatureTitle = Firma del Cliente
@@ -168,6 +171,9 @@ SignatureRequired = La firma es obligatoria
 ContactRequired = Seleccione un contacto o introduzca los datos
 Signed = Firmado
 NotSigned = Sin firmar
+PDFTemplate = Plantilla PDF
+PDFGenerated = PDF generado correctamente
+ErrorGeneratingPDF = Error al generar el PDF
 
 # Cambio de estado
 ChangeStatus = Cambiar Estado
@@ -323,6 +329,15 @@ NotePrivate = Nota privada
 OrderCreated = Pedido creado correctamente
 LineTotal = Total línea
 Customer = Cliente
+SignedBy = Firmado por
+Location = Ubicación
+AttachedPhotos = Fotos Adjuntas
+CustomerSignature = Firma del Cliente
+Date = Fecha
+SignatureOfCustomer = Firma del Cliente
+CustomerAcknowledgesReceiptOfOrder = El cliente reconoce haber recibido conforme el pedido
+PhotoNotFound = Foto no encontrada
+SignatureNotFound = Firma no disponible
 
 # Errores y mensajes
 ErrorAddLine = Error al añadir la línea
@@ -335,3 +350,66 @@ All = Todos
 Product = Producto
 Service = Servicio
 VAT = IVA
+ClientSignature = Firma del cliente
+NewSignature = Nueva Firma
+
+# Zona de envío
+SelectFilesToAttach = Seleccionar archivos a adjuntar
+FormatE164 = Formato internacional
+PhoneFormatHelp = Ej: +34612345678 o 612345678
+PhoneWillBeNormalized = El teléfono se convertirá automáticamente al formato internacional
+PhoneAndMessageRequired = El teléfono y el mensaje son obligatorios
+EmailAndMessageRequired = El email y el mensaje son obligatorios
+SelectAll = Seleccionar todo
+DeselectAll = Deseleccionar todo
+# Zona de envío - Enlaces públicos
+DocumentsToShare = Documentos disponibles
+DocumentsShareHelp = Habilite el enlace público para compartir documentos de forma segura
+EnablePublicLink = Habilitar enlace público
+DisablePublicLink = Deshabilitar enlace público
+PublicLinkEnabled = Enlace público habilitado
+PublicLinkDisabled = Enlace público deshabilitado
+CopyPublicLink = Copiar enlace
+LinkCopied = ¡Enlace copiado!
+SendAsLink = Enviar como enlace
+SendAsAttachment = Enviar como adjunto
+SelectFilesToInclude = Seleccionar documentos a incluir
+OnlySharedFilesCanBeSent = Solo se pueden enviar documentos con enlace público habilitado
+EnableShareFirst = Habilite primero el enlace público
+WhatsAppSentWithLink = WhatsApp enviado con enlaces a documentos
+EmailSentWithLink = Email enviado con enlaces a documentos
+WhatsAppSent = WhatsApp enviado correctamente
+EmailSent = Email enviado correctamente
+Preview = Vista previa
+Download = Descargar
+Signed = Firmado
+
+# Selección documentos envío
+SelectDocumentsToSend = Selecciona los documentos a enviar
+SelectAll = Seleccionar todos
+DeselectAll = Deseleccionar todos
+Selected = seleccionados
+DocumentsWillBeShared = Los documentos seleccionados se enviarán como enlaces públicos
+
+# Notes Tab
+NotePublicHint = Visible para el cliente
+NotePrivateHint = Solo interno
+EnterPublicNote = Escribe una nota pública...
+EnterPrivateNote = Escribe una nota privada...
+NoPublicNote = Sin nota pública
+NoPrivateNote = Sin nota privada
+SaveNotes = Guardar notas
+NotesSaved = Notas guardadas correctamente
+
+# ExtraFields
+SaveExtraFields = Guardar campos
+ExtraFieldsSaved = Campos extra guardados correctamente
+
+# Notifications
+NotificationsWillBeSentOnValidation = Se enviarán al validar el pedido
+NoNotificationsDefined = No hay notificaciones configuradas
+
+# Quick Search
+SearchOrderAutocomplete = Buscar por cliente, teléfono, referencia, proyecto...
+AdvancedFilters = Filtros avanzados
+NoResults = Sin resultados

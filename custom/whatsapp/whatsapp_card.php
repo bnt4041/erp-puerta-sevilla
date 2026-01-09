@@ -24,7 +24,8 @@ if (empty($id) || empty($objecttype)) {
 }
 
 // Fetch object
-require_once DOL_DOCUMENT_ROOT.'/'.$objecttype.'/class/'.($objecttype == 'propal' ? 'propal' : $objecttype).'.class.php';
+$core_path = dirname(dirname(dirname(__FILE__)));
+require_once $core_path.'/'.$objecttype.'/class/'.($objecttype == 'propal' ? 'propal' : $objecttype).'.class.php';
 $classname = ($objecttype == 'propal' ? 'Propal' : ucfirst($objecttype));
 if ($objecttype == 'societe') $classname = 'Societe';
 if ($objecttype == 'contact') $classname = 'Contact';

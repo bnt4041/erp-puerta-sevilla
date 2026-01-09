@@ -176,8 +176,28 @@ $resql = $db->query($sql);
         </div>
     </div>
 
-    <!-- Filters -->
-    <div class="zonajob-filters">
+    <!-- Quick Search Autocomplete -->
+    <div class="zonajob-quick-search">
+        <div class="autocomplete-container">
+            <i class="fas fa-search autocomplete-icon"></i>
+            <input type="text" 
+                   id="quickSearch" 
+                   class="autocomplete-input" 
+                   placeholder="<?php echo $langs->trans('SearchOrderAutocomplete'); ?>" 
+                   autocomplete="off">
+            <div id="autocompleteResults" class="autocomplete-results"></div>
+        </div>
+    </div>
+
+    <!-- Collapsible Filters -->
+    <div class="zonajob-filters-toggle">
+        <button type="button" class="btn-toggle-filters" onclick="toggleFilters()">
+            <i class="fas fa-filter"></i> <?php echo $langs->trans('AdvancedFilters'); ?>
+            <i class="fas fa-chevron-down filter-chevron"></i>
+        </button>
+    </div>
+    
+    <div class="zonajob-filters" id="advancedFilters" style="display: none;">
         <form method="get" action="<?php echo $_SERVER['PHP_SELF']; ?>" class="filter-form">
             <div class="filter-row">
                 <div class="filter-group">
@@ -392,6 +412,119 @@ $resql = $db->query($sql);
     </div>
     <?php } ?>
 </div>
+
+<script>
+// Toggle advanced filters
+function toggleFilters() {
+    var filters = document.getElementById('advancedFilters');
+    var chevron = document.querySelector('.filter-chevron');
+    if (filters.style.display === 'none') {
+        filters.style.display = 'block';
+        chevron.classList.add('open');
+    } else {
+        filters.style.display = 'none';
+        chevron.classList.remove('open');
+    }
+}
+
+// Autocomplete functionality
+var searchTimeout = null;
+var quickSearchInput = document.getElementById('quickSearch');
+var resultsContainer = document.getElementById('autocompleteResults');
+
+if (quickSearchInput) {
+    quickSearchInput.addEventListener('input', function() {
+        var query = this.value.trim();
+        
+        if (searchTimeout) {
+            clearTimeout(searchTimeout);
+        }
+        
+        if (query.length < 2) {
+            resultsContainer.style.display = 'none';
+            resultsContainer.innerHTML = '';
+            return;
+        }
+        
+        searchTimeout = setTimeout(function() {
+            fetchAutocomplete(query);
+        }, 300);
+    });
+    
+    quickSearchInput.addEventListener('focus', function() {
+        if (this.value.length >= 2 && resultsContainer.innerHTML !== '') {
+            resultsContainer.style.display = 'block';
+        }
+    });
+    
+    // Close autocomplete when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!quickSearchInput.contains(e.target) && !resultsContainer.contains(e.target)) {
+            resultsContainer.style.display = 'none';
+        }
+    });
+}
+
+function fetchAutocomplete(query) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '<?php echo DOL_URL_ROOT; ?>/custom/zonajob/ajax/search_orders.php?q=' + encodeURIComponent(query), true);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            try {
+                var response = JSON.parse(xhr.responseText);
+                renderAutocompleteResults(response.results);
+            } catch (e) {
+                console.error('Error parsing response', e);
+            }
+        }
+    };
+    xhr.send();
+}
+
+function renderAutocompleteResults(results) {
+    if (!results || results.length === 0) {
+        resultsContainer.innerHTML = '<div class="autocomplete-no-results"><?php echo $langs->trans('NoResults'); ?></div>';
+        resultsContainer.style.display = 'block';
+        return;
+    }
+    
+    var html = '';
+    results.forEach(function(item) {
+        var statusClass = 'status-' + item.status;
+        html += '<a href="' + item.url + '" class="autocomplete-item">';
+        html += '  <div class="ac-main">';
+        html += '    <span class="ac-ref">' + escapeHtml(item.ref) + '</span>';
+        if (item.ref_client) {
+            html += '    <span class="ac-ref-client">(' + escapeHtml(item.ref_client) + ')</span>';
+        }
+        html += '  </div>';
+        html += '  <div class="ac-details">';
+        html += '    <span class="ac-soc"><i class="fas fa-building"></i> ' + escapeHtml(item.socname || '') + '</span>';
+        if (item.projet_ref) {
+            html += '    <span class="ac-project"><i class="fas fa-project-diagram"></i> ' + escapeHtml(item.projet_ref) + '</span>';
+        }
+        html += '  </div>';
+        html += '  <span class="ac-status ' + statusClass + '">' + escapeHtml(item.status_label) + '</span>';
+        html += '</a>';
+    });
+    
+    resultsContainer.innerHTML = html;
+    resultsContainer.style.display = 'block';
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(text));
+    return div.innerHTML;
+}
+
+// Show filters if any search param is active
+<?php if (!empty($search_ref) || !empty($search_soc) || !empty($search_project) || !empty($filter_status)) { ?>
+document.getElementById('advancedFilters').style.display = 'block';
+document.querySelector('.filter-chevron').classList.add('open');
+<?php } ?>
+</script>
 
 <?php
 

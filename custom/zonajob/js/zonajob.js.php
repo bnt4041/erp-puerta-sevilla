@@ -461,11 +461,209 @@ var ZonaJob = (function() {
         }
     }
 
+    /**
+     * Initialize product autocomplete search
+     */
+    function initProductAutocomplete() {
+        var searchInput = document.getElementById('product_search');
+        if (!searchInput) return;
+
+        var autocompleteDropdown = document.getElementById('product_autocomplete');
+        var hiddenInput = document.getElementById('fk_product');
+        var debounceTimer;
+
+        if (!autocompleteDropdown || !hiddenInput) {
+            return;
+        }
+
+        searchInput.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            var query = this.value.trim();
+
+            if (query.length < 1) {
+                autocompleteDropdown.style.display = 'none';
+                hiddenInput.value = 0;
+                return;
+            }
+
+            // Debounce search requests
+            debounceTimer = setTimeout(function() {
+                searchProducts(query, searchInput, autocompleteDropdown, hiddenInput);
+            }, 300);
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (e.target !== searchInput && !autocompleteDropdown.contains(e.target)) {
+                autocompleteDropdown.style.display = 'none';
+            }
+        });
+    }
+
+    /**
+     * Search products via AJAX
+     */
+    function searchProducts(query, searchInput, dropdown, hiddenInput) {
+        var xhr = new XMLHttpRequest();
+
+        // Prefer server-injected absolute URL if available
+        var ajaxUrl = (window.ZONAJOB_PRODUCT_SEARCH_URL && String(window.ZONAJOB_PRODUCT_SEARCH_URL)) || '';
+        if (!ajaxUrl) {
+            // Fallback: same directory as current page
+            var baseUrl = window.location.pathname.split('/').slice(0, -1).join('/');
+            ajaxUrl = baseUrl + '/ajax_product_search.php';
+        }
+        
+        // Debug logging
+        console.log('AJAX URL:', ajaxUrl);
+        console.log('Search query:', query);
+        
+        xhr.open('GET', ajaxUrl + '?search=' + encodeURIComponent(query) + '&limit=15', true);
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                try {
+                    var data = JSON.parse(xhr.responseText);
+
+                    if (data && Array.isArray(data.products)) {
+                        populateAutocomplete(data.products, dropdown, searchInput, hiddenInput);
+                        return;
+                    }
+
+                    dropdown.innerHTML = '<div style="padding: 1rem; text-align: center; color: #b00;">Error: respuesta inválida</div>';
+                    dropdown.style.display = 'block';
+                } catch (e) {
+                    console.error('Error parsing autocomplete response:', e);
+                    console.error('Response was:', xhr.responseText);
+
+                    dropdown.innerHTML = '<div style="padding: 1rem; text-align: center; color: #b00;">Error al procesar respuesta</div>';
+                    dropdown.style.display = 'block';
+                }
+            } else {
+                console.error('AJAX request failed with status:', xhr.status);
+
+                dropdown.innerHTML = '<div style="padding: 1rem; text-align: center; color: #b00;">Error (' + xhr.status + ') al buscar</div>';
+                dropdown.style.display = 'block';
+            }
+        };
+        xhr.onerror = function() {
+            console.error('AJAX request error');
+
+            dropdown.innerHTML = '<div style="padding: 1rem; text-align: center; color: #b00;">Error de red al buscar</div>';
+            dropdown.style.display = 'block';
+        };
+        xhr.send();
+    }
+
+    /**
+     * Populate autocomplete dropdown
+     */
+    function populateAutocomplete(products, dropdown, searchInput, hiddenInput) {
+        dropdown.innerHTML = '';
+
+        if (!Array.isArray(products) || products.length === 0) {
+            dropdown.innerHTML = '<div style="padding: 1rem; text-align: center; color: #999;">No se encontraron productos</div>';
+            dropdown.style.display = 'block';
+            return;
+        }
+
+        products.forEach(function(product) {
+            var item = document.createElement('div');
+            item.style.cssText = 'padding: 0.75rem; cursor: pointer; border-bottom: 1px solid #eee; hover:background-color: #f5f5f5;';
+            item.innerHTML = '<strong>' + escapeHtml(product.ref) + '</strong> - ' + escapeHtml(product.label) + '<br><small style="color: #999;">' + product.type + ' | Precio: ' + product.price + '€</small>';
+            
+            item.addEventListener('click', function() {
+                selectProduct(product, searchInput, hiddenInput, dropdown);
+            });
+
+            item.addEventListener('mouseover', function() {
+                this.style.backgroundColor = '#f5f5f5';
+            });
+
+            item.addEventListener('mouseout', function() {
+                this.style.backgroundColor = 'white';
+            });
+
+            dropdown.appendChild(item);
+        });
+
+        dropdown.style.display = 'block';
+    }
+
+    /**
+     * Select a product from autocomplete
+     */
+    function selectProduct(product, searchInput, hiddenInput, dropdown) {
+        searchInput.value = product.ref + ' - ' + product.label;
+        hiddenInput.value = product.id;
+
+        // Update price and VAT fields
+        var priceField = document.getElementById('line_price');
+        var vatField = document.getElementById('line_vat');
+        var descField = document.getElementById('line_description');
+
+        if (priceField) priceField.value = (product.price !== undefined && product.price !== null) ? product.price : 0;
+        if (vatField) {
+            var vatValue = (product.tva_tx !== undefined && product.tva_tx !== null && product.tva_tx !== '') ? parseFloat(product.tva_tx) : '';
+            vatField.value = (isNaN(vatValue) ? '' : String(vatValue));
+        }
+        if (descField) descField.value = product.description || '';
+
+        dropdown.style.display = 'none';
+    }
+
+    /**
+     * Escape HTML to prevent XSS
+     */
+    function escapeHtml(text) {
+        if (text === null || text === undefined) return '';
+        text = String(text);
+        var map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
+
+    /**
+     * Make button more visible
+     */
+    function enhanceAddLineButton() {
+        var btn = document.querySelector('.btn-add-line');
+        if (btn) {
+            // Ensure button is visible
+            btn.style.display = 'block';
+            btn.style.visibility = 'visible';
+            btn.style.opacity = '1';
+            
+            // Add visual highlight
+            btn.style.fontSize = '1rem';
+            btn.style.padding = '0.75rem 1.5rem';
+            btn.style.fontWeight = 'bold';
+            
+            // Add slight animation on hover
+            btn.addEventListener('mouseover', function() {
+                this.style.transform = 'scale(1.05)';
+                this.style.boxShadow = '0 4px 12px rgba(40, 167, 69, 0.4)';
+            });
+            btn.addEventListener('mouseout', function() {
+                this.style.transform = 'scale(1)';
+                this.style.boxShadow = 'none';
+            });
+        }
+    }
+
     // Initialize on DOM ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
+        document.addEventListener('DOMContentLoaded', initProductAutocomplete);
+        document.addEventListener('DOMContentLoaded', enhanceAddLineButton);
     } else {
         init();
+        initProductAutocomplete();
+        enhanceAddLineButton();
     }
 
     // Public API
@@ -482,7 +680,9 @@ var ZonaJob = (function() {
         toggleAddLineForm: toggleAddLineForm,
         editLine: editLine,
         cancelEditLine: cancelEditLine,
-        updateProductInfo: updateProductInfo
+        updateProductInfo: updateProductInfo,
+        initProductAutocomplete: initProductAutocomplete,
+        searchProducts: searchProducts
     };
 })();
 

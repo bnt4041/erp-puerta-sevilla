@@ -395,14 +395,15 @@ class ZonaJobSignature extends CommonObject
     }
 
     /**
-     * Save signature data to file
+     * Save signature data to file with geolocation and timestamp stamp
+     * Saves to ECM (Dolibarr's standard document folder for the order)
      *
      * @param string $signature_data Base64 signature data
      * @return string|bool File path or false on error
      */
     public function saveSignatureToFile($signature_data)
     {
-        global $conf;
+        global $conf, $db;
 
         // Remove data URL prefix if present
         if (strpos($signature_data, 'data:image') === 0) {
@@ -414,7 +415,74 @@ class ZonaJobSignature extends CommonObject
             return false;
         }
 
-        $dir = $conf->zonajob->dir_output.'/signatures';
+        // Get order reference to save in ECM folder
+        $orderRef = '';
+        if (!empty($this->fk_commande)) {
+            require_once DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php';
+            $order = new Commande($db);
+            if ($order->fetch($this->fk_commande) > 0) {
+                $orderRef = $order->ref;
+            }
+        }
+
+        // Create image from signature data
+        $image = @imagecreatefromstring($decoded);
+        if ($image === false) {
+            // If imagecreatefromstring fails, save raw data without stamp
+            return $this->saveRawSignatureFile($decoded, $orderRef);
+        }
+
+        // Add geolocation and timestamp stamp to the image
+        $stampedImage = $this->addStampToSignature($image);
+
+        // Save to ECM standard folder (documents/commande/REF/)
+        if (!empty($orderRef)) {
+            $dir = $conf->commande->dir_output.'/'.$orderRef;
+        } else {
+            $dir = $conf->zonajob->dir_output.'/signatures';
+        }
+
+        if (!is_dir($dir)) {
+            dol_mkdir($dir);
+        }
+
+        $filename = 'signature_'.$this->ref.'_'.dol_print_date(dol_now(), 'dayhourlog').'.png';
+        $filepath = $dir.'/'.$filename;
+
+        // Save the stamped image
+        $result = imagepng($stampedImage, $filepath);
+        imagedestroy($image);
+        imagedestroy($stampedImage);
+
+        if ($result) {
+            $this->signature_file = $filename;
+            // Store relative path from commande folder for PDF use
+            if (!empty($orderRef)) {
+                $this->signature_file = $orderRef.'/'.$filename;
+            }
+            return $filepath;
+        }
+
+        return false;
+    }
+
+    /**
+     * Save raw signature file without stamp (fallback)
+     *
+     * @param string $decoded Decoded image data
+     * @param string $orderRef Order reference
+     * @return string|bool File path or false on error
+     */
+    private function saveRawSignatureFile($decoded, $orderRef)
+    {
+        global $conf;
+
+        if (!empty($orderRef)) {
+            $dir = $conf->commande->dir_output.'/'.$orderRef;
+        } else {
+            $dir = $conf->zonajob->dir_output.'/signatures';
+        }
+
         if (!is_dir($dir)) {
             dol_mkdir($dir);
         }
@@ -424,10 +492,75 @@ class ZonaJobSignature extends CommonObject
 
         if (file_put_contents($filepath, $decoded)) {
             $this->signature_file = $filename;
+            if (!empty($orderRef)) {
+                $this->signature_file = $orderRef.'/'.$filename;
+            }
             return $filepath;
         }
 
         return false;
+    }
+
+    /**
+     * Add geolocation and timestamp stamp to signature image
+     *
+     * @param resource $image GD image resource
+     * @return resource Stamped image resource
+     */
+    private function addStampToSignature($image)
+    {
+        $width = imagesx($image);
+        $height = imagesy($image);
+
+        // Create new canvas with extra space for stamp (40px at bottom)
+        $stampHeight = 40;
+        $newHeight = $height + $stampHeight;
+        $newImage = imagecreatetruecolor($width, $newHeight);
+
+        // Make background white
+        $white = imagecolorallocate($newImage, 255, 255, 255);
+        imagefill($newImage, 0, 0, $white);
+
+        // Copy original signature to new canvas
+        imagecopy($newImage, $image, 0, 0, 0, 0, $width, $height);
+
+        // Prepare stamp text
+        $stampColor = imagecolorallocate($newImage, 80, 80, 80); // Dark gray
+        $lineColor = imagecolorallocate($newImage, 200, 200, 200); // Light gray for separator
+
+        // Draw separator line
+        imageline($newImage, 5, $height + 2, $width - 5, $height + 2, $lineColor);
+
+        // Build stamp text
+        $dateText = 'Fecha: '.dol_print_date($this->date_signature ?: dol_now(), 'dayhour');
+        $geoText = '';
+        if (!empty($this->latitude) && !empty($this->longitude)) {
+            $geoText = 'GPS: '.$this->latitude.', '.$this->longitude;
+        }
+        $ipText = 'IP: '.($this->ip_address ?: getUserRemoteIP());
+
+        // Use built-in font (size 2 = small)
+        $font = 2;
+        $lineHeight = 12;
+        $yStart = $height + 8;
+
+        // Draw stamp texts
+        imagestring($newImage, $font, 5, $yStart, $dateText, $stampColor);
+        if (!empty($geoText)) {
+            imagestring($newImage, $font, 5, $yStart + $lineHeight, $geoText, $stampColor);
+            imagestring($newImage, $font, 5, $yStart + ($lineHeight * 2), $ipText, $stampColor);
+        } else {
+            imagestring($newImage, $font, 5, $yStart + $lineHeight, $ipText, $stampColor);
+        }
+
+        // Add signer name on the right
+        if (!empty($this->signer_name)) {
+            $signerText = 'Firmante: '.$this->signer_name;
+            $textWidth = imagefontwidth($font) * strlen($signerText);
+            imagestring($newImage, $font, $width - $textWidth - 5, $yStart, $signerText, $stampColor);
+        }
+
+        return $newImage;
     }
 
     /**

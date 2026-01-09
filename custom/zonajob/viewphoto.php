@@ -1,7 +1,8 @@
 <?php
-/* Copyright (C) 2025 ZonaJob Dev
- *
- * View photo endpoint
+/**
+ * \file    zonajob/viewphoto.php
+ * \ingroup zonajob
+ * \brief   View photo - Serves images from standard Dolibarr documents location
  */
 
 // Load Dolibarr environment
@@ -12,21 +13,23 @@ if (!$res && file_exists("../main.inc.php")) {
 if (!$res && file_exists("../../main.inc.php")) {
     $res = @include "../../main.inc.php";
 }
+if (!$res && file_exists("../../../main.inc.php")) {
+    $res = @include "../../../main.inc.php";
+}
 if (!$res) {
     die("Include of main fails");
 }
 
-require_once DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php';
-dol_include_once('/zonajob/class/zonajobphoto.class.php');
-
-// Load language files
-$langs->loadLangs(array("zonajob@zonajob"));
+require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 
 // Get parameters
 $file = GETPOST('file', 'alpha');
 $thumb = GETPOSTINT('thumb');
-$w = GETPOSTINT('w') > 0 ? GETPOSTINT('w') : 200;
-$h = GETPOSTINT('h') > 0 ? GETPOSTINT('h') : 200;
+$w = GETPOSTINT('w');
+$h = GETPOSTINT('h');
+
+if (empty($w)) $w = 200;
+if (empty($h)) $h = 200;
 
 // Security check
 if (empty($user->rights->zonajob->order->read) && empty($user->rights->commande->lire)) {
@@ -38,86 +41,204 @@ if (empty($file)) {
     exit('Missing file parameter');
 }
 
-// Clean file path (security)
+// Decode URL encoded path
+$file = urldecode($file);
+
+// Security: Validate file path to prevent directory traversal
 $file = str_replace('..', '', $file);
 $file = str_replace('//', '/', $file);
 
-// Build full filepath
-$filepath = $conf->zonajob->dir_output.'/photos/'.$file;
+// The file path should be absolute path like:
+// /var/www/html/dolpuerta/documents/commandes/PED001/photo_xxx.jpg
+$filepath = $file;
+
+// Additional security: Ensure file is within documents/commandes directory
+$documents_base = $conf->commande->dir_output;
+if (!is_dir($documents_base)) {
+    $documents_base = dirname($documents_base);
+}
+$documents_base = realpath($documents_base);
+
+// Get real path for comparison
+$file_real = @realpath($filepath);
+
+if (empty($file_real) || (strpos($file_real, $documents_base) === false && $documents_base != dirname($file_real))) {
+    dol_syslog("ZonaJob: Unauthorized access attempt to photo: " . $file, LOG_ERR);
+    http_response_code(403);
+    exit('Access denied');
+}
 
 // Check file exists
 if (!file_exists($filepath) || !is_file($filepath)) {
+    dol_syslog("ZonaJob: Photo file not found: " . $filepath, LOG_WARNING);
     http_response_code(404);
-    exit('File not found: '.$filepath);
-}
-
-// Get order ID from path to check permissions
-$pathParts = explode('/', $file);
-$orderId = isset($pathParts[0]) ? intval($pathParts[0]) : 0;
-
-if ($orderId > 0) {
-    $order = new Commande($db);
-    $result = $order->fetch($orderId);
-    
-    // Check if user has access to this order
-    if ($result > 0) {
-        // Check commercial restriction
-        if (!$user->rights->societe->client->voir && empty($socid)) {
-            $sql = "SELECT COUNT(*) as nb FROM ".MAIN_DB_PREFIX."societe_commerciaux";
-            $sql .= " WHERE fk_soc = ".$order->socid." AND fk_user = ".$user->id;
-            $resql = $db->query($sql);
-            if ($resql) {
-                $obj = $db->fetch_object($resql);
-                if ($obj->nb == 0) {
-                    http_response_code(403);
-                    exit('Access denied');
-                }
-            }
-        }
-    }
+    exit('File not found');
 }
 
 // Get mime type
-$finfo = finfo_open(FILEINFO_MIME_TYPE);
-$mime = finfo_file($finfo, $filepath);
-finfo_close($finfo);
+$finfo = @finfo_open(FILEINFO_MIME_TYPE);
+$mime_type = @finfo_file($finfo, $filepath);
+@finfo_close($finfo);
 
-// If thumbnail requested and it's an image, create thumbnail
-if ($thumb && strpos($mime, 'image/') === 0) {
-    $cachekey = dol_hash($filepath.'_'.$w.'_'.$h, 3);
-    $cachedir = $conf->zonajob->dir_output.'/photos/thumbs';
-    if (!is_dir($cachedir)) {
-        dol_mkdir($cachedir);
+if (empty($mime_type)) {
+    $mime_type = 'application/octet-stream';
+}
+
+// Validate it's an image
+$allowed_types = array('image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/x-webp');
+if (!in_array($mime_type, $allowed_types)) {
+    dol_syslog("ZonaJob: Invalid mime type for photo: " . $mime_type, LOG_ERR);
+    http_response_code(400);
+    exit('Invalid file type');
+}
+
+// Generate thumbnail if requested
+$serve_file = $filepath;
+if ($thumb) {
+    // Create cache directory for thumbs
+    $thumb_dir = dirname($filepath) . '/.thumbs';
+    if (!is_dir($thumb_dir)) {
+        @mkdir($thumb_dir, 0755, true);
     }
-    $cachefile = $cachedir.'/'.$cachekey.'.jpg';
     
-    // Check if thumbnail exists and is fresh
-    if (!file_exists($cachefile) || filemtime($cachefile) < filemtime($filepath)) {
-        // Create thumbnail
-        require_once DOL_DOCUMENT_ROOT.'/core/lib/images.lib.php';
-        $result = vignette($filepath, $w, $h, '_thumb', 50, "thumbs");
-        
-        if ($result) {
-            // vignette creates file with _thumb suffix
-            $ext = pathinfo($filepath, PATHINFO_EXTENSION);
-            $thumbpath = str_replace('.'.$ext, '_thumb.'.$ext, $filepath);
-            if (file_exists($thumbpath)) {
-                copy($thumbpath, $cachefile);
-                $filepath = $cachefile;
-            }
-        }
-    } else {
-        $filepath = $cachefile;
+    // Generate thumb filename
+    $base_name = basename($filepath, pathinfo($filepath, PATHINFO_EXTENSION));
+    $ext = pathinfo($filepath, PATHINFO_EXTENSION);
+    $thumb_name = $base_name . '_' . $w . 'x' . $h . '.' . $ext;
+    $thumb_path = $thumb_dir . '/' . $thumb_name;
+    
+    // Generate thumbnail if not cached
+    if (!file_exists($thumb_path)) {
+        generateThumbnail($filepath, $thumb_path, $w, $h);
+    }
+    
+    if (file_exists($thumb_path)) {
+        $serve_file = $thumb_path;
     }
 }
 
-// Send headers
-header('Content-Type: '.$mime);
-header('Content-Length: '.filesize($filepath));
-header('Content-Disposition: inline; filename="'.basename($photo->filename).'"');
+// Set headers
+header('Content-Type: ' . $mime_type);
+header('Content-Length: ' . filesize($serve_file));
 header('Cache-Control: public, max-age=86400');
 header('Pragma: public');
+header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 86400) . ' GMT');
 
-// Output file
-readfile($filepath);
+// Send file
+readfile($serve_file);
 exit;
+
+/**
+ * Generate thumbnail
+ *
+ * @param string $src Source file path
+ * @param string $dest Destination file path
+ * @param int $w Width
+ * @param int $h Height
+ * @return void
+ */
+function generateThumbnail($src, $dest, $w, $h)
+{
+    if (extension_loaded('imagick')) {
+        try {
+            $image = new Imagick($src);
+            $image->thumbnailImage($w, $h, true);
+            $image->writeImage($dest);
+            $image->destroy();
+            return;
+        } catch (Exception $e) {
+            // Fall back to GD
+        }
+    }
+    
+    if (extension_loaded('gd')) {
+        try {
+            generateThumbnailGD($src, $dest, $w, $h);
+            return;
+        } catch (Exception $e) {
+            dol_syslog("Error generating thumbnail: " . $e->getMessage(), LOG_ERR);
+        }
+    }
+}
+
+/**
+ * Generate thumbnail using GD
+ *
+ * @param string $src Source file
+ * @param string $dest Destination file
+ * @param int $w Width
+ * @param int $h Height
+ * @return void
+ */
+function generateThumbnailGD($src, $dest, $w, $h)
+{
+    $info = @getimagesize($src);
+    if (!$info) {
+        throw new Exception("Cannot get image size");
+    }
+    
+    $mime = $info['mime'];
+    
+    // Create source image
+    switch ($mime) {
+        case 'image/jpeg':
+            $image = @imagecreatefromjpeg($src);
+            break;
+        case 'image/png':
+            $image = @imagecreatefrompng($src);
+            break;
+        case 'image/gif':
+            $image = @imagecreatefromgif($src);
+            break;
+        case 'image/webp':
+            $image = @imagecreatefromwebp($src);
+            break;
+        default:
+            throw new Exception("Unsupported image type: " . $mime);
+    }
+    
+    if (!$image) {
+        throw new Exception("Cannot create image from source");
+    }
+    
+    $src_w = imagesx($image);
+    $src_h = imagesy($image);
+    
+    // Calculate dimensions maintaining aspect ratio
+    $ratio = min($w / $src_w, $h / $src_h);
+    if ($ratio > 1) $ratio = 1; // Don't enlarge
+    
+    $new_w = (int)($src_w * $ratio);
+    $new_h = (int)($src_h * $ratio);
+    
+    // Create thumbnail
+    $thumb = imagecreatetruecolor($new_w, $new_h);
+    
+    if ($mime == 'image/png' || $mime == 'image/gif') {
+        imagecolortransparent($thumb, imagecolorallocatealpha($thumb, 0, 0, 0, 127));
+        imagealphablending($thumb, false);
+        imagesavealpha($thumb, true);
+    }
+    
+    imagecopyresampled($thumb, $image, 0, 0, 0, 0, $new_w, $new_h, $src_w, $src_h);
+    
+    // Save thumbnail
+    switch ($mime) {
+        case 'image/jpeg':
+            @imagejpeg($thumb, $dest, 90);
+            break;
+        case 'image/png':
+            @imagepng($thumb, $dest);
+            break;
+        case 'image/gif':
+            @imagegif($thumb, $dest);
+            break;
+        case 'image/webp':
+            @imagewebp($thumb, $dest);
+            break;
+    }
+    
+    imagedestroy($image);
+    imagedestroy($thumb);
+}
+?>

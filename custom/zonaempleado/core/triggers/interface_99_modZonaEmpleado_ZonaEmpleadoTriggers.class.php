@@ -22,12 +22,32 @@
  */
 
 require_once DOL_DOCUMENT_ROOT.'/core/triggers/dolibarrtriggers.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/notify.class.php';
 
 /**
  * Class of triggers for ZonaEmpleado module
  */
 class InterfaceZonaEmpleadoTriggers extends DolibarrTriggers
 {
+    /**
+     * Events supported by ZonaEmpleado module notifications
+     */
+    public static $arrayofnotifsupported = array(
+        'ZONAEMPLEADO_USER_LOGIN',
+        'ZONAEMPLEADO_USER_LOGOUT',
+        'ZONAEMPLEADO_USER_REGISTRATION',
+        'ZONAEMPLEADO_PROFILE_UPDATED',
+        'ZONAEMPLEADO_DOCUMENT_SHARED',
+        'ZONAEMPLEADO_ANNOUNCEMENT_CREATED',
+        'ZONAEMPLEADO_ANNOUNCEMENT_UPDATED',
+        'ZONAEMPLEADO_HOLIDAY_REQUEST_SUBMITTED',
+        'ZONAEMPLEADO_HOLIDAY_REQUEST_APPROVED',
+        'ZONAEMPLEADO_HOLIDAY_REQUEST_REJECTED',
+        'ZONAEMPLEADO_PAYSLIP_PUBLISHED',
+        'ZONAEMPLEADO_MESSAGE_RECEIVED',
+        'ZONAEMPLEADO_SCHEDULE_MODIFIED',
+    );
+
     /**
      * Constructor
      *
@@ -38,8 +58,8 @@ class InterfaceZonaEmpleadoTriggers extends DolibarrTriggers
         $this->db = $db;
 
         $this->name = preg_replace('/^Interface/i', '', get_class($this));
-        $this->family = "demo";
-        $this->description = "ZonaEmpleado triggers.";
+        $this->family = "zonaempleado";
+        $this->description = "ZonaEmpleado triggers with notification support.";
         $this->version = '1.0';
         $this->picto = 'users';
     }
@@ -90,21 +110,29 @@ class InterfaceZonaEmpleadoTriggers extends DolibarrTriggers
             case 'USER_LOGIN':
                 // Log user login for employee zone statistics
                 $this->logEmployeeActivity($user, 'login');
+                // Send notification
+                $this->sendNotification('ZONAEMPLEADO_USER_LOGIN', $object, $user, $langs, $conf);
                 break;
 
             case 'USER_LOGOUT':
                 // Log user logout
                 $this->logEmployeeActivity($user, 'logout');
+                // Send notification
+                $this->sendNotification('ZONAEMPLEADO_USER_LOGOUT', $object, $user, $langs, $conf);
                 break;
 
             case 'USER_CREATE':
                 // When a new user is created, initialize employee zone settings
                 $this->initializeEmployeeSettings($object);
+                // Send notification
+                $this->sendNotification('ZONAEMPLEADO_USER_REGISTRATION', $object, $user, $langs, $conf);
                 break;
 
             case 'USER_MODIFY':
                 // When user is modified, update employee zone data if needed
                 $this->updateEmployeeData($object);
+                // Send notification
+                $this->sendNotification('ZONAEMPLEADO_PROFILE_UPDATED', $object, $user, $langs, $conf);
                 break;
 
             case 'USER_DELETE':
@@ -190,5 +218,41 @@ class InterfaceZonaEmpleadoTriggers extends DolibarrTriggers
         // TODO: Implement data cleanup
         
         return 1;
+    }
+
+    /**
+     * Send notification for ZonaEmpleado events
+     *
+     * @param string 		$action 	Event action code (ZONAEMPLEADO_*)
+     * @param CommonObject 	$object 	Object triggering the event
+     * @param User 			$user 		User object
+     * @param Translate 	$langs 		Language object
+     * @param Conf 			$conf 		Config object
+     * @return int 1 if OK, 0 if notifications disabled
+     */
+    private function sendNotification($action, $object, User $user, Translate $langs, Conf $conf)
+    {
+        // Check if notification module is enabled
+        if (empty($conf->notification) || !isModEnabled('notification')) {
+            return 0; // Notification module not enabled
+        }
+
+        try {
+            $notify = new Notify($this->db);
+            
+            // Send the notification using Dolibarr's notification system
+            $result = $notify->send($action, $object);
+            
+            if ($result < 0) {
+                dol_syslog("ZonaEmpleado: Error sending notification for action ".$action, LOG_ERR);
+                return -1;
+            }
+            
+            dol_syslog("ZonaEmpleado: Notification sent for action ".$action." on object id ".$object->id, LOG_DEBUG);
+            return 1;
+        } catch (Exception $e) {
+            dol_syslog("ZonaEmpleado: Exception in sendNotification: ".$e->getMessage(), LOG_ERR);
+            return -1;
+        }
     }
 }

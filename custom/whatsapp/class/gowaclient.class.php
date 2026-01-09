@@ -168,6 +168,150 @@ class GoWAClient
 	}
 
 	/**
+	 * Send a media message (image, video, audio, document)
+	 *
+	 * @param string $to        Recipient phone number (with country code)
+	 * @param string $filePath  Local path to the file
+	 * @param string $mediaType Type of media: image, video, audio, document
+	 * @param string $caption   Optional caption for the media
+	 * @return array            Array with 'error' and 'message'
+	 */
+	public function sendMedia($to, $filePath, $mediaType = 'document', $caption = '')
+	{
+		if (empty($this->url)) {
+			return array('error' => 1, 'message' => 'GoWA URL not configured');
+		}
+
+		if (!file_exists($filePath)) {
+			return array('error' => 1, 'message' => 'File not found: ' . $filePath);
+		}
+
+		// Clean phone number
+		$to = preg_replace('/[^0-9]/', '', $to);
+		if (strlen($to) < 10) {
+			return array('error' => 1, 'message' => 'Invalid phone number (too short)');
+		}
+
+		// Determine endpoint based on media type
+		$endpointMap = array(
+			'image' => '/send/image',
+			'video' => '/send/video',
+			'audio' => '/send/audio',
+			'document' => '/send/document'
+		);
+		
+		$endpoint = rtrim($this->url, '/') . ($endpointMap[$mediaType] ?? '/send/document');
+
+		// Get file info
+		$filename = basename($filePath);
+		$fileContent = file_get_contents($filePath);
+		$mimeType = mime_content_type($filePath) ?: 'application/octet-stream';
+
+		// Try base64 method first (most common for GoWA-like APIs)
+		$base64Data = base64_encode($fileContent);
+		
+		$data = array(
+			'phone' => $to,
+			'media' => $base64Data,
+			'filename' => $filename,
+			'mimetype' => $mimeType
+		);
+		
+		if (!empty($caption)) {
+			$data['caption'] = $caption;
+		}
+
+		$result = $this->callAPI($endpoint, $data, 'POST');
+		
+		// If base64 method fails, try multipart form-data
+		if ($result['error'] == 1) {
+			return $this->sendMediaMultipart($endpoint, $to, $filePath, $filename, $mimeType, $caption);
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Send media using multipart/form-data (alternative method)
+	 *
+	 * @param string $endpoint  API endpoint
+	 * @param string $to        Recipient phone number
+	 * @param string $filePath  Local path to the file
+	 * @param string $filename  Original filename
+	 * @param string $mimeType  MIME type
+	 * @param string $caption   Optional caption
+	 * @return array            Response
+	 */
+	private function sendMediaMultipart($endpoint, $to, $filePath, $filename, $mimeType, $caption = '')
+	{
+		$ch = curl_init();
+		
+		$postFields = array(
+			'phone' => $to,
+			'file' => new CURLFile($filePath, $mimeType, $filename)
+		);
+		
+		if (!empty($caption)) {
+			$postFields['caption'] = $caption;
+		}
+
+		$headers = array('Accept: application/json');
+		
+		if (!empty($this->token)) {
+			$headers[] = 'Authorization: Bearer ' . $this->token;
+		}
+
+		curl_setopt($ch, CURLOPT_URL, $endpoint);
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 60); // Longer timeout for file uploads
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+		$response = curl_exec($ch);
+		$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		$error = curl_error($ch);
+		curl_close($ch);
+
+		if ($error) {
+			return array('error' => 1, 'message' => 'cURL Error: ' . $error);
+		}
+
+		if ($httpCode >= 200 && $httpCode < 300) {
+			return array('error' => 0, 'data' => json_decode($response, true));
+		} else {
+			return array('error' => 1, 'message' => 'API Error: ' . $httpCode . ' - ' . $response);
+		}
+	}
+
+	/**
+	 * Send a document with optional caption
+	 *
+	 * @param string $to        Recipient phone number
+	 * @param string $filePath  Local path to the document
+	 * @param string $caption   Optional caption
+	 * @return array            Response
+	 */
+	public function sendDocument($to, $filePath, $caption = '')
+	{
+		return $this->sendMedia($to, $filePath, 'document', $caption);
+	}
+
+	/**
+	 * Send an image with optional caption
+	 *
+	 * @param string $to        Recipient phone number
+	 * @param string $filePath  Local path to the image
+	 * @param string $caption   Optional caption
+	 * @return array            Response
+	 */
+	public function sendImage($to, $filePath, $caption = '')
+	{
+		return $this->sendMedia($to, $filePath, 'image', $caption);
+	}
+
+	/**
 	 * Call the goWA API using native cURL (allows localhost)
 	 *
 	 * @param string $url      Endpoint URL
